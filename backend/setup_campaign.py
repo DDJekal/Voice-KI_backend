@@ -2,9 +2,11 @@
 Campaign Setup Tool - Phase 1 des 2-Phasen WebRTC Link Systems
 
 Erstellt einmalig pro Campaign ein wiederverwendbares Package mit KB Templates.
+Questions.json wird automatisch mit OpenAI generiert!
 """
 
 import sys
+import asyncio
 import argparse
 from pathlib import Path
 
@@ -17,19 +19,36 @@ from src.campaign.package_builder import CampaignPackageBuilder
 from src.storage.campaign_storage import CampaignStorage
 
 
-def setup_campaign(campaign_id: str, force: bool = False):
+async def setup_campaign_async(
+    campaign_id: str, 
+    force: bool = False,
+    enable_policies: bool = True,
+    no_policies: bool = False,
+    policy_level: str = "standard"
+):
     """
-    Erstellt Campaign Package und speichert lokal.
+    Erstellt Campaign Package und speichert lokal (async).
     
     Args:
         campaign_id: Campaign ID
         force: Überschreibt existierendes Package
+        enable_policies: Enable conversation policies (default: True)
+        no_policies: Disable policies (for A/B testing)
+        policy_level: Policy level (basic, standard, advanced)
     """
     
     print("\n" + "="*70)
-    print("🔧 CAMPAIGN SETUP - Phase 1")
+    print("🔧 CAMPAIGN SETUP - Phase 1 (mit automatischer Question Generation)")
     print("="*70)
     print(f"Campaign ID: {campaign_id}")
+    
+    # Policy-Config
+    policies_enabled = enable_policies and not no_policies
+    if policies_enabled:
+        print(f"🔧 Policies: Aktiviert (Level: {policy_level})")
+    else:
+        print(f"ℹ️  Policies: Deaktiviert (A/B-Testing)")
+    
     print("="*70 + "\n")
     
     # Konfiguration laden
@@ -67,6 +86,11 @@ def setup_campaign(campaign_id: str, force: bool = False):
             print("   Setze in .env: API_URL=https://high-office.hirings.cloud/api/v1")
             sys.exit(1)
         
+        if not settings.openai_api_key:
+            print("❌ Fehler: OPENAI_API_KEY nicht gesetzt!")
+            print("   Benötigt für automatische Question Generation")
+            sys.exit(1)
+        
         api = APIDataSource(
             api_url=settings.api_url,
             api_key=settings.api_key,
@@ -75,48 +99,43 @@ def setup_campaign(campaign_id: str, force: bool = False):
         )
         print(f"   ✅ API URL: {settings.api_url}")
         
-        # Package Builder initialisieren
+        # Package Builder initialisieren (ohne questions_json_path!)
         print("\n🏗️  Initialisiere Package Builder...")
         builder = CampaignPackageBuilder(
             prompts_dir=settings.get_prompts_dir_path(),
-            questions_json_path=settings.get_questions_json_path()
+            policy_config={
+                "enabled": policies_enabled,
+                "level": policy_level
+            }
         )
         print(f"   ✅ Prompts Dir: {settings.prompts_dir}")
-        print(f"   ✅ Questions Path: {settings.questions_json_path}")
+        print(f"   ✅ Questions werden automatisch mit OpenAI generiert")
+        print(f"   ✅ OpenAI Model: {settings.openai_model}")
+        if policies_enabled:
+            print(f"   ✅ Policies: {policy_level} level")
         
-        # Package erstellen
+        # Package erstellen (jetzt async!)
+        print("\n📦 Erstelle Campaign Package...")
+        package = await builder.build_package(campaign_id, api)
+        
+        # Speichern
+        print("\n💾 Speichere Package lokal...")
+        storage.save_package(campaign_id, package)
+        print(f"   ✅ Gespeichert: campaign_packages/{campaign_id}.json")
+        
         print("\n" + "="*70)
-        package = builder.build_package(campaign_id, api)
+        print("✅ CAMPAIGN SETUP ERFOLGREICH!")
         print("="*70)
-        
-        # Package speichern
-        print("\n💾 Speichere Package...")
-        path = storage.save_package(campaign_id, package)
-        
-        # Erfolgs-Ausgabe
-        print("\n" + "="*70)
-        print("✅ CAMPAIGN SETUP ABGESCHLOSSEN!")
-        print("="*70)
-        print(f"📦 Package: {path}")
-        print(f"🏢 Company: {package['company_name']}")
-        print(f"📋 Campaign: {package['campaign_name']}")
-        print(f"❓ Fragen: {len(package['questions'].get('questions', []))}")
-        print(f"📄 Templates: {len(package['kb_templates'])} Phasen")
-        print("="*70)
-        print("\n🔗 Bereit für Phase 2: Link-Generierung")
-        print(f"   python generate_link.py --applicant-id <ID> --campaign-id {campaign_id}")
-        print()
-        
-        sys.exit(0)
+        print(f"\n📦 Package Info:")
+        print(f"   Company: {package['company_name']}")
+        print(f"   Campaign: {package['campaign_name']}")
+        print(f"   Fragen: {len(package['questions']['questions'])}")
+        print(f"   Templates: {len(package['kb_templates'])} Phasen")
+        print("\n" + "="*70 + "\n")
         
     except FileNotFoundError as e:
         print(f"\n❌ Fehler: {e}")
         sys.exit(1)
-        
-    except ValueError as e:
-        print(f"\n❌ Validation Error: {e}")
-        sys.exit(1)
-        
     except Exception as e:
         print(f"\n❌ Unerwarteter Fehler: {e}")
         import traceback
@@ -124,35 +143,10 @@ def setup_campaign(campaign_id: str, force: bool = False):
         sys.exit(1)
 
 
-def list_campaigns():
-    """Listet alle gespeicherten Campaign Packages."""
-    
-    storage = CampaignStorage()
-    campaigns = storage.list_campaigns()
-    
-    if not campaigns:
-        print("\n📭 Keine Campaign Packages gefunden.")
-        print("   Erstelle ein Package: python setup_campaign.py --campaign-id <ID>")
-        return
-    
-    print("\n" + "="*70)
-    print(f"📦 GESPEICHERTE CAMPAIGN PACKAGES ({len(campaigns)})")
-    print("="*70 + "\n")
-    
-    for camp in campaigns:
-        print(f"Campaign ID: {camp['campaign_id']}")
-        print(f"  Company: {camp['company_name']}")
-        print(f"  Campaign: {camp['campaign_name']}")
-        print(f"  Erstellt: {camp['created_at']}")
-        print(f"  Datei: {camp['file_path']}")
-        print()
-
-
 def main():
     """CLI Entry Point"""
-    
     parser = argparse.ArgumentParser(
-        description="Campaign Setup Tool - Erstellt KB Templates für Campaigns"
+        description="Campaign Setup Tool - Erstellt Campaign Packages mit automatischer Question Generation"
     )
     
     parser.add_argument(
@@ -162,32 +156,70 @@ def main():
     )
     
     parser.add_argument(
-        "--list",
-        action="store_true",
-        help="Listet alle gespeicherten Campaigns"
-    )
-    
-    parser.add_argument(
         "--force",
         action="store_true",
         help="Überschreibt existierendes Package"
     )
     
+    parser.add_argument(
+        "--enable-policies",
+        action="store_true",
+        default=True,
+        help="Enable conversation policies (default: enabled)"
+    )
+    
+    parser.add_argument(
+        "--no-policies",
+        action="store_true",
+        help="Disable policies (for A/B testing)"
+    )
+    
+    parser.add_argument(
+        "--policy-level",
+        choices=["basic", "standard", "advanced"],
+        default="standard",
+        help="Policy level: basic (3 policies), standard (6 policies, default), advanced (7+ policies)"
+    )
+    
+    parser.add_argument(
+        "--list",
+        action="store_true",
+        help="Liste alle vorhandenen Packages"
+    )
+    
     args = parser.parse_args()
     
-    # Liste oder Setup
     if args.list:
-        list_campaigns()
-    elif args.campaign_id:
-        setup_campaign(args.campaign_id, args.force)
-    else:
+        storage = CampaignStorage()
+        packages = storage.list_packages()
+        print("\n📦 Vorhandene Campaign Packages:")
+        if not packages:
+            print("   Keine Packages gefunden")
+        else:
+            for pkg_id in packages:
+                print(f"   - {pkg_id}")
+        print()
+        sys.exit(0)
+    
+    if not args.campaign_id:
         parser.print_help()
         print("\n💡 Beispiele:")
         print("   python setup_campaign.py --campaign-id 16")
-        print("   python setup_campaign.py --list")
         print("   python setup_campaign.py --campaign-id 16 --force")
+        print("   python setup_campaign.py --campaign-id 16 --policy-level advanced")
+        print("   python setup_campaign.py --campaign-id 16 --no-policies  # A/B testing")
+        print("   python setup_campaign.py --list")
+        sys.exit(1)
+    
+    # Run async setup
+    asyncio.run(setup_campaign_async(
+        args.campaign_id, 
+        args.force,
+        args.enable_policies,
+        args.no_policies,
+        args.policy_level
+    ))
 
 
 if __name__ == "__main__":
     main()
-

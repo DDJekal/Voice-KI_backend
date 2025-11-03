@@ -200,6 +200,10 @@ FRAGEN FÜR DIESE PHASE
             else:
                 kb += self._format_question_section(by_category[cat_key])
         
+        # NEU: Context-Rules hinzufügen (wenn Policies angewendet wurden)
+        if questions_json.get("_meta", {}).get("policies_applied"):
+            kb += self._build_conversation_context_rules(questions_json)
+        
         return kb
 
     def build_phase_4(self, data: Dict[str, Any]) -> str:
@@ -264,6 +268,13 @@ RÜCKMELDUNG-ZEITFENSTER:
                 
                 if gc.get("end_message"):
                     output += f"\nENDE-NACHRICHT bei NEIN:\n\"{gc['end_message']}\"\n"
+                
+                # NEU: Slot-Requirements
+                if gc.get("requires_slots"):
+                    output += f"▸ Benötigt Slots: {', '.join(gc['requires_slots'])}\n"
+                
+                if gc.get("condition"):
+                    output += f"▸ Bedingung: {gc['condition']}\n"
             
             if gc.get("is_alternative"):
                 output += f"▸ Dies ist eine ALTERNATIVE zu: {gc.get('alternative_for')}\n"
@@ -273,6 +284,56 @@ RÜCKMELDUNG-ZEITFENSTER:
                     output += "▸ ⚠️  LETZTE Alternative - bei NEIN Gespräch beenden!\n"
                     if gc.get("end_message_if_all_no"):
                         output += f"\nENDE-NACHRICHT:\n\"{gc['end_message_if_all_no']}\"\n"
+            
+            # NEU: Context-Triggers
+            if gc.get("context_triggers"):
+                ct = gc["context_triggers"]
+                output += "\n▸ KEYWORD-TRIGGER:\n"
+                if ct.get("keywords_to_follow_up"):
+                    keywords = ct["keywords_to_follow_up"]
+                    output += f"  Wenn Kandidat erwähnt: {', '.join(keywords)}\n"
+                    output += "  → Sofort vertiefen und nachfragen!\n"
+            
+            output += "="*60 + "\n\n"
+        
+        # NEU: Slot-Config
+        if question.get("slot_config"):
+            sc = question["slot_config"]
+            output += "\n" + "="*60 + "\n"
+            output += "✨  SLOT-TRACKING\n"
+            output += "="*60 + "\n"
+            output += f"▸ Füllt Slot: {sc['fills_slot']}\n"
+            output += f"▸ Erforderlich: {'JA' if sc.get('required') else 'NEIN'}\n"
+            output += f"▸ Confidence-Schwelle: {sc.get('confidence_threshold', 0.8)}\n"
+            
+            if sc.get("validation"):
+                val = sc["validation"]
+                if val.get("keywords_yes"):
+                    output += f"▸ Positive Signale: {', '.join(val['keywords_yes'])}\n"
+                if val.get("keywords_no"):
+                    output += f"▸ Negative Signale: {', '.join(val['keywords_no'])}\n"
+            
+            output += "="*60 + "\n\n"
+        
+        # NEU: Conversation-Hints
+        if question.get("conversation_hints"):
+            ch = question["conversation_hints"]
+            output += "\n" + "="*60 + "\n"
+            output += "💬  GESPRÄCHSFÜHRUNG\n"
+            output += "="*60 + "\n"
+            
+            if ch.get("on_unclear_answer"):
+                output += f"▸ Bei unklarer Antwort:\n  \"{ch['on_unclear_answer']}\"\n\n"
+            
+            if ch.get("on_negative_answer"):
+                output += f"▸ Bei NEIN-Antwort:\n  \"{ch['on_negative_answer']}\"\n\n"
+            
+            if ch.get("confidence_boost_phrases"):
+                phrases = ch["confidence_boost_phrases"][:5]  # Max 5 zeigen
+                output += f"▸ Klare Signale: {', '.join(phrases)}\n"
+            
+            if ch.get("diversify_after"):
+                output += f"▸ WICHTIG: Nach dieser Frage keine weiteren {ch['diversify_after']}-Fragen!\n"
             
             output += "="*60 + "\n\n"
         
@@ -423,4 +484,129 @@ RÜCKMELDUNG-ZEITFENSTER:
             section += "-" * 60 + "\n\n"
         
         return section
+    
+    def _build_conversation_context_rules(self, questions_json: Dict[str, Any]) -> str:
+        """
+        Generiert Context-Rules-Sektion für natürliche Gesprächsführung.
+        
+        Diese Regeln werden aus den Policy-enhanced Questions extrahiert
+        und als allgemeine Leitlinien für ElevenLabs formuliert.
+        """
+        # Sammle alle Slots aus Fragen
+        required_slots = []
+        optional_slots = []
+        keyword_triggers = {}
+        
+        for q in questions_json.get("questions", []):
+            if q.get("slot_config"):
+                sc = q["slot_config"]
+                slot_name = sc["fills_slot"]
+                if sc.get("required"):
+                    required_slots.append(slot_name)
+                else:
+                    optional_slots.append(slot_name)
+            
+            # Sammle Keyword-Triggers
+            if q.get("gate_config", {}).get("context_triggers", {}).get("keywords_to_follow_up"):
+                keywords = q["gate_config"]["context_triggers"]["keywords_to_follow_up"]
+                for kw in keywords:
+                    if kw not in keyword_triggers:
+                        keyword_triggers[kw] = []
+                    keyword_triggers[kw].append(q["id"])
+        
+        rules = f"""
+
+{'='*70}
+🧠  KONTEXT-REGELN FÜR NATÜRLICHE GESPRÄCHSFÜHRUNG
+{'='*70}
+
+Diese Regeln gelten für ALLE Fragen in Phase 3 und sorgen für
+natürliche, empathische und effektive Gespräche.
+
+1. KEYWORD-SENSITIVITÄT (reagiere proaktiv!):
+"""
+        
+        if keyword_triggers:
+            for kw, question_ids in keyword_triggers.items():
+                rules += f"   • \"{kw}\" erwähnt → Sofort vertiefen! (relevant für Fragen)\n"
+        else:
+            rules += "   • \"IMC\" / \"Intensiv\" / \"ITS\" → Vertiefe sofort\n"
+            rules += "   • \"Teilzeit\" → Kläre Stunden/Woche direkt\n"
+            rules += "   • \"Nachtdienst\" / \"Schichtdienst\" → Schichtmodell-Frage vorziehen\n"
+            rules += "   • \"Familie\" / \"Kinder\" → Zeige Verständnis für Flexibilitätswünsche\n"
+            rules += "   • \"Gehalt\" / \"Bezahlung\" → Auf spätere Phase verweisen\n"
+        
+        rules += f"""
+
+2. CONFIDENCE & SLOT-TRACKING:
+   
+   Erforderliche Slots für Phase 3:
+"""
+        
+        if required_slots:
+            for slot in required_slots:
+                rules += f"     ✓ {slot} (MUSS geklärt sein)\n"
+        else:
+            rules += "     ✓ qualifikation (MUSS geklärt sein)\n"
+            rules += "     ✓ standort_praeferenz (MUSS geklärt sein)\n"
+            rules += "     ✓ verfuegbarkeit_ab (MUSS geklärt sein)\n"
+        
+        if optional_slots:
+            for slot in optional_slots[:5]:  # Max 5 zeigen
+                rules += f"     ○ {slot} (wünschenswert)\n"
+        
+        rules += """
+   
+   Bei unklarer Antwort (Confidence < 0.8):
+     → Rückfrage: "Verstehe ich richtig, dass Sie {interpretation}?"
+     → Beispiel: "Sie sagten 'bald verfügbar' – meinen Sie innerhalb 
+        der nächsten 4 Wochen oder eher 2-3 Monate?"
+
+3. GATE-SEQUENZ (strikt einhalten!):
+   
+   ⚠️  Alle Gates MÜSSEN VOR Rahmenbedingungen geklärt sein!
+   
+   Reihenfolge:
+     1. Gate: Qualifikation (muss erfüllt sein)
+        → Bei Scheitern: Alternativen prüfen, dann ggf. Call beenden
+     2. Gate: Verfügbarkeit (falls vorhanden)
+        → Bei > 6 Monate: höflich beenden
+   
+   ✅ NUR wenn alle Gates bestanden → weiter zu Präferenzen
+
+4. GESPRÄCHS-DIVERSITÄT:
+   
+   ❌ VERMEIDE:
+     • 3+ Ja/Nein-Fragen hintereinander
+     • Zu viele Choice-Fragen ohne Pausen
+     • Starre Abarbeitung ohne Empathie
+   
+   ✅ MACHE:
+     • Nach komplexer Frage → kurze Bestätigung: "Verstanden, danke!"
+     • Nach Gate-Frage → Info einstreuen: "Super, dann erkläre ich 
+       Ihnen kurz unsere Standorte..."
+     • Zwischendurch Wertschätzung: "Das klingt nach wertvoller 
+       Erfahrung!"
+
+5. PROAKTIVE KLÄRUNG:
+   
+   Wenn Kandidat unsicher wirkt ("vielleicht", "weiß nicht", "kommt drauf an"):
+     → Optionen konkretisieren
+     → Beispiel: Statt nur "Teilzeit oder Vollzeit?" 
+        besser: "Möchten Sie eher 50-75% arbeiten oder eine feste 
+        3-Tage-Woche? Beides ist möglich."
+
+6. EMPATHIE & TONALITÄT:
+   
+   • Bei negativer Gate-Antwort: "Vielen Dank für Ihre Offenheit..."
+   • Bei Präferenzen: "Das verstehe ich gut..."
+   • Bei Unsicherheit: "Kein Problem, wir können das später 
+     konkretisieren..."
+   • Bei guter Qualifikation: "Ausgezeichnet, das passt sehr gut!"
+
+{'='*70}
+
+"""
+        return rules
+
 

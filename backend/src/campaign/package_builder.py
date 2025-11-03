@@ -7,6 +7,7 @@ from typing import Dict, Any, Optional
 
 from ..data_sources.api_loader import APIDataSource
 from .template_builder import TemplateBuilder
+from ..questions.builder import build_question_catalog
 
 
 class CampaignPackageBuilder:
@@ -15,33 +16,32 @@ class CampaignPackageBuilder:
     
     Ein Campaign Package enthält:
     - KB Templates für alle 4 Phasen
-    - Questions.json
+    - Questions.json (automatisch generiert mit OpenAI)
     - Company Metadata
     """
     
     def __init__(
         self, 
         prompts_dir: Optional[Path] = None,
-        questions_json_path: Optional[Path] = None
+        policy_config: Optional[Dict[str, Any]] = None
     ):
         """
         Args:
             prompts_dir: Pfad zu VoiceKI _prompts/
-            questions_json_path: Pfad zu questions.json
+            policy_config: Optional policy configuration
         """
         self.template_builder = TemplateBuilder(prompts_dir)
-        
-        if questions_json_path is None:
-            questions_json_path = Path("../KI-Sellcruiting_VerarbeitungProtokollzuFragen/output/questions.json")
-        self.questions_json_path = questions_json_path
+        self.policy_config = policy_config or {"enabled": True, "level": "standard"}
     
-    def build_package(
+    async def build_package(
         self, 
         campaign_id: str, 
         api_source: APIDataSource
     ) -> Dict[str, Any]:
         """
         Erstellt vollständiges Campaign Package.
+        
+        ACHTUNG: Jetzt ASYNC weil questions.json automatisch generiert wird!
         
         Args:
             campaign_id: Campaign ID
@@ -51,23 +51,34 @@ class CampaignPackageBuilder:
             Campaign Package Dict
         
         Raises:
-            FileNotFoundError: Wenn questions.json nicht gefunden
             ValueError: Wenn Campaign-Daten ungültig
         """
         print(f"\n🔧 Erstelle Campaign Package für Campaign {campaign_id}")
         
-        # 1. Lade questions.json
-        print("1️⃣ Lade questions.json...")
-        questions = self._load_questions_json()
-        print(f"   ✅ {len(questions.get('questions', []))} Fragen geladen")
-        
-        # 2. Lade Company + Campaign Daten von API
-        print("2️⃣ Lade Company & Campaign Daten von API...")
+        # 1. Lade Company + Campaign Daten von API
+        print("1️⃣ Lade Company & Campaign Daten von API...")
         company = api_source.get_company_profile(campaign_id)
         protocol = api_source.get_conversation_protocol(campaign_id)
         
         print(f"   ✅ Company: {company.get('name', 'Unknown')}")
         print(f"   ✅ Campaign: {protocol.get('name', 'Unknown')}")
+        
+        # 2. Generiere questions.json automatisch mit OpenAI!
+        print("2️⃣ Generiere questions.json automatisch (OpenAI)...")
+        
+        # Context für Question-Builder (mit Policy-Config)
+        build_context = {}
+        if self.policy_config.get("enabled", True):
+            build_context["policy_level"] = self.policy_config.get("level", "standard")
+            print(f"   🔧 Policies aktiviert (Level: {build_context['policy_level']})")
+        else:
+            print("   ℹ️  Policies deaktiviert (A/B-Testing)")
+        
+        questions_catalog = await build_question_catalog(protocol, build_context)
+        print(f"   ✅ {len(questions_catalog.questions)} Fragen generiert")
+        
+        # Convert to dict for backward compatibility
+        questions = questions_catalog.model_dump()
         
         # 3. Extrahiere Prioritäten
         print("3️⃣ Extrahiere Prioritäten...")
@@ -104,7 +115,8 @@ class CampaignPackageBuilder:
                 "company_website": company.get('website', ''),
                 "priority_areas": priorities,
                 "privacy_url": company.get('privacy_url', ''),
-                "career_page": company.get('career_page', '')
+                "career_page": company.get('career_page', ''),
+                "generated_with": "python-question-generator"
             }
         }
         
@@ -113,27 +125,6 @@ class CampaignPackageBuilder:
         print("   ✅ Package validiert")
         
         return package
-    
-    def _load_questions_json(self) -> Dict[str, Any]:
-        """
-        Lädt questions.json.
-        
-        Returns:
-            Questions.json als Dict
-        
-        Raises:
-            FileNotFoundError: Wenn Datei nicht existiert
-        """
-        if not self.questions_json_path.exists():
-            raise FileNotFoundError(
-                f"questions.json nicht gefunden: {self.questions_json_path}\n"
-                f"Bitte zuerst TypeScript Tool ausführen:\n"
-                f"  cd ../KI-Sellcruiting_VerarbeitungProtokollzuFragen\n"
-                f"  npm run generate"
-            )
-        
-        with open(self.questions_json_path, 'r', encoding='utf-8') as f:
-            return json.load(f)
     
     def _extract_priorities(
         self, 
@@ -201,4 +192,3 @@ class CampaignPackageBuilder:
         # Questions muss "questions" Array enthalten
         if 'questions' not in package['questions']:
             raise ValueError("questions.json fehlt 'questions' Array")
-
