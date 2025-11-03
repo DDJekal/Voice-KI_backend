@@ -1,0 +1,347 @@
+{
+  "_meta": {
+    "schema_version": "1.0",
+    "generated_at": "2025-10-27T13:30:00.000Z",
+    "generator": "python-enhanced-generator@1.0.0",
+    "source": "Gesprächsprotokoll_Beispiel1.json",
+    "note": "Projektleiter Elektrotechnik / Erneuerbare Energien"
+  },
+  "questions": [
+    {
+      "id": "adresse_bestaetigen",
+      "question": "Ich habe Ihre Adresse als Mustermannstraße 3, 79098 Freiburg. Ist das korrekt?",
+      "type": "boolean",
+      "required": true,
+      "priority": 1,
+      "group": "Kontakt",
+      "category": "identifikation",
+      "category_order": 1,
+      "source": {
+        "verbatim": false
+      }
+    },
+    {
+      "id": "kriterium_315",
+      "question": "zwingend: min 2. Jahre Berufserfahrung in Deutschland",
+      "type": "boolean",
+      "required": true,
+      "priority": 1,
+      "group": "Qualifikation",
+      "category": "standardqualifikationen",
+      "category_order": 3,
+      "source": {
+        "page_id": 90,
+        "prompt_id": 315,
+        "verbatim": true
+      },
+      "context": "Muss-Kriterium"
+    },
+    {
+      "id": "kriterium_313",
+      "question": "zwingend: Studium Elektrotechnik oder in einem eng verwandten Bereich",
+      "type": "boolean",
+      "required": true,
+      "priority": 1,
+      "group": "Qualifikation",
+      "category": "standardqualifikationen",
+      "category_order": 3,
+      "source": {
+        "page_id": 90,
+        "prompt_id": 313,
+        "verbatim": true
+      },
+      "context": "Muss-Kriterium"
+    },
+    {
+      "id": "kriterium_321",
+      "question": "wünschenswert: Führerschein",
+      "type": "boolean",
+      "required": false,
+      "priority": 2,
+      "group": "Qualifikation",
+      "category": "standardqualifikationen",
+      "category_order": 3,
+      "source": {
+        "page_id": 90,
+        "prompt_id": 321,
+        "verbatim": true
+      },
+      "context": "Wünschenswert"
+    },
+    {
+      "id": "kriterium_319",
+      "question": "alternativ: Ausbildung zur Elektrofachkraft (m/w/d)",
+      "type": "boolean",
+      "required": false,
+      "priority": 2,
+      "group": "Qualifikation",
+      "category": "standardqualifikationen",
+      "category_order": 3,
+      "source": {
+        "page_id": 90,
+        "prompt_id": 319,
+        "verbatim": true
+      },
+      "context": "Wünschenswert"
+    },
+    {
+      "id": "kriterium_317",
+      "question": "alternativ: Ausbildung zum Elektriker/ Elektrotechniker/ Elektroniker (m/w/d)",
+      "type": "boolean",
+      "required": false,
+      "priority": 2,
+      "group": "Qualifikation",
+      "category": "standardqualifikationen",
+      "category_order": 3,
+      "source": {
+        "page_id": 90,
+        "prompt_id": 317,
+        "verbatim": true
+      },
+      "context": "Wünschenswert"
+    },
+    {
+      "id": "kriterium_311",
+      "question": "Deutsch B2",
+      "type": "boolean",
+      "required": false,
+      "priority": 2,
+      "group": "Qualifikation",
+      "category": "standardqualifikationen",
+      "category_order": 3,
+      "source": {
+        "page_id": 90,
+        "prompt_id": 311,
+        "verbatim": true
+      },
+      "context": "Wünschenswert"
+    },
+    {
+      "id": "info_345",
+      "question": "kein Fremdfinanziertes Unternhemen - stehen sicher am Markt und finanzieren sich aus eigener Kraft (nicht wie viele andere Unternehmen im Energiebereich die sich groß präsentieren, aber dann schnell wieder abstürzen",
+      "type": "info",
+      "required": false,
+      "priority": 3,
+      "group": "Info",
+      "category": "info",
+      "category_order": 4,
+      "source": {
+        "page_id": 92,
+        "prompt_id": 345,
+        "verbatim": true
+      }
+    },
+    {
+      "id": "info_343",
+      "question": "breit aufgestellt Einsatzfelder: Photov., Windkraft, Unternehmen, Netzbetreiber, E-Mobilität (Ladesationen)",
+      "type": "info",
+      "required": false,
+      "priority": 3,
+      "group": "Info",
+      "category": "info",
+      "category_order": 4,
+      "source": {
+        "page_id": 92,
+        "prompt_id": 343,
+        "verbatim": true
+      }
+    },
+    {
+      "id": "info_341",
+      "question": "Full-Service-Unternehmen: übernehemen jeden Schritt beim Kunden von Anschluss und Transport bis zu den regelmäßigen Wartungen am Ende",
+      "type": "info",
+      "required": false,
+      "priority": 3,
+      "group": "Info",
+      "category": "info",
+      "category_order": 4,
+      "source": {
+        "page_id": 92,
+        "prompt_id": 341,
+        "verbatim": true
+      }
+    },
+    {
+      "id": "info_339",
+      "question": "große Solarparks und nicht nur eine kleine Photov. Anlage aufs Dach (Also punkt 1 große Projekte)",
+      "type": "info",
+      "required": false,
+      "priority": 3,
+      "group": "Info",
+      "category": "info",
+      "category_order": 4,
+      "source": {
+        "page_id": 92,
+        "prompt_id": 339,
+        "verbatim": true
+      }
+    },
+    {
+      "id": "info_337",
+      "question": "seit 1995: Traditionsunternehmen",
+      "type": "info",
+      "required": false,
+      "priority": 3,
+      "group": "Info",
+      "category": "info",
+      "category_order": 4,
+      "source": {
+        "page_id": 92,
+        "prompt_id": 337,
+        "verbatim": true
+      }
+    },
+    {
+      "id": "info_335",
+      "question": "deutsche Qualität: Produktion in DE (schnelle Lieferzeiten+Kompatibel in allen deutschen Mittelspannungnetzen)",
+      "type": "info",
+      "required": false,
+      "priority": 3,
+      "group": "Info",
+      "category": "info",
+      "category_order": 4,
+      "source": {
+        "page_id": 92,
+        "prompt_id": 335,
+        "verbatim": true
+      }
+    },
+    {
+      "id": "info_333",
+      "question": "stehen für nachhaltige Zukunft und erneubare Energien",
+      "type": "info",
+      "required": false,
+      "priority": 3,
+      "group": "Info",
+      "category": "info",
+      "category_order": 4,
+      "source": {
+        "page_id": 92,
+        "prompt_id": 333,
+        "verbatim": true
+      }
+    },
+    {
+      "id": "info_331",
+      "question": "Standort: Am Fichtenkamp 7-9 Bünde",
+      "type": "info",
+      "required": false,
+      "priority": 3,
+      "group": "Info",
+      "category": "info",
+      "category_order": 4,
+      "source": {
+        "page_id": 92,
+        "prompt_id": 331,
+        "verbatim": true
+      }
+    },
+    {
+      "id": "info_329",
+      "question": "AP : Hergert hergert@faber-etec.de",
+      "type": "info",
+      "required": false,
+      "priority": 3,
+      "group": "Info",
+      "category": "info",
+      "category_order": 4,
+      "source": {
+        "page_id": 92,
+        "prompt_id": 329,
+        "verbatim": true
+      }
+    },
+    {
+      "id": "standort_bestaetigung",
+      "question": "Die Stelle ist am Standort Am Fichtenkamp 7-9 in Bünde. Ist das für Sie erreichbar?",
+      "type": "boolean",
+      "required": true,
+      "priority": 1,
+      "group": "Standort",
+      "category": "standort",
+      "category_order": 5,
+      "source": {
+        "verbatim": false
+      }
+    },
+    {
+      "id": "einsatzbereich_interesse",
+      "question": "Wir arbeiten in verschiedenen Bereichen: Photovoltaik, Windkraft, E-Mobilität mit Ladestationen, und Netzbetreiber-Projekte. Welcher Bereich spricht Sie am meisten an?",
+      "type": "choice",
+      "options": [
+        "Photovoltaik (große Solarparks)",
+        "Windkraft",
+        "E-Mobilität (Ladestationen)",
+        "Netzbetreiber-Projekte",
+        "Alle Bereiche interessieren mich"
+      ],
+      "required": false,
+      "priority": 2,
+      "group": "Einsatzbereich",
+      "category": "einsatzbereiche",
+      "category_order": 6,
+      "source": {
+        "verbatim": false
+      }
+    },
+    {
+      "id": "rahmen_327",
+      "question": "Unbefristeter Arbeitsvertrag bei einem zuverlässigen Arbeitgeber",
+      "type": "boolean",
+      "required": false,
+      "priority": 2,
+      "group": "Rahmen",
+      "category": "rahmenbedingungen",
+      "category_order": 7,
+      "source": {
+        "page_id": 91,
+        "prompt_id": 327,
+        "verbatim": true
+      }
+    },
+    {
+      "id": "rahmen_325",
+      "question": "Attraktives Grundgehalt plus leistungsabhängige Erfolgsbeteiligung möglich( Gaber zahlt min. 10 % mehr als der jetzige Arbeitgeber!",
+      "type": "boolean",
+      "required": false,
+      "priority": 2,
+      "group": "Rahmen",
+      "category": "rahmenbedingungen",
+      "category_order": 7,
+      "source": {
+        "page_id": 91,
+        "prompt_id": 325,
+        "verbatim": true
+      }
+    },
+    {
+      "id": "rahmen_323",
+      "question": "Vollzeit",
+      "type": "boolean",
+      "required": false,
+      "priority": 2,
+      "group": "Rahmen",
+      "category": "rahmenbedingungen",
+      "category_order": 7,
+      "source": {
+        "page_id": 91,
+        "prompt_id": 323,
+        "verbatim": true
+      }
+    },
+    {
+      "id": "fuehrerschein_verfuegbar",
+      "question": "Haben Sie einen Führerschein?",
+      "type": "boolean",
+      "required": false,
+      "priority": 2,
+      "group": "Zusätzlich",
+      "category": "zusaetzliche_informationen",
+      "category_order": 8,
+      "source": {
+        "verbatim": false
+      },
+      "context": "Wünschenswert für Außeneinsätze"
+    }
+  ]
+}

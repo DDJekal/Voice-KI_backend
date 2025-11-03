@@ -1,0 +1,396 @@
+{
+  "_meta": {
+    "schema_version": "1.0",
+    "generated_at": "2025-10-27T14:13:40.826Z",
+    "generator": "sellcruiting-question-builder@1.0.0"
+  },
+  "questions": [
+    {
+      "id": "standort_wahl_pre_check",
+      "question": "Gibt es einen bestimmten Standort, der Sie besonders interessiert?",
+      "type": "boolean",
+      "required": true,
+      "priority": 1,
+      "group": "Standort",
+      "source": {
+        "verbatim": false
+      },
+      "help_text": "Diese Frage hilft uns, den Dialog effizienter zu gestalten"
+    },
+    {
+      "id": "standort_wahl_open",
+      "question": "An welchen Standort denken Sie?",
+      "type": "string",
+      "required": false,
+      "priority": 1,
+      "group": "Standort",
+      "source": {
+        "verbatim": false
+      },
+      "conditions": [
+        {
+          "when": {
+            "field": "standort_wahl_pre_check",
+            "op": "eq",
+            "value": true
+          },
+          "then": {
+            "action": "ask"
+          }
+        }
+      ],
+      "context": "Fuzzy-Matching erlaubt - auch ähnliche Begriffe akzeptieren"
+    },
+    {
+      "id": "standort_wahl",
+      "question": "Kein Problem. Wir haben mehrere Standorte in Stuttgart - in der Auerbachstraße, bekannt als Standort Burgholzhof, in der Hohenheimerstraße, Standort City, und in der Gerokstraße, ebenfalls Standort City, im Gebäude Gerokstraße. Welcher Standort interessiert Sie am meisten?",
+      "type": "choice",
+      "options": [
+        "Auerbachstraße 110, 70376 Stuttgart (Standort Burgholzhof)",
+        "Hohenheimerstraße 21, 70184 Stuttgart (Standort City)",
+        "Gerokstraße 31, 70184 Stuttgart (Standort City, Gebäude Gerokstraße)"
+      ],
+      "required": false,
+      "priority": 1,
+      "group": "Standort",
+      "source": {
+        "verbatim": false
+      },
+      "conditions": [
+        {
+          "when": {
+            "field": "standort_wahl_pre_check",
+            "op": "eq",
+            "value": false
+          },
+          "then": {
+            "action": "ask"
+          }
+        },
+        {
+          "when": {
+            "field": "standort_wahl_open",
+            "op": "exists"
+          },
+          "then": {
+            "action": "skip"
+          }
+        }
+      ],
+      "conversation_flow": {
+        "pre_check": {
+          "question": "Gibt es einen bestimmten Standort, der Sie besonders interessiert?",
+          "on_yes": "open_question",
+          "on_no": "clustered_options"
+        },
+        "open_question": {
+          "question": "An welchen Standort denken Sie?",
+          "allow_fuzzy_match": true,
+          "on_unclear": "clustered_options"
+        },
+        "clustered_options": {
+          "presentation_hint": "Kein Problem. Wir haben mehrere Standorte in Stuttgart - in der Auerbachstraße, bekannt als Standort Burgholzhof, in der Hohenheimerstraße, Standort City, und in der Gerokstraße, ebenfalls Standort City, im Gebäude Gerokstraße. Welcher Standort interessiert Sie am meisten?",
+          "categories": [
+            {
+              "id": "stuttgart",
+              "label": "Stuttgart",
+              "options": [
+                "Auerbachstraße 110, 70376 Stuttgart (Standort Burgholzhof)",
+                "Hohenheimerstraße 21, 70184 Stuttgart (Standort City)",
+                "Gerokstraße 31, 70184 Stuttgart (Standort City, Gebäude Gerokstraße)"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "bereich_pre_check",
+      "question": "Haben Sie eine Präferenz bezüglich der Fachabteilung, in der Sie arbeiten möchten?",
+      "type": "boolean",
+      "required": true,
+      "priority": 1,
+      "group": "Einsatzbereich",
+      "source": {
+        "page_id": 79,
+        "prompt_id": 188,
+        "verbatim": true
+      },
+      "help_text": "Diese Frage hilft uns, den Dialog effizienter zu gestalten"
+    },
+    {
+      "id": "bereich_open",
+      "question": "Welche Abteilung wäre das?",
+      "type": "string",
+      "required": false,
+      "priority": 1,
+      "group": "Einsatzbereich",
+      "source": {
+        "page_id": 79,
+        "prompt_id": 188,
+        "verbatim": true
+      },
+      "input_hint": "Bitte eine Abteilung nennen.",
+      "conditions": [
+        {
+          "when": {
+            "field": "bereich_pre_check",
+            "op": "eq",
+            "value": true
+          },
+          "then": {
+            "action": "ask"
+          }
+        }
+      ],
+      "context": "Fuzzy-Matching erlaubt - auch ähnliche Begriffe akzeptieren"
+    },
+    {
+      "id": "bereich",
+      "question": "Sehr gerne. Aktuell suchen wir besonders in der Palliativmedizin und im Herzkatheterlabor. Darüber hinaus haben wir operative Bereiche wie Anästhesie und OP, internistische Abteilungen wie Kardiologie und Onkologie, sowie diagnostische Bereiche wie das Schlaflabor und die Bronchologie. Was davon spricht Sie an?",
+      "type": "choice",
+      "options": [
+        "Anästhesie",
+        "Bronchologie",
+        "Chirurgische Station (Plastisch)",
+        "Dialyse",
+        "Endoskopie",
+        "Gastroenterologie",
+        "Geriatrie",
+        "Geriatrische Reha",
+        "Gynäkologie (Kreißsaal, Gynäkologische Ambulanz, Mutter-Kind-Zentrum, Gynäkologisch-Onkologisch)",
+        "Herzkatheterlabor",
+        "IMC",
+        "Intensivmedizin",
+        "Kardiologie, Herzchirurgie",
+        "Nephrologie",
+        "OP",
+        "OP und ANÄ (Plastische)",
+        "Onkologie",
+        "Orthopädie & Unfallchirurgie",
+        "Palliativmedizin",
+        "Pneumologie",
+        "Psychosomatik",
+        "Rehabilitation",
+        "Schlaflabor",
+        "Stroke Unit",
+        "Thoraxchirurgie"
+      ],
+      "required": false,
+      "priority": 1,
+      "group": "Einsatzbereich",
+      "source": {
+        "page_id": 79,
+        "prompt_id": 188,
+        "verbatim": true
+      },
+      "input_hint": "Bitte eine Abteilung nennen.",
+      "conditions": [
+        {
+          "when": {
+            "field": "bereich_pre_check",
+            "op": "eq",
+            "value": false
+          },
+          "then": {
+            "action": "ask"
+          }
+        },
+        {
+          "when": {
+            "field": "bereich_open",
+            "op": "exists"
+          },
+          "then": {
+            "action": "skip"
+          }
+        }
+      ],
+      "conversation_flow": {
+        "pre_check": {
+          "question": "Haben Sie eine Präferenz bezüglich der Fachabteilung, in der Sie arbeiten möchten?",
+          "on_yes": "open_question",
+          "on_no": "clustered_options"
+        },
+        "open_question": {
+          "question": "Welche Abteilung wäre das?",
+          "allow_fuzzy_match": true,
+          "on_unclear": "clustered_options"
+        },
+        "clustered_options": {
+          "presentation_hint": "Sehr gerne. Aktuell suchen wir besonders in der Palliativmedizin und im Herzkatheterlabor. Darüber hinaus haben wir operative Bereiche wie Anästhesie und OP, internistische Abteilungen wie Kardiologie und Onkologie, sowie diagnostische Bereiche wie das Schlaflabor und die Bronchologie. Was davon spricht Sie an?",
+          "categories": [
+            {
+              "id": "priority",
+              "label": "Aktuell besonders gesucht",
+              "options": [
+                "Palliativmedizin",
+                "Herzkatheterlabor"
+              ]
+            },
+            {
+              "id": "operativ",
+              "label": "Operative Bereiche",
+              "options": [
+                "Anästhesie",
+                "OP"
+              ]
+            },
+            {
+              "id": "internistisch",
+              "label": "Internistische Bereiche",
+              "options": [
+                "Kardiologie",
+                "Onkologie"
+              ]
+            },
+            {
+              "id": "diagnostik",
+              "label": "Diagnostische Bereiche",
+              "options": [
+                "Schlaflabor",
+                "Bronchologie"
+              ]
+            },
+            {
+              "id": "weitere",
+              "label": "Weitere Bereiche",
+              "options": [
+                "Geriatrie",
+                "Gastroenterologie",
+                "Pneumologie",
+                "Psychosomatik",
+                "Rehabilitation",
+                "Stroke Unit",
+                "Thoraxchirurgie"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "examen_pflege",
+      "question": "Sind Sie examinierte Pflegefachfrau oder Pflegefachmann?",
+      "type": "boolean",
+      "required": true,
+      "priority": 1,
+      "group": "Qualifikation",
+      "source": {
+        "verbatim": false
+      },
+      "context": "Muss-Kriterium aus Protokoll"
+    },
+    {
+      "id": "op_mfa_alternative",
+      "question": "Wären Sie alternativ für den OP-Bereich mit einer MFA-Qualifizierungsmaßnahme offen?",
+      "type": "boolean",
+      "required": false,
+      "priority": 2,
+      "group": "Qualifikation",
+      "source": {
+        "verbatim": false
+      },
+      "conditions": [
+        {
+          "when": {
+            "field": "bereich",
+            "op": "in",
+            "value": [
+              "OP",
+              "Anästhesie",
+              "Endoskopie"
+            ]
+          },
+          "then": {
+            "action": "ask"
+          }
+        }
+      ]
+    },
+    {
+      "id": "prio_herzkatheterlabor",
+      "question": "Haben Sie besonderes Interesse am Bereich Herzkatheterlabor?",
+      "type": "boolean",
+      "required": false,
+      "priority": 1,
+      "group": "Präferenzen",
+      "help_text": "Aktuell akuten Bedarf im Herzkatheterlabor am Standort Auerbachstraße 110, 70376 Stuttgart",
+      "source": {
+        "page_id": 81,
+        "prompt_id": 204,
+        "verbatim": false
+      }
+    },
+    {
+      "id": "prio_palliativmedizin",
+      "question": "Haben Sie besonderes Interesse am Bereich Palliativmedizin?",
+      "type": "boolean",
+      "required": false,
+      "priority": 1,
+      "group": "Präferenzen",
+      "help_text": "Vorrangige Stellenvergabe erfolgt auf der Palliativstation, da dort aktuell Bedarf besteht",
+      "source": {
+        "page_id": 79,
+        "prompt_id": 182,
+        "verbatim": false
+      }
+    },
+    {
+      "id": "arbeitszeitmodell",
+      "question": "Welches Arbeitszeitmodell bevorzugen Sie?",
+      "type": "choice",
+      "options": [
+        "Vollzeit (39 Std/ Woche)",
+        "Teilzeit (flexibel)"
+      ],
+      "required": true,
+      "priority": 2,
+      "group": "Rahmen",
+      "source": {
+        "verbatim": false
+      }
+    },
+    {
+      "id": "schichten",
+      "question": "Welche Schichten können Sie abdecken?",
+      "type": "multi_choice",
+      "options": [
+        "Früh",
+        "Spät",
+        "Nacht",
+        "Wechsel",
+        "individuelle Anpassungen möglich"
+      ],
+      "required": false,
+      "priority": 2,
+      "group": "Rahmen",
+      "help_text": "individuelle Anpassungen möglich",
+      "source": {
+        "verbatim": false
+      }
+    },
+    {
+      "id": "tarif_info",
+      "question": "Die Vergütung ist an den Angelehnt an den TV-ÖD P Tabelle angelehnt. Ist das für Sie grundsätzlich in Ordnung?",
+      "type": "boolean",
+      "required": false,
+      "priority": 3,
+      "group": "Rahmen",
+      "source": {
+        "verbatim": false
+      }
+    },
+    {
+      "id": "adresse_bestaetigen",
+      "question": "Ich habe Ihre Adresse als Mustermannstraße 3, 79098 Freiburg. Ist das korrekt?",
+      "type": "boolean",
+      "required": true,
+      "priority": 1,
+      "group": "Kontakt",
+      "source": {
+        "verbatim": false
+      }
+    }
+  ]
+}

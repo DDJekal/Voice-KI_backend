@@ -1,0 +1,178 @@
+{
+  "_meta": {
+    "schema_version": "1.1",
+    "generated_at": "2025-10-27T14:00:00.000Z",
+    "generator": "python-rbk-pflege-generator@1.0.0",
+    "source": "Gesprächsprotokoll_Teil3.json",
+    "note": "Robert Bosch Klinikum Pflegefachkräfte mit konditionaler Gate-Logik",
+    "features": [
+      "conditional_gates",
+      "alternative_checks"
+    ]
+  },
+  "questions": [
+    {
+      "id": "adresse_bestaetigen",
+      "question": "Ich habe Ihre Adresse als Mustermannstraße 3, 79098 Freiburg. Ist das korrekt?",
+      "type": "boolean",
+      "required": true,
+      "priority": 1,
+      "group": "Kontakt",
+      "category": "identifikation",
+      "category_order": 1,
+      "source": {
+        "verbatim": false
+      }
+    },
+    {
+      "id": "kriterium_pflegefachkraft",
+      "question": "Sind Sie examinierte Pflegefachfrau oder Pflegefachmann?",
+      "type": "boolean",
+      "required": true,
+      "priority": 1,
+      "group": "Qualifikation",
+      "category": "standardqualifikationen",
+      "category_order": 3,
+      "source": {
+        "page_id": 79,
+        "prompt_id": 184,
+        "verbatim": true
+      },
+      "context": "Muss-Kriterium",
+      "gate_config": {
+        "is_gate": true,
+        "can_end_call": true,
+        "has_alternatives": true,
+        "alternative_question_ids": [
+          "kriterium_mfa_op"
+        ],
+        "logic": "IF Pflegefachkraft = NEIN AND MFA = NEIN THEN end_call"
+      }
+    },
+    {
+      "id": "kriterium_mfa_op",
+      "question": "Für den OP-Bereich haben wir eine Alternative: Sind Sie MFA (Medizinische Fachangestellte) und interessiert an einer Qualifizierungsmaßnahme nach Curriculum der Bundesärztekammer?",
+      "type": "boolean",
+      "required": false,
+      "priority": 1,
+      "group": "Qualifikation",
+      "category": "standardqualifikationen",
+      "category_order": 3,
+      "source": {
+        "page_id": 79,
+        "prompt_id": 186,
+        "verbatim": true
+      },
+      "context": "Alternative für OP-Bereich",
+      "conditions": [
+        {
+          "when": {
+            "field": "kriterium_pflegefachkraft",
+            "op": "eq",
+            "value": false
+          },
+          "then": {
+            "action": "ask"
+          }
+        }
+      ],
+      "gate_config": {
+        "is_alternative": true,
+        "alternative_for": "kriterium_pflegefachkraft",
+        "can_satisfy_gate": true,
+        "final_alternative": true,
+        "end_message_if_all_no": "Vielen Dank für Ihre Offenheit. Leider benötigen wir für diese Stelle entweder eine examinierte Pflegefachkraft oder eine MFA mit Interesse an einer Qualifizierungsmaßnahme für den OP-Bereich. Deshalb müssen wir das Gespräch an dieser Stelle beenden. Vielen Dank für Ihr Interesse und alles Gute für Ihre weitere Suche."
+      }
+    },
+    {
+      "id": "info_prio_palliativ",
+      "question": "Wichtig: Vorrangige Stellenvergabe erfolgt auf der Palliativstation, da dort aktuell Bedarf besteht. Falls diese Station nicht infrage kommt, prüfen wir gerne alternative Einsatzmöglichkeiten in anderen Bereichen",
+      "type": "info",
+      "required": false,
+      "priority": 1,
+      "group": "Info",
+      "category": "info",
+      "category_order": 4,
+      "source": {
+        "page_id": 79,
+        "prompt_id": 182,
+        "verbatim": true
+      }
+    },
+    {
+      "id": "einsatzbereich_interesse",
+      "question": "In welcher Fachabteilung möchten Sie gerne arbeiten?",
+      "type": "choice",
+      "options": [
+        "Palliativstation",
+        "OP",
+        "Intensivstation",
+        "Notaufnahme",
+        "Innere Medizin",
+        "Chirurgie",
+        "Geriatrie"
+      ],
+      "required": true,
+      "priority": 1,
+      "group": "Einsatzbereich",
+      "category": "einsatzbereiche",
+      "category_order": 6,
+      "source": {
+        "page_id": 79,
+        "prompt_id": 188,
+        "verbatim": true
+      },
+      "help_text": "Vorrangige Vergabe: Palliativstation"
+    },
+    {
+      "id": "arbeitszeitmodell",
+      "question": "Welches Arbeitszeitmodell bevorzugen Sie?",
+      "type": "choice",
+      "options": [
+        "Vollzeit (39 Std/Woche)",
+        "Teilzeit (flexibel)"
+      ],
+      "required": true,
+      "priority": 2,
+      "group": "Rahmen",
+      "category": "rahmenbedingungen",
+      "category_order": 7,
+      "source": {
+        "page_id": 80,
+        "prompt_id": 194,
+        "verbatim": true
+      }
+    },
+    {
+      "id": "verguetung_info",
+      "question": "Die Vergütung ist angelehnt an den TV-ÖD P. Ist das für Sie grundsätzlich in Ordnung?",
+      "type": "boolean",
+      "required": false,
+      "priority": 3,
+      "group": "Rahmen",
+      "category": "rahmenbedingungen",
+      "category_order": 7,
+      "source": {
+        "page_id": 80,
+        "prompt_id": 198,
+        "verbatim": true
+      }
+    },
+    {
+      "id": "adresse_erfragen",
+      "question": "Können Sie mir Ihre vollständige Adresse nennen?",
+      "type": "string",
+      "required": true,
+      "priority": 1,
+      "group": "Kontakt",
+      "category": "kontaktinformationen",
+      "category_order": 2,
+      "source": {
+        "page_id": 79,
+        "prompt_id": 190,
+        "verbatim": true
+      },
+      "context": "Falls noch nicht vollständig bekannt"
+    }
+  ]
+}

@@ -1,0 +1,482 @@
+{
+  "created_on": "2025-10-15T08:59:18.551199+00:00",
+  "id": 60,
+  "name": "Pflegefachkräfte",
+  "pages": [
+    {
+      "created_on": "2025-10-15T08:59:18.573263+00:00",
+      "id": 79,
+      "name": "Der Bewerber erfüllt folgende Kriterien:",
+      "position": 1,
+      "prompts": [
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:01:30.102033+00:00",
+          "id": 190,
+          "information": null,
+          "is_template": false,
+          "position": 1,
+          "question": "genaue Adresse der Bewerber erfragen!",
+          "updated_on": "2025-10-15T09:01:30.102033+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:01:26.129091+00:00",
+          "id": 188,
+          "information": null,
+          "is_template": false,
+          "position": 2,
+          "question": "Erfragen: In welcher Fachabteilung möchten Sie gerne arbeiten? (im Kommentarfeld eintragen )",
+          "updated_on": "2025-10-15T09:01:26.129091+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:01:21.633347+00:00",
+          "id": 186,
+          "information": null,
+          "is_template": false,
+          "position": 3,
+          "question": "alternativ: Für den Bereich OP: MFA > Qualifizierungsmaßnahme nach Curriculum der Bundesärztekammer im Hause möglich",
+          "updated_on": "2025-10-15T09:01:21.633347+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:01:17.277614+00:00",
+          "id": 184,
+          "information": null,
+          "is_template": false,
+          "position": 4,
+          "question": "zwingend: Pflegefachmann /-frau",
+          "updated_on": "2025-10-15T09:01:17.277614+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:01:10.450041+00:00",
+          "id": 182,
+          "information": null,
+          "is_template": false,
+          "position": 5,
+          "question": "Wichtige SC->Prio 1: Vorrangige Stellenvergabe erfolgt auf der Palliativstation, da dort aktuell Bedarf besteht. Falls diese Station nicht infrage kommt, prüfen wir gerne alternative Einsatzmöglichkeiten in anderen Bereichen",
+          "updated_on": "2025-10-15T09:01:10.450041+00:00"
+        }
+      ],
+      "updated_on": "2025-10-15T08:59:42.068443+00:00"
+    },
+    {
+      "created_on": "2025-10-15T08:59:44.846499+00:00",
+      "id": 80,
+      "name": "Der Bewerber akzeptiert folgende Rahmenbedingungen:",
+      "position": 2,
+      "prompts": [
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:01:53.992617+00:00",
+          "id": 198,
+          "information": null,
+          "is_template": false,
+          "position": 1,
+          "question": "Angelehnt an den TV-ÖD P Tabelle",
+          "updated_on": "2025-10-15T09:01:53.992617+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:01:49.488056+00:00",
+          "id": 196,
+          "information": null,
+          "is_template": false,
+          "position": 2,
+          "question": "Teilzeit: flexibel",
+          "updated_on": "2025-10-15T09:01:49.488056+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:01:45.664568+00:00",
+          "id": 194,
+          "information": null,
+          "is_template": false,
+          "position": 3,
+          "question": "Vollzeit: 39 Std/ Woche",
+          "updated_on": "2025-10-15T09:01:45.664568+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:01:41.775457+00:00",
+          "id": 192,
+          "information": null,
+          "is_template": false,
+          "position": 4,
+          "question": "Schichtzeiten: individuelle Anpassungen möglich",
+          "updated_on": "2025-10-15T09:01:41.776477+00:00"
+        }
+      ],
+      "updated_on": "2025-10-15T08:59:52.019837+00:00"
+    },
+    {
+      "created_on": "2025-10-15T08:59:55.148403+00:00",
+      "id": 81,
+      "name": "Weitere Informationen",
+      "position": 3,
+      "prompts": [
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:02:27.734353+00:00",
+          "id": 212,
+          "information": null,
+          "is_template": false,
+          "position": 1,
+          "question": "JobRad-Leasing und Mitarbeiterrabatte bei einer Vielzahl von Unternehmen",
+          "updated_on": "2025-10-15T09:02:27.734353+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:02:22.055243+00:00",
+          "id": 210,
+          "information": null,
+          "is_template": false,
+          "position": 2,
+          "question": "Bei Bedarf Mitarbeiterwohnungen sowie Betreuungsmöglichkeiten für die Kinder unserer Mitarbeitenden in einer Kindertagesstätte in der Nähe",
+          "updated_on": "2025-10-15T09:02:22.055243+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:02:17.120813+00:00",
+          "id": 208,
+          "information": null,
+          "is_template": false,
+          "position": 3,
+          "question": "Standortmöglichkeit a) Hohenheimerstraße 21, 70184 Stuttgart. Bereich: Geriatrische Reha",
+          "updated_on": "2025-10-15T09:02:17.120813+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:02:13.049066+00:00",
+          "id": 206,
+          "information": null,
+          "is_template": false,
+          "position": 4,
+          "question": "Standortmöglichkeit b) Auerbachstraße 110, 70376 Stuttgart. Bereich Intensiv und OP , Akutbereiche",
+          "updated_on": "2025-10-15T09:02:13.049066+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:02:09.417846+00:00",
+          "id": 204,
+          "information": null,
+          "is_template": false,
+          "position": 5,
+          "question": "Wir haben aktuell akuten Bedarf in unserem Herzkatheterlabor ( Standort Auerbachstraße 110, 70376 Stuttgart)",
+          "updated_on": "2025-10-15T09:02:09.417846+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:02:05.071033+00:00",
+          "id": 202,
+          "information": null,
+          "is_template": false,
+          "position": 6,
+          "question": "brandneue Station: Bereich der Palliativmedizin",
+          "updated_on": "2025-10-15T09:02:05.071033+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:02:00.853019+00:00",
+          "id": 200,
+          "information": null,
+          "is_template": false,
+          "position": 7,
+          "question": "AP: OP: Adis Hamedovic Intensivstation: Natalie Kraft Geriatrie: Jutta Schrempf / Tobias Bock-Viessmann",
+          "updated_on": "2025-10-15T09:02:00.853019+00:00"
+        }
+      ],
+      "updated_on": "2025-10-15T09:00:00.765900+00:00"
+    },
+    {
+      "created_on": "2025-10-15T09:00:06.155638+00:00",
+      "id": 82,
+      "name": "Station Möglichkeit Standortmöglichkeit a) Standort Burgholzhof (Auerbachstraße 110, 70376 Stuttgart)",
+      "position": 4,
+      "prompts": [
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:03:54.959016+00:00",
+          "id": 248,
+          "information": null,
+          "is_template": false,
+          "position": 1,
+          "question": "18. Stroke Unit",
+          "updated_on": "2025-10-15T09:03:54.959016+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:03:50.671367+00:00",
+          "id": 246,
+          "information": null,
+          "is_template": false,
+          "position": 2,
+          "question": "17. Thoraxchirurgie",
+          "updated_on": "2025-10-15T09:03:50.671367+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:03:46.190067+00:00",
+          "id": 244,
+          "information": null,
+          "is_template": false,
+          "position": 3,
+          "question": "16.Gastroenterologie",
+          "updated_on": "2025-10-15T09:03:46.190067+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:03:42.003570+00:00",
+          "id": 242,
+          "information": null,
+          "is_template": false,
+          "position": 4,
+          "question": "15.Pneumologie",
+          "updated_on": "2025-10-15T09:03:42.003570+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:03:37.962745+00:00",
+          "id": 240,
+          "information": null,
+          "is_template": false,
+          "position": 5,
+          "question": "14.Orthopädie & Unfallchirurgie",
+          "updated_on": "2025-10-15T09:03:37.962745+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:03:33.283977+00:00",
+          "id": 238,
+          "information": null,
+          "is_template": false,
+          "position": 6,
+          "question": "13.Gynäkologie (Kreißsaal, Gynäkologische Ambulanz, Mutter-Kind-Zentrum, Gynäkologisch-Onkologisch)",
+          "updated_on": "2025-10-15T09:03:33.283977+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:03:28.848310+00:00",
+          "id": 236,
+          "information": null,
+          "is_template": false,
+          "position": 7,
+          "question": "12.Gastroenterologie",
+          "updated_on": "2025-10-15T09:03:28.848310+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:03:25.029556+00:00",
+          "id": 234,
+          "information": null,
+          "is_template": false,
+          "position": 8,
+          "question": "11.Bronchologie",
+          "updated_on": "2025-10-15T09:03:25.029556+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:03:20.546698+00:00",
+          "id": 232,
+          "information": null,
+          "is_template": false,
+          "position": 9,
+          "question": "\n10.Endoskopie",
+          "updated_on": "2025-10-15T09:03:20.546698+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:03:16.312661+00:00",
+          "id": 230,
+          "information": null,
+          "is_template": false,
+          "position": 10,
+          "question": "9.Herzkatheterlabor",
+          "updated_on": "2025-10-15T09:03:16.312661+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:03:12.475581+00:00",
+          "id": 228,
+          "information": null,
+          "is_template": false,
+          "position": 11,
+          "question": "8.Anästhesie",
+          "updated_on": "2025-10-15T09:03:12.475581+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:03:07.993791+00:00",
+          "id": 226,
+          "information": null,
+          "is_template": false,
+          "position": 12,
+          "question": "7.OP",
+          "updated_on": "2025-10-15T09:03:07.993791+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:03:04.077110+00:00",
+          "id": 224,
+          "information": null,
+          "is_template": false,
+          "position": 13,
+          "question": "6.Dialyse",
+          "updated_on": "2025-10-15T09:03:04.077110+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:03:00.003428+00:00",
+          "id": 222,
+          "information": null,
+          "is_template": false,
+          "position": 14,
+          "question": "5.Onkologie",
+          "updated_on": "2025-10-15T09:03:00.003428+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:02:55.766416+00:00",
+          "id": 220,
+          "information": null,
+          "is_template": false,
+          "position": 15,
+          "question": "4.IMC",
+          "updated_on": "2025-10-15T09:02:55.766416+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:02:50.701892+00:00",
+          "id": 218,
+          "information": null,
+          "is_template": false,
+          "position": 16,
+          "question": "3.Intensivmedizin",
+          "updated_on": "2025-10-15T09:02:50.701892+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:02:45.432825+00:00",
+          "id": 216,
+          "information": null,
+          "is_template": false,
+          "position": 17,
+          "question": "\n2.Nephrologie",
+          "updated_on": "2025-10-15T09:02:45.432825+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:02:40.361932+00:00",
+          "id": 214,
+          "information": null,
+          "is_template": false,
+          "position": 18,
+          "question": "1.Kardiologie, Herzchirurgie",
+          "updated_on": "2025-10-15T09:02:40.361932+00:00"
+        }
+      ],
+      "updated_on": "2025-10-15T09:00:16.182182+00:00"
+    },
+    {
+      "created_on": "2025-10-15T09:00:09.998436+00:00",
+      "id": 83,
+      "name": "Station Möglichkeit Standortmöglichkeit b) Standort City (21 70184 Stuttgart)",
+      "position": 5,
+      "prompts": [
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:04:23.773378+00:00",
+          "id": 260,
+          "information": null,
+          "is_template": false,
+          "position": 1,
+          "question": "6.Chirurgische Station (Plastisch)",
+          "updated_on": "2025-10-15T09:04:23.773378+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:04:19.635807+00:00",
+          "id": 258,
+          "information": null,
+          "is_template": false,
+          "position": 2,
+          "question": "5.IMC",
+          "updated_on": "2025-10-15T09:04:19.637071+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:04:15.191794+00:00",
+          "id": 256,
+          "information": null,
+          "is_template": false,
+          "position": 3,
+          "question": "\n4. OP und ANÄ (Plastische)",
+          "updated_on": "2025-10-15T09:04:15.191794+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:04:11.251178+00:00",
+          "id": 254,
+          "information": null,
+          "is_template": false,
+          "position": 4,
+          "question": "3.Schlaflabor",
+          "updated_on": "2025-10-15T09:04:11.251178+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:04:07.173762+00:00",
+          "id": 252,
+          "information": null,
+          "is_template": false,
+          "position": 5,
+          "question": "2.Rehabilitation",
+          "updated_on": "2025-10-15T09:04:07.173762+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:04:02.795968+00:00",
+          "id": 250,
+          "information": null,
+          "is_template": false,
+          "position": 6,
+          "question": "1.Geriatrie",
+          "updated_on": "2025-10-15T09:04:02.795968+00:00"
+        }
+      ],
+      "updated_on": "2025-10-15T09:00:26.443531+00:00"
+    },
+    {
+      "created_on": "2025-10-15T09:00:52.491828+00:00",
+      "id": 84,
+      "name": "Station Möglichkeit Standortmöglichkeit c) Standort City Gebäude Gerokstraße (Gerokstraße 31, 70184 Stuttgart)",
+      "position": 6,
+      "prompts": [
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:04:36.668225+00:00",
+          "id": 264,
+          "information": null,
+          "is_template": false,
+          "position": 1,
+          "question": "2.Psychosomatik",
+          "updated_on": "2025-10-15T09:04:36.668225+00:00"
+        },
+        {
+          "checked": null,
+          "created_on": "2025-10-15T09:04:32.597732+00:00",
+          "id": 262,
+          "information": null,
+          "is_template": false,
+          "position": 2,
+          "question": "1. Palliativmedizin",
+          "updated_on": "2025-10-15T09:04:32.597732+00:00"
+        }
+      ],
+      "updated_on": "2025-10-15T09:01:00.183291+00:00"
+    }
+  ],
+  "updated_on": "2025-10-15T08:59:18.551199+00:00"
+}

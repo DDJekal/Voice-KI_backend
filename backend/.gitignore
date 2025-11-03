@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Campaign Packages (lokal generiert)
+campaign_packages/
+
+# Output & Test Data
+Output_ordner/
+test_data/
+
+# Test Scripts (optional - können auch committed werden)
+# test_*.py
+# debug_*.py
+# generate_questions_*.py
+# generate_output.py
+
+# Documentation Artefakte (optional)
+# *_COMPLETE.md
+# *_SUMMARY.md
+# SESSION_SUMMARY.md
+# IMPLEMENTATION_PLAN.md

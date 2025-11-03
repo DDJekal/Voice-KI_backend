@@ -1,0 +1,52 @@
+services:
+  - type: web
+    name: voiceki-backend
+    env: python
+    region: frankfurt  # EU Region
+    plan: free  # Upgrade auf starter ($7/mo) für 24/7
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn api_server:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /health
+    
+    envVars:
+      # API Data Source
+      - key: USE_API_SOURCE
+        value: true
+      
+      - key: API_URL
+        value: https://high-office.hirings.cloud/api/v1
+      
+      - key: API_KEY
+        sync: false  # Secret - manuell im Dashboard setzen
+      
+      - key: API_STATUS
+        value: new
+      
+      - key: FILTER_TEST_APPLICANTS
+        value: true
+      
+      # HOC Upload
+      - key: HOC_API_URL
+        value: https://high-office.hirings.cloud/api/v1
+      
+      - key: HOC_UPLOAD_ENABLED
+        value: true
+      
+      # Webhook Authentication
+      - key: WEBHOOK_SECRET
+        generateValue: true  # Auto-generiert von Render
+      
+      # ElevenLabs (für später - Phase 2)
+      - key: ELEVENLABS_API_KEY
+        sync: false  # Secret
+      
+      - key: ELEVENLABS_AGENT_ID
+        sync: false  # Secret
+      
+      # Paths (relative zum backend/)
+      - key: PROMPTS_DIR
+        value: ../VoiceKI _prompts
+      
+      - key: QUESTIONS_JSON_PATH
+        value: ../KI-Sellcruiting_VerarbeitungProtokollzuFragen/output/questions.json
+
