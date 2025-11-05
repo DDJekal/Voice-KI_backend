@@ -90,3 +90,141 @@ Gib NUR valides JSON zurück, keine zusätzlichen Erklärungen:
 - Bei Prioritäten: Erfasse die BEGRÜNDUNG aus dem Text
 - Verbatim: Nur echte Fragen markieren, keine Anweisungen
 
+### 8. Protokoll-Fragen extrahieren (NEU für Hybrid-Ansatz)
+
+Extrahiere ALLE echten Fragen aus den Prompts, die als Fragen gestellt werden sollen.
+
+**AUSNAHMEN (NICHT extrahieren):**
+- ❌ Name-Bestätigung (z.B. "Spreche ich mit...")
+- ❌ Adress-Bestätigung (z.B. "Ich habe Ihre Adresse als...")
+- ❌ Anweisungen ohne Frageformat (z.B. "genaue Adresse erfragen!")
+- ❌ Reine Informationen ohne Frage
+
+**ZU EXTRAHIEREN:**
+- ✅ Qualifikations-Fragen (z.B. "Haben Sie ein abgeschlossenes Examen?")
+- ✅ Erfahrungs-Fragen (z.B. "Haben Sie Erfahrung in der Intensivpflege?")
+- ✅ Präferenz-Fragen (z.B. "In welchem Bereich möchten Sie arbeiten?")
+- ✅ Schichtbereitschaft (z.B. "Sind Sie bereit zu Schichtdienst?")
+- ✅ Mobilität (z.B. "Haben Sie einen Führerschein?")
+- ✅ Alle anderen echten Fragen
+
+**Type Detection:**
+- `boolean`: Ja/Nein Fragen ("Haben Sie...", "Sind Sie...", "Können Sie...")
+- `choice`: Auswahl-Fragen ("Welche/r/s...", "In welchem...", "Wo möchten Sie...")
+- `string`: Offene Fragen ("Nennen Sie...", "Beschreiben Sie...")
+- `date`: Zeitpunkt-Fragen ("Ab wann...", "Wann...")
+
+**Category Detection:**
+- `qualifikation`: Examen, Abschluss, Zertifikate, Ausbildung
+- `erfahrung`: Berufserfahrung, Kenntnisse, Praxis
+- `einsatzbereich`: Abteilung, Bereich, Station, Fachabteilung
+- `rahmen`: Arbeitszeit, Schichten, Mobilität, Verfügbarkeit
+- `praeferenzen`: Wünsche, Interessen, Prioritäten
+
+**is_gate Detection:**
+- `true` bei Keywords: "zwingend", "erforderlich", "Voraussetzung", "Pflicht", "muss"
+- `true` wenn in must_have erwähnt
+- `false` sonst
+
+**Format im Output JSON:**
+
+Füge dem Output ein neues Feld `protocol_questions` hinzu:
+
+```json
+{
+  "sites": [...],
+  "priorities": [...],
+  "must_have": [...],
+  "alternatives": [...],
+  "constraints": {...},
+  "verbatim_candidates": [...],
+  "all_departments": [...],
+  "protocol_questions": [
+    {
+      "text": "Haben Sie Erfahrung in der Intensivpflege?",
+      "page_id": 82,
+      "prompt_id": 301,
+      "type": "boolean",
+      "options": null,
+      "category": "erfahrung",
+      "is_required": false,
+      "is_gate": false,
+      "help_text": null
+    },
+    {
+      "text": "Sind Sie bereit zu Schichtdienst und Wochenend-/Feiertagsarbeit?",
+      "page_id": 84,
+      "prompt_id": 315,
+      "type": "boolean",
+      "options": null,
+      "category": "rahmen",
+      "is_required": true,
+      "is_gate": true,
+      "help_text": "Zwingend erforderlich für diese Position"
+    }
+  ]
+}
+```
+
+**Formulierungs-Hinweise:**
+- Formuliere direkt als Frage
+- Natürlich und höflich
+- Keine Anweisungen ("Frage nach..." → "Haben Sie...")
+- Bei Umformulierung: Behalte den Kern der Frage bei
+
+### 8.5 Formulierungs-Richtlinien für perfekte Grammatik (WICHTIG!)
+
+**GRAMMATIK-REGELN:**
+
+1. **Korrekte Deklination bei Geschlechtern:**
+   - ❌ FALSCH: "Sind Sie examinierte Pflegefachfrau oder Pflegefachmann?"
+   - ✅ RICHTIG: "Haben Sie ein abgeschlossenes Examen als Pflegefachfrau/-mann?"
+   - ✅ ODER: "Sind Sie examinierter Pflegefachmann oder examinierte Pflegefachfrau?"
+
+2. **Präpositionen korrekt verwenden:**
+   - ❌ FALSCH: "Interesse am Bereich Herzkatheterlabor"
+   - ✅ RICHTIG: "Interesse für das Herzkatheterlabor"
+   - ❌ FALSCH: "bereit zu Schichtdienst"
+   - ✅ RICHTIG: "bereit, im Schichtdienst zu arbeiten"
+
+3. **Redundanzen vermeiden:**
+   - ❌ FALSCH: "Haben Sie besonderes Interesse am Bereich Palliativstation?"
+   - ✅ RICHTIG: "Interessieren Sie sich für die Palliativstation?"
+
+**FORMULIERUNGS-PATTERNS (Nutze diese Templates!):**
+
+**Für Interesse/Präferenzen:**
+- ✅ "Interessieren Sie sich für [BEREICH]?"
+- ✅ "Würden Sie gerne in/im [BEREICH] arbeiten?"
+- ✅ "Könnten Sie sich vorstellen, in/im [BEREICH] zu arbeiten?"
+- ❌ NICHT: "Haben Sie besonderes Interesse am Bereich..."
+
+**Für Qualifikationen:**
+- ✅ "Haben Sie ein abgeschlossenes Examen als [ROLLE]?"
+- ✅ "Verfügen Sie über eine Ausbildung als [ROLLE]?"
+- ✅ "Sind Sie ausgebildete/r [ROLLE]?"
+- ❌ NICHT: Geschlechts-spezifische Deklinationen bei oder-Konstruktionen
+
+**Für Erfahrungen:**
+- ✅ "Haben Sie bereits Erfahrung in [BEREICH]?"
+- ✅ "Haben Sie schon einmal in [BEREICH] gearbeitet?"
+- ✅ "Konnten Sie bereits Erfahrungen in [BEREICH] sammeln?"
+
+**Für Schichtarbeit/Verfügbarkeit:**
+- ✅ "Wären Sie grundsätzlich bereit, im Schichtdienst zu arbeiten?"
+- ✅ "Können Sie sich vorstellen, in Schichten zu arbeiten?"
+- ✅ "Wären Sie bereit, auch an Wochenenden und Feiertagen zu arbeiten?"
+- ❌ NICHT: "Sind Sie bereit zu Schichtdienst" (grammatikalisch unvollständig)
+
+**Für Abteilungs-/Standortwahl:**
+- ✅ "In welcher [Abteilung/Station] würden Sie gerne arbeiten?"
+- ✅ "Welcher [Standort] wäre für Sie am interessantesten?"
+- ✅ "Haben Sie bereits eine Präferenz für eine bestimmte [Abteilung]?"
+
+**NATURAL LANGUAGE RULES:**
+- Vermeide redundante Konstruktionen ("am Bereich", "zum Thema", "bezüglich des Bereichs")
+- Verwende aktive statt passive Formulierungen
+- Halte Sätze kurz und präzise (maximal 15-20 Wörter)
+- Verwende höfliche, offene Formulierungen ("würden Sie", "könnten Sie", "wären Sie")
+- Bei help_text: Schreibe vollständige Sätze (z.B. "Wir haben aktuell akuten Bedarf" statt "aktuell akuten Bedarf")
+

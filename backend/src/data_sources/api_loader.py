@@ -32,7 +32,8 @@ class APIDataSource(DataSource):
         self.session = requests.Session()
         
         if api_key:
-            self.session.headers.update({'Authorization': f'Bearer {api_key}'})
+            # WICHTIG: Kein "Bearer" Präfix! HOC API erwartet direkten Token
+            self.session.headers.update({'Authorization': f'{api_key}'})
         
         # Cache für API-Daten
         self._api_data = None
@@ -43,7 +44,7 @@ class APIDataSource(DataSource):
             try:
                 # API Endpoint: /applicants/{status}
                 endpoint = f"{self.api_url}/applicants/{self.status}"
-                print(f"📡 Lade Daten von: {endpoint}")
+                print(f"Lade Daten von: {endpoint}")
                 
                 response = self.session.get(endpoint)
                 response.raise_for_status()
@@ -62,9 +63,9 @@ class APIDataSource(DataSource):
                     filtered_count = original_count - len(applicants)
                     
                     if filtered_count > 0:
-                        print(f"⚠️  {filtered_count} Test-Bewerber herausgefiltert")
+                        print(f"WARNUNG: {filtered_count} Test-Bewerber herausgefiltert")
                 
-                print(f"✅ API-Daten geladen: {len(applicants)} Bewerber (Status: {self.status})")
+                print(f"API-Daten geladen: {len(applicants)} Bewerber (Status: {self.status})")
                 
             except requests.exceptions.RequestException as e:
                 raise Exception(f"Fehler beim Laden der API-Daten: {e}")

@@ -25,7 +25,7 @@ class QuestionGroup(str, Enum):
     STANDORT = "Standort"
     EINSATZBEREICH = "Einsatzbereich"
     QUALIFIKATION = "Qualifikation"
-    PRAEFER ENZEN = "Präferenzen"
+    PRAEFERENZEN = "Präferenzen"
     RAHMEN = "Rahmen"
     KONTAKT = "Kontakt"
 
@@ -81,6 +81,20 @@ class VerbatimCandidate(BaseModel):
     is_real_question: bool = False
 
 
+# Protocol Question Models (NEU für Hybrid-Ansatz)
+class ProtocolQuestion(BaseModel):
+    """Strukturierte Frage direkt aus dem Protokoll (LLM-extrahiert)"""
+    text: str
+    page_id: int
+    prompt_id: Optional[int] = None
+    type: Optional[str] = None  # "boolean", "choice", "string", etc.
+    options: Optional[List[str]] = None
+    category: Optional[str] = None  # "qualifikation", "erfahrung", "praeferenzen"
+    is_required: bool = False
+    is_gate: bool = False  # Gate-Question?
+    help_text: Optional[str] = None
+
+
 # Extract Result
 class ExtractResult(BaseModel):
     """Result from LLM extract pipeline stage"""
@@ -92,6 +106,9 @@ class ExtractResult(BaseModel):
     constraints: Constraints = Field(default_factory=Constraints)
     verbatim_candidates: List[VerbatimCandidate] = Field(default_factory=list)
     all_departments: List[str]
+    
+    # NEU: Strukturierte Protokoll-Fragen
+    protocol_questions: List[ProtocolQuestion] = Field(default_factory=list)
 
 
 # Conversation Flow Models
@@ -200,6 +217,7 @@ class Question(BaseModel):
     id: str
     question: str
     type: QuestionType
+    preamble: Optional[str] = None  # NEU: Einführung/Kontext vor der Frage
     options: Optional[List[str]] = None
     conversation_flow: Optional[ConversationalFlow] = None
     required: bool
@@ -232,8 +250,12 @@ class CatalogMeta(BaseModel):
 
 class QuestionCatalog(BaseModel):
     """Complete question catalog"""
-    _meta: CatalogMeta = Field(default_factory=CatalogMeta)
+    meta: CatalogMeta = Field(default_factory=CatalogMeta, alias="_meta")
     questions: List[Question]
+    
+    model_config = {
+        "populate_by_name": True
+    }
 
 
 # Conversation Protocol Models (for input)

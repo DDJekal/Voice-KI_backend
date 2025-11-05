@@ -38,16 +38,16 @@ async def setup_campaign_async(
     """
     
     print("\n" + "="*70)
-    print("🔧 CAMPAIGN SETUP - Phase 1 (mit automatischer Question Generation)")
+    print("CAMPAIGN SETUP - Phase 1 (mit automatischer Question Generation)")
     print("="*70)
     print(f"Campaign ID: {campaign_id}")
     
     # Policy-Config
     policies_enabled = enable_policies and not no_policies
     if policies_enabled:
-        print(f"🔧 Policies: Aktiviert (Level: {policy_level})")
+        print(f"Policies: Aktiviert (Level: {policy_level})")
     else:
-        print(f"ℹ️  Policies: Deaktiviert (A/B-Testing)")
+        print(f"Policies: Deaktiviert (A/B-Testing)")
     
     print("="*70 + "\n")
     
@@ -59,12 +59,12 @@ async def setup_campaign_async(
     
     # Prüfe ob Package bereits existiert
     if storage.package_exists(campaign_id) and not force:
-        print(f"⚠️  Campaign Package existiert bereits: {campaign_id}")
+        print(f"WARNUNG: Campaign Package existiert bereits: {campaign_id}")
         print(f"   Nutze --force um zu überschreiben")
         
         info = storage.get_package_info(campaign_id)
         if info:
-            print(f"\n📦 Existierendes Package:")
+            print(f"\nExistierendes Package:")
             print(f"   Company: {info['company_name']}")
             print(f"   Campaign: {info['campaign_name']}")
             print(f"   Erstellt: {info['created_at']}")
@@ -74,20 +74,20 @@ async def setup_campaign_async(
     
     try:
         # API Data Source initialisieren
-        print("📡 Initialisiere API Data Source...")
+        print("Initialisiere API Data Source...")
         
         if not settings.use_api_source:
-            print("❌ Fehler: USE_API_SOURCE muss auf 'true' gesetzt sein!")
+            print("Fehler: USE_API_SOURCE muss auf 'true' gesetzt sein!")
             print("   Setze in .env: USE_API_SOURCE=true")
             sys.exit(1)
         
         if not settings.api_url:
-            print("❌ Fehler: API_URL nicht gesetzt!")
+            print("Fehler: API_URL nicht gesetzt!")
             print("   Setze in .env: API_URL=https://high-office.hirings.cloud/api/v1")
             sys.exit(1)
         
         if not settings.openai_api_key:
-            print("❌ Fehler: OPENAI_API_KEY nicht gesetzt!")
+            print("Fehler: OPENAI_API_KEY nicht gesetzt!")
             print("   Benötigt für automatische Question Generation")
             sys.exit(1)
         
@@ -97,10 +97,10 @@ async def setup_campaign_async(
             status="new",
             filter_test_applicants=True
         )
-        print(f"   ✅ API URL: {settings.api_url}")
+        print(f"   API URL: {settings.api_url}")
         
         # Package Builder initialisieren (ohne questions_json_path!)
-        print("\n🏗️  Initialisiere Package Builder...")
+        print("\nInitialisiere Package Builder...")
         builder = CampaignPackageBuilder(
             prompts_dir=settings.get_prompts_dir_path(),
             policy_config={
@@ -108,36 +108,35 @@ async def setup_campaign_async(
                 "level": policy_level
             }
         )
-        print(f"   ✅ Prompts Dir: {settings.prompts_dir}")
-        print(f"   ✅ Questions werden automatisch mit OpenAI generiert")
-        print(f"   ✅ OpenAI Model: {settings.openai_model}")
+        print(f"   Prompts Dir: {settings.prompts_dir}")
+        print(f"   Questions werden automatisch mit OpenAI generiert")
+        print(f"   OpenAI Model: {settings.openai_model}")
         if policies_enabled:
-            print(f"   ✅ Policies: {policy_level} level")
+            print(f"   Policies: {policy_level} level")
         
         # Package erstellen (jetzt async!)
-        print("\n📦 Erstelle Campaign Package...")
+        print("\nErstelle Campaign Package...")
         package = await builder.build_package(campaign_id, api)
         
         # Speichern
-        print("\n💾 Speichere Package lokal...")
+        print("\nSpeichere Package lokal...")
         storage.save_package(campaign_id, package)
-        print(f"   ✅ Gespeichert: campaign_packages/{campaign_id}.json")
+        print(f"   Gespeichert: campaign_packages/{campaign_id}.json")
         
         print("\n" + "="*70)
-        print("✅ CAMPAIGN SETUP ERFOLGREICH!")
+        print("CAMPAIGN SETUP ERFOLGREICH!")
         print("="*70)
-        print(f"\n📦 Package Info:")
+        print(f"\nPackage Info:")
         print(f"   Company: {package['company_name']}")
         print(f"   Campaign: {package['campaign_name']}")
         print(f"   Fragen: {len(package['questions']['questions'])}")
-        print(f"   Templates: {len(package['kb_templates'])} Phasen")
         print("\n" + "="*70 + "\n")
         
     except FileNotFoundError as e:
-        print(f"\n❌ Fehler: {e}")
+        print(f"\nFehler: {e}")
         sys.exit(1)
     except Exception as e:
-        print(f"\n❌ Unerwarteter Fehler: {e}")
+        print(f"\nUnerwarteter Fehler: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)
@@ -192,7 +191,7 @@ def main():
     if args.list:
         storage = CampaignStorage()
         packages = storage.list_packages()
-        print("\n📦 Vorhandene Campaign Packages:")
+        print("\nVorhandene Campaign Packages:")
         if not packages:
             print("   Keine Packages gefunden")
         else:

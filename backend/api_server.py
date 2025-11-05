@@ -117,7 +117,7 @@ def verify_webhook_auth(authorization: Optional[str] = None) -> bool:
 
 async def run_campaign_setup(campaign_id: str, force: bool = False):
     """
-    Führt Campaign Setup aus (async wrapper).
+    Führt Campaign Setup aus (jetzt richtig async!).
     
     Args:
         campaign_id: Campaign ID
@@ -134,29 +134,24 @@ async def run_campaign_setup(campaign_id: str, force: bool = False):
         logger.info(f"Using existing package for campaign {campaign_id}")
         return storage.load_package(campaign_id)
     
-    # Neues Package erstellen in Thread Pool
-    loop = asyncio.get_event_loop()
+    # Neues Package erstellen - jetzt richtig async!
+    api = APIDataSource(
+        api_url=settings.api_url,
+        api_key=settings.api_key,
+        status="new",
+        filter_test_applicants=True
+    )
     
-    def _setup():
-        """Synchroner Setup-Code"""
-        api = APIDataSource(
-            api_url=settings.api_url,
-            api_key=settings.api_key,
-            status="new",
-            filter_test_applicants=True
-        )
-        
-        builder = CampaignPackageBuilder(
-            prompts_dir=settings.get_prompts_dir_path(),
-            questions_json_path=settings.get_questions_json_path()
-        )
-        
-        package = builder.build_package(campaign_id, api)
-        storage.save_package(campaign_id, package)
-        
-        return package
+    builder = CampaignPackageBuilder(
+        prompts_dir=settings.get_prompts_dir_path()
+        # questions_json_path REMOVED - wird jetzt automatisch generiert!
+    )
     
-    return await loop.run_in_executor(None, _setup)
+    # build_package ist jetzt async!
+    package = await builder.build_package(campaign_id, api)
+    storage.save_package(campaign_id, package)
+    
+    return package
 
 
 async def upload_to_hoc(package: dict) -> str:

@@ -251,38 +251,16 @@ class PolicyResolver:
         
         Policy: Avoid asking multiple yes/no questions in a row.
         Mix question types for natural conversation flow.
+        
+        NOTE: Diversification hints are now DISABLED to reduce JSON size.
+        ElevenLabs handles conversation flow automatically.
         """
-        logger.debug("Applying diversification policy...")
+        logger.debug("Applying diversification policy (hints disabled)...")
         
-        # Group questions by category order
-        categorized = {}
-        for q in questions:
-            order = q.category_order or 99
-            if order not in categorized:
-                categorized[order] = []
-            categorized[order].append(q)
+        # Diversification hints are disabled - they bloat the JSON
+        # ElevenLabs handles natural conversation flow automatically
         
-        # Check for boolean clusters
-        for order, qs in categorized.items():
-            boolean_count = 0
-            
-            for q in qs:
-                if q.type.value == "boolean":
-                    boolean_count += 1
-                    
-                    # Add diversification hint after 2 booleans
-                    if boolean_count >= 2:
-                        if not q.conversation_hints:
-                            q.conversation_hints = ConversationHints()
-                        
-                        q.conversation_hints.diversify_after = "boolean"
-                        
-                        logger.debug(f"  Diversification hint added: {q.id}")
-                        self.audit_log["policies_applied"].append(
-                            f"diversification: {q.id}"
-                        )
-                else:
-                    boolean_count = 0  # Reset counter
+        logger.debug("  Diversification hints skipped (feature disabled)")
         
         return questions
     
@@ -292,31 +270,17 @@ class PolicyResolver:
         
         Policy: For important questions, add hints for handling
         unclear or uncertain answers.
-        """
-        logger.debug("Applying confidence-check policy...")
         
-        for q in questions:
-            # Add confidence checks to required questions
-            if q.required and not q.conversation_hints:
-                q.conversation_hints = ConversationHints()
-            
-            if q.required and q.conversation_hints:
-                # Add clarification prompts
-                if not q.conversation_hints.on_unclear_answer:
-                    q.conversation_hints.on_unclear_answer = (
-                        "Verstehe ich richtig, dass Sie {interpretation}? "
-                        "Bitte korrigieren Sie mich, falls das nicht stimmt."
-                    )
-                
-                # Add confidence boost phrases based on question type
-                if q.type.value == "boolean" and not q.conversation_hints.confidence_boost_phrases:
-                    q.conversation_hints.confidence_boost_phrases = [
-                        "ja", "definitiv", "sicher", "korrekt", "genau",
-                        "nein", "nicht", "keineswegs"
-                    ]
-                
-                logger.debug(f"  Confidence check added: {q.id}")
-                self.audit_log["policies_applied"].append(f"confidence_check: {q.id}")
+        NOTE: Conversation hints are now DISABLED to reduce JSON size.
+        ElevenLabs handles unclear answers automatically.
+        """
+        logger.debug("Applying confidence-check policy (hints disabled)...")
+        
+        # Conversation hints are disabled - they bloat the JSON and ElevenLabs
+        # handles this automatically with its built-in conversation intelligence
+        
+        # Just log that we skipped this
+        logger.debug("  Conversation hints skipped (feature disabled)")
         
         return questions
     

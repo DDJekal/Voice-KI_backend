@@ -53,76 +53,74 @@ class CampaignPackageBuilder:
         Raises:
             ValueError: Wenn Campaign-Daten ungültig
         """
-        print(f"\n🔧 Erstelle Campaign Package für Campaign {campaign_id}")
+        print(f"\nErstelle Campaign Package fuer Campaign {campaign_id}")
         
         # 1. Lade Company + Campaign Daten von API
-        print("1️⃣ Lade Company & Campaign Daten von API...")
+        print("1. Lade Company & Campaign Daten von API...")
         company = api_source.get_company_profile(campaign_id)
         protocol = api_source.get_conversation_protocol(campaign_id)
         
-        print(f"   ✅ Company: {company.get('name', 'Unknown')}")
-        print(f"   ✅ Campaign: {protocol.get('name', 'Unknown')}")
+        print(f"   Company: {company.get('name', 'Unknown')}")
+        print(f"   Campaign: {protocol.get('name', 'Unknown')}")
         
         # 2. Generiere questions.json automatisch mit OpenAI!
-        print("2️⃣ Generiere questions.json automatisch (OpenAI)...")
+        print("2. Generiere questions.json automatisch (OpenAI)...")
         
         # Context für Question-Builder (mit Policy-Config)
         build_context = {}
         if self.policy_config.get("enabled", True):
             build_context["policy_level"] = self.policy_config.get("level", "standard")
-            print(f"   🔧 Policies aktiviert (Level: {build_context['policy_level']})")
+            print(f"   Policies aktiviert (Level: {build_context['policy_level']})")
         else:
-            print("   ℹ️  Policies deaktiviert (A/B-Testing)")
+            print("   Policies deaktiviert (A/B-Testing)")
         
         questions_catalog = await build_question_catalog(protocol, build_context)
-        print(f"   ✅ {len(questions_catalog.questions)} Fragen generiert")
+        print(f"   {len(questions_catalog.questions)} Fragen generiert")
         
         # Convert to dict for backward compatibility
         questions = questions_catalog.model_dump()
         
         # 3. Extrahiere Prioritäten
-        print("3️⃣ Extrahiere Prioritäten...")
+        print("3. Extrahiere Prioritaeten...")
         priorities = self._extract_priorities(company, questions)
         if priorities:
-            print(f"   ✅ Prioritäten: {', '.join(priorities)}")
+            print(f"   Prioritaeten: {', '.join(priorities)}")
         else:
-            print("   ℹ️  Keine Prioritäten gefunden")
+            print("   Keine Prioritaeten gefunden")
         
-        # 4. Erstelle Templates
-        print("4️⃣ Erstelle KB Templates...")
-        templates = self.template_builder.build_all_templates(
-            company_data=company,
-            questions_json=questions
-        )
-        print(f"   ✅ Phase 1: {len(templates['phase_1'])} Zeichen")
-        print(f"   ✅ Phase 2: {len(templates['phase_2'])} Zeichen")
-        print(f"   ✅ Phase 3: {len(templates['phase_3'])} Zeichen")
-        print(f"   ✅ Phase 4: {len(templates['phase_4'])} Zeichen")
-        
-        # 5. Package zusammenstellen
-        print("5️⃣ Stelle Package zusammen...")
+        # 4. Package zusammenstellen (KB Templates entfernt - werden in ElevenLabs Dashboard verwaltet)
+        print("4. Stelle Package zusammen...")
         package = {
-            "campaign_id": campaign_id,
+            # Unternehmensinformationen ZUERST (besser für Lesbarkeit)
             "company_name": company.get('name', ''),
+            "campaign_id": campaign_id,
             "campaign_name": protocol.get('name', ''),
             "created_at": datetime.utcnow().isoformat() + "Z",
-            "questions": questions,
-            "kb_templates": templates,
-            "meta": {
-                "company_size": company.get('size', ''),
-                "company_address": company.get('address', ''),
-                "company_benefits": company.get('benefits', ''),
-                "company_website": company.get('website', ''),
-                "priority_areas": priorities,
+            
+            # Company Metadata
+            "company_info": {
+                "size": company.get('size', ''),
+                "address": company.get('address', ''),
+                "benefits": company.get('benefits', ''),
+                "website": company.get('website', ''),
                 "privacy_url": company.get('privacy_url', ''),
                 "career_page": company.get('career_page', ''),
-                "generated_with": "python-question-generator"
+            },
+            
+            # Questions Catalog (für ElevenLabs Conversational AI)
+            "questions": questions,
+            
+            # Metadata
+            "meta": {
+                "priority_areas": priorities,
+                "generated_with": "python-question-generator",
+                "note": "KB Templates werden nicht mehr generiert - sie werden direkt im ElevenLabs Dashboard als Prompts konfiguriert"
             }
         }
         
-        # 6. Validierung
+        # 5. Validierung
         self._validate_package(package)
-        print("   ✅ Package validiert")
+        print("   Package validiert")
         
         return package
     
@@ -174,20 +172,11 @@ class CampaignPackageBuilder:
         Raises:
             ValueError: Wenn Package ungültig
         """
-        required_keys = ['campaign_id', 'company_name', 'kb_templates', 'questions']
+        required_keys = ['campaign_id', 'company_name', 'questions']
         
         for key in required_keys:
             if key not in package:
                 raise ValueError(f"Package fehlt required key: {key}")
-        
-        # Templates müssen alle 4 Phasen enthalten
-        template_keys = ['phase_1', 'phase_2', 'phase_3', 'phase_4']
-        for key in template_keys:
-            if key not in package['kb_templates']:
-                raise ValueError(f"KB Templates fehlt: {key}")
-            
-            if not package['kb_templates'][key]:
-                raise ValueError(f"KB Template {key} ist leer")
         
         # Questions muss "questions" Array enthalten
         if 'questions' not in package['questions']:

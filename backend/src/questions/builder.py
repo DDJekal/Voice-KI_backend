@@ -110,9 +110,19 @@ async def build_question_catalog(
             logger.info("Stage 6.5/7: Policies disabled, skipping...")
             policy_enhanced = categorized
         
+        # 6.6. Sort questions by category_order, required, priority, and id
+        logger.info("Stage 6.6/7: Sort questions by category, required status, and priority...")
+        # Sortierung: 
+        # 1. category_order (niedrigere Nummer = früher)
+        # 2. required (True = früher als False)
+        # 3. priority (niedrigere Nummer = wichtiger)
+        # 4. id (alphabetisch für Konsistenz)
+        policy_enhanced.sort(key=lambda q: (q.category_order, not q.required, q.priority, q.id))
+        logger.info(f"  Sorted {len(policy_enhanced)} questions")
+        
         # 7. Wrap with metadata
         catalog = QuestionCatalog(
-            _meta=CatalogMeta(
+            meta=CatalogMeta(
                 schema_version="1.0",
                 generated_at=datetime.now().isoformat(),
                 generator="voiceki-python-question-builder@1.0.0",
@@ -122,7 +132,8 @@ async def build_question_catalog(
         )
         
         # 8. Validate catalog
-        validate_question_catalog(catalog.model_dump())
+        # Use by_alias=True to serialize with "_meta" for backward compatibility
+        validate_question_catalog(catalog.model_dump(by_alias=True))
         
         logger.info("=" * 70)
         logger.info(f"✅ Question Catalog Built Successfully!")
