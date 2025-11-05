@@ -112,13 +112,38 @@ async def build_question_catalog(
         
         # 6.6. Sort questions by category_order, required, priority, and id
         logger.info("Stage 6.6/7: Sort questions by category, required status, and priority...")
-        # Sortierung: 
-        # 1. category_order (niedrigere Nummer = früher)
-        # 2. required (True = früher als False)
-        # 3. priority (niedrigere Nummer = wichtiger)
-        # 4. id (alphabetisch für Konsistenz)
-        policy_enhanced.sort(key=lambda q: (q.category_order, not q.required, q.priority, q.id))
-        logger.info(f"  Sorted {len(policy_enhanced)} questions")
+        
+        # Custom sort key function
+        def sort_key(q):
+            """
+            Sortierung mit Speziallogik für Basis-Qualifikationen.
+            
+            Reihenfolge:
+            1. category_order (niedrigere Nummer = früher)
+            2. required (True = früher als False)
+            3. priority (niedrigere Nummer = wichtiger)
+            4. is_basic_qualification (Basis-Examen VOR Fachweiterbildungen)
+            5. id (alphabetisch für Konsistenz)
+            """
+            # Erkenne Basis-Qualifikationsfragen (allgemeines Examen)
+            is_basic_qualification = (
+                "qualification_nursing" in q.id or
+                ("examen" in q.question.lower() and 
+                 "fachweiterbildung" not in q.question.lower() and
+                 "weiterbildung" not in q.question.lower())
+            )
+            
+            return (
+                q.category_order,         # 1. Kategorie-Reihenfolge
+                not q.required,           # 2. Required=True zuerst (not inverted)
+                q.priority,               # 3. Niedrige Priorität = wichtiger
+                not is_basic_qualification,  # 4. Basis-Examen zuerst (not inverted)
+                q.id                      # 5. Alphabetisch bei sonst gleichen
+            )
+        
+        policy_enhanced.sort(key=sort_key)
+        logger.info(f"  Sorted {len(policy_enhanced)} questions (with basic qualification priority)")
+
         
         # 7. Wrap with metadata
         catalog = QuestionCatalog(

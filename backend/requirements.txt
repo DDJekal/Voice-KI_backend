@@ -1,10 +1,17 @@
+# Force cache refresh - 2025-11-05
 requests==2.31.0
 python-dotenv==1.0.0
 pydantic==2.10.6
 pydantic-settings==2.7.1
-elevenlabs
+elevenlabs==2.21.0
 
 # FastAPI Webhook Server
 fastapi==0.115.0
 uvicorn[standard]==0.34.0
 python-multipart==0.0.20
+
+# OpenAI for Question Generation (REQUIRED!)
+openai==1.57.0
+
+# JSON Schema Validation
+jsonschema==4.23.0
