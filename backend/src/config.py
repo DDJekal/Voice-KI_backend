@@ -19,10 +19,14 @@ class Settings(BaseSettings):
         case_sensitive=False
     )
 
-    # OpenAI Configuration (für TypeScript Tool)
+    # OpenAI Configuration (für Question Generator)
     openai_api_key: str = Field(
         default="",
-        description="OpenAI API Key für Question Builder Tool"
+        description="OpenAI API Key für Question Generator"
+    )
+    openai_model: str = Field(
+        default="gpt-4o",
+        description="OpenAI Model (gpt-4o, gpt-4-turbo, etc.)"
     )
 
     # ElevenLabs Configuration
