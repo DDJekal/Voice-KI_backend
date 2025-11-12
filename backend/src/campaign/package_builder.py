@@ -77,8 +77,8 @@ class CampaignPackageBuilder:
         questions_catalog = await build_question_catalog(protocol, build_context)
         print(f"   {len(questions_catalog.questions)} Fragen generiert")
         
-        # Convert to dict for backward compatibility
-        questions = questions_catalog.model_dump()
+        # Convert to dict - aber nur mit benötigten Feldern!
+        questions = self._trim_questions_for_export(questions_catalog)
         
         # 3. Extrahiere Prioritäten
         print("3. Extrahiere Prioritaeten...")
@@ -108,14 +108,7 @@ class CampaignPackageBuilder:
             },
             
             # Questions Catalog (für ElevenLabs Conversational AI)
-            "questions": questions,
-            
-            # Metadata
-            "meta": {
-                "priority_areas": priorities,
-                "generated_with": "python-question-generator",
-                "note": "KB Templates werden nicht mehr generiert - sie werden direkt im ElevenLabs Dashboard als Prompts konfiguriert"
-            }
+            "questions": questions
         }
         
         # 5. Validierung
@@ -181,3 +174,53 @@ class CampaignPackageBuilder:
         # Questions muss "questions" Array enthalten
         if 'questions' not in package['questions']:
             raise ValueError("questions.json fehlt 'questions' Array")
+    
+    def _trim_questions_for_export(self, questions_catalog) -> Dict[str, Any]:
+        """
+        Exportiert nur die benötigten Felder aus Questions Catalog.
+        
+        Behaltene Felder pro Frage:
+        - id, question, preamble, group, context
+        - category, category_order, type, options
+        - priority, help_text
+        
+        Entfernte Felder pro Frage:
+        - conversation_flow, required, input_hint, conditions
+        - source, slot_config, gate_config, conversation_hints
+        
+        Entfernte Meta-Informationen:
+        - meta.schema_version, meta.generated_at, meta.generator
+        - meta.policies_applied
+        
+        Args:
+            questions_catalog: QuestionCatalog Pydantic Model
+        
+        Returns:
+            Dict mit nur {"questions": [...]} - keine Meta-Infos
+        """
+        
+        # Felder, die exportiert werden sollen
+        EXPORT_FIELDS = {
+            'id', 'question', 'preamble', 'group', 'context',
+            'category', 'category_order', 'type', 'options',
+            'priority', 'help_text'
+        }
+        
+        # Trimme Questions
+        trimmed_questions = []
+        for q in questions_catalog.questions:
+            q_dict = q.model_dump()
+            
+            # Behalte nur Export-Felder
+            trimmed = {
+                key: value 
+                for key, value in q_dict.items() 
+                if key in EXPORT_FIELDS
+            }
+            
+            trimmed_questions.append(trimmed)
+        
+        # Keine Meta-Infos - nur die Questions
+        return {
+            "questions": trimmed_questions
+        }

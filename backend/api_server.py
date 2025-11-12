@@ -61,6 +61,19 @@ class SetupCampaignResponse(BaseModel):
     company_name: str
 
 
+class CampaignListItem(BaseModel):
+    campaign_id: str
+    company_name: str
+    campaign_name: str
+    created_at: str
+    question_count: int
+
+
+class CampaignListResponse(BaseModel):
+    count: int
+    campaigns: list[CampaignListItem]
+
+
 # Logging Middleware
 @app.middleware("http")
 async def log_requests(request, call_next):
@@ -262,6 +275,122 @@ async def setup_campaign_webhook(
         raise HTTPException(
             status_code=500,
             detail=f"Internal server error: {str(e)}"
+        )
+
+
+@app.get("/campaigns/{campaign_id}/package")
+async def get_campaign_package(
+    campaign_id: str,
+    authorization: str = Header(None)
+):
+    """
+    Gibt ein spezifisches Campaign Package zurück.
+    
+    Nutzen:
+    - HOC kann Package jederzeit abrufen
+    - Fallback bei fehlgeschlagenem Upload
+    - Für Testing/Debugging
+    
+    Args:
+        campaign_id: Campaign ID
+        authorization: Bearer Token
+    
+    Returns:
+        Campaign Package JSON
+    
+    Raises:
+        HTTPException: 401 (Unauthorized), 404 (Not Found)
+    """
+    
+    # Auth prüfen
+    verify_webhook_auth(authorization)
+    
+    logger.info(f"Package retrieval requested for campaign {campaign_id}")
+    
+    try:
+        storage = CampaignStorage()
+        
+        if not storage.package_exists(campaign_id):
+            raise HTTPException(
+                status_code=404,
+                detail=f"Campaign Package {campaign_id} nicht gefunden. Bitte zuerst Setup durchführen."
+            )
+        
+        package = storage.load_package(campaign_id)
+        
+        logger.info(f"Package {campaign_id} successfully retrieved")
+        return package
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error retrieving package {campaign_id}: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Fehler beim Laden des Packages: {str(e)}"
+        )
+
+
+@app.get("/campaigns", response_model=CampaignListResponse)
+async def list_campaigns(
+    authorization: str = Header(None)
+):
+    """
+    Listet alle verfügbaren Campaign Packages.
+    
+    Nutzen:
+    - Übersicht über alle erstellten Packages
+    - Für Debugging/Monitoring
+    
+    Args:
+        authorization: Bearer Token
+    
+    Returns:
+        Liste mit Campaign-Infos
+    
+    Raises:
+        HTTPException: 401 (Unauthorized)
+    """
+    
+    # Auth prüfen
+    verify_webhook_auth(authorization)
+    
+    logger.info("Campaign list requested")
+    
+    try:
+        storage = CampaignStorage()
+        campaigns = storage.list_campaigns()
+        
+        # Konvertiere zu Response-Format
+        campaign_items = []
+        for campaign in campaigns:
+            # Lade Package für question_count
+            try:
+                pkg = storage.load_package(campaign['campaign_id'])
+                question_count = len(pkg.get('questions', {}).get('questions', []))
+            except Exception:
+                question_count = 0
+            
+            campaign_items.append(CampaignListItem(
+                campaign_id=campaign['campaign_id'],
+                company_name=campaign['company_name'],
+                campaign_name=campaign['campaign_name'],
+                created_at=campaign['created_at'],
+                question_count=question_count
+            ))
+        
+        logger.info(f"Returning {len(campaign_items)} campaigns")
+        
+        return CampaignListResponse(
+            count=len(campaign_items),
+            campaigns=campaign_items
+        )
+        
+    except Exception as e:
+        logger.error(f"Error listing campaigns: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Fehler beim Laden der Campaign-Liste: {str(e)}"
         )
 
 
