@@ -21,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from src.config import get_settings
 from src.campaign.package_builder import CampaignPackageBuilder
 from src.storage.campaign_storage import CampaignStorage
+from src.questions.builder import build_question_catalog
 
 # Logging Setup
 logging.basicConfig(
@@ -110,6 +111,16 @@ class CampaignListResponse(BaseModel):
     campaigns: list[CampaignListItem]
 
 
+# New simplified models for protocol processing
+class ProcessProtocolResponse(BaseModel):
+    """Response for protocol processing"""
+    protocol_id: int
+    protocol_name: str
+    processed_at: str
+    question_count: int
+    questions: list[dict]  # Simplified question format
+
+
 # Logging Middleware
 @app.middleware("http")
 async def log_requests(request, call_next):
@@ -162,6 +173,31 @@ def verify_webhook_auth(authorization: Optional[str] = None) -> bool:
         )
     
     return True
+
+
+def trim_question(question) -> dict:
+    """
+    Trimmt Question-Objekt auf essentielle Felder.
+    
+    Args:
+        question: Question Pydantic Model
+    
+    Returns:
+        Dict mit nur den essentiellen Feldern
+    """
+    EXPORT_FIELDS = {
+        'id', 'question', 'preamble', 'group', 'context',
+        'category', 'category_order', 'type', 'options',
+        'priority', 'help_text'
+    }
+    
+    q_dict = question.model_dump()
+    
+    return {
+        key: value 
+        for key, value in q_dict.items() 
+        if key in EXPORT_FIELDS
+    }
 
 
 async def run_campaign_setup(
@@ -433,6 +469,72 @@ async def list_campaigns(
         raise HTTPException(
             status_code=500,
             detail=f"Fehler beim Laden der Campaign-Liste: {str(e)}"
+        )
+
+
+@app.post("/webhook/process-protocol", response_model=ProcessProtocolResponse)
+async def process_protocol_webhook(
+    request: ConversationProtocol,
+    authorization: str = Header(None)
+):
+    """
+    Verarbeitet Conversation Protocol und gibt Questions zurück.
+    
+    NEUER VEREINFACHTER ENDPOINT - Kein Storage, keine Campaign IDs.
+    
+    Args:
+        request: Conversation Protocol
+        authorization: Bearer Token
+    
+    Returns:
+        Generierte Questions
+    
+    Raises:
+        HTTPException: Bei Fehlern (401, 500)
+    """
+    
+    # 1. Auth prüfen
+    verify_webhook_auth(authorization)
+    
+    logger.info(f"Protocol processing triggered for: {request.name} (ID: {request.id})")
+    
+    try:
+        # 2. Questions generieren mit OpenAI
+        logger.info("Generating questions with OpenAI...")
+        
+        build_context = {
+            "policy_level": "standard"  # Standard policies
+        }
+        
+        questions_catalog = await build_question_catalog(
+            request.model_dump(),
+            build_context
+        )
+        
+        logger.info(f"Generated {len(questions_catalog.questions)} questions")
+        
+        # 3. Trim questions to essential fields
+        trimmed_questions = [
+            trim_question(q) 
+            for q in questions_catalog.questions
+        ]
+        
+        logger.info("Questions trimmed and ready")
+        
+        # 4. Response
+        return ProcessProtocolResponse(
+            protocol_id=request.id,
+            protocol_name=request.name,
+            processed_at=datetime.utcnow().isoformat() + "Z",
+            question_count=len(trimmed_questions),
+            questions=trimmed_questions
+        )
+        
+    except Exception as e:
+        logger.error(f"Protocol processing failed: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Protocol processing error: {str(e)}"
         )
 
 
