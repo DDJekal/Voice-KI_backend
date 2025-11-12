@@ -19,7 +19,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from src.config import get_settings
-from src.data_sources.api_loader import APIDataSource
 from src.campaign.package_builder import CampaignPackageBuilder
 from src.storage.campaign_storage import CampaignStorage
 
@@ -47,8 +46,45 @@ app.add_middleware(
 
 
 # Request/Response Models
+class CompanyData(BaseModel):
+    """Company information"""
+    name: str
+    size: Optional[str] = ""
+    address: Optional[str] = ""
+    benefits: Optional[str] = ""
+    target_group: Optional[str] = ""
+    website: Optional[str] = ""
+    career_page: Optional[str] = ""
+    privacy_url: Optional[str] = ""
+    impressum: Optional[str] = ""
+
+
+class PromptData(BaseModel):
+    """Prompt within a page"""
+    id: int
+    question: str
+    position: int
+
+
+class PageData(BaseModel):
+    """Page within conversation protocol"""
+    id: int
+    name: str
+    position: int
+    prompts: list[PromptData]
+
+
+class ConversationProtocol(BaseModel):
+    """Conversation protocol structure"""
+    id: int
+    name: str
+    pages: list[PageData]
+
+
 class SetupCampaignRequest(BaseModel):
     campaign_id: str
+    company: CompanyData
+    conversation_protocol: ConversationProtocol
     force_rebuild: bool = False
 
 
@@ -128,12 +164,19 @@ def verify_webhook_auth(authorization: Optional[str] = None) -> bool:
     return True
 
 
-async def run_campaign_setup(campaign_id: str, force: bool = False):
+async def run_campaign_setup(
+    campaign_id: str, 
+    company_data: dict,
+    protocol_data: dict,
+    force: bool = False
+):
     """
-    Führt Campaign Setup aus (jetzt richtig async!).
+    Führt Campaign Setup aus mit direkt übergebenen Daten.
     
     Args:
         campaign_id: Campaign ID
+        company_data: Company-Daten von HOC
+        protocol_data: Conversation Protocol von HOC
         force: Überschreibt existierendes Package
     
     Returns:
@@ -147,21 +190,18 @@ async def run_campaign_setup(campaign_id: str, force: bool = False):
         logger.info(f"Using existing package for campaign {campaign_id}")
         return storage.load_package(campaign_id)
     
-    # Neues Package erstellen - jetzt richtig async!
-    api = APIDataSource(
-        api_url=settings.api_url,
-        api_key=settings.api_key,
-        status="new",
-        filter_test_applicants=True
-    )
-    
+    # Neues Package erstellen mit übergebenen Daten
     builder = CampaignPackageBuilder(
         prompts_dir=settings.get_prompts_dir_path()
-        # questions_json_path REMOVED - wird jetzt automatisch generiert!
     )
     
-    # build_package ist jetzt async!
-    package = await builder.build_package(campaign_id, api)
+    # build_package_from_data ist neu - nimmt Daten direkt
+    package = await builder.build_package_from_data(
+        campaign_id=campaign_id,
+        company_data=company_data,
+        protocol_data=protocol_data
+    )
+    
     storage.save_package(campaign_id, package)
     
     return package
@@ -235,9 +275,11 @@ async def setup_campaign_webhook(
     logger.info(f"Setup triggered for campaign {request.campaign_id} (force={request.force_rebuild})")
     
     try:
-        # 2. Setup ausführen
+        # 2. Setup ausführen mit übergebenen Daten
         package = await run_campaign_setup(
             campaign_id=request.campaign_id,
+            company_data=request.company.model_dump(),
+            protocol_data=request.conversation_protocol.model_dump(),
             force=request.force_rebuild
         )
         

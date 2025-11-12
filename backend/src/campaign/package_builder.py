@@ -117,6 +117,86 @@ class CampaignPackageBuilder:
         
         return package
     
+    async def build_package_from_data(
+        self,
+        campaign_id: str,
+        company_data: Dict[str, Any],
+        protocol_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Erstellt Campaign Package aus direkt übergebenen Daten (NEUE Methode).
+        
+        Diese Methode ersetzt build_package() wenn Daten direkt von HOC kommen.
+        
+        Args:
+            campaign_id: Campaign ID
+            company_data: Company-Daten von HOC
+            protocol_data: Conversation Protocol von HOC
+        
+        Returns:
+            Campaign Package Dict
+        
+        Raises:
+            ValueError: Wenn Daten ungültig
+        """
+        print(f"\n🔧 Erstelle Campaign Package fuer Campaign {campaign_id}")
+        print(f"   Company: {company_data.get('name', 'Unknown')}")
+        print(f"   Protocol: {protocol_data.get('name', 'Unknown')}")
+        
+        # 1. Generiere questions.json automatisch mit OpenAI
+        print("1️⃣ Generiere questions.json automatisch (OpenAI)...")
+        
+        # Context für Question-Builder (mit Policy-Config)
+        build_context = {}
+        if self.policy_config.get("enabled", True):
+            build_context["policy_level"] = self.policy_config.get("level", "standard")
+            print(f"   Policies aktiviert (Level: {build_context['policy_level']})")
+        else:
+            print("   Policies deaktiviert (A/B-Testing)")
+        
+        questions_catalog = await build_question_catalog(protocol_data, build_context)
+        print(f"   ✅ {len(questions_catalog.questions)} Fragen generiert")
+        
+        # Convert to dict - aber nur mit benötigten Feldern!
+        questions = self._trim_questions_for_export(questions_catalog)
+        
+        # 2. Extrahiere Prioritäten
+        print("2️⃣ Extrahiere Prioritaeten...")
+        priorities = self._extract_priorities(company_data, questions)
+        if priorities:
+            print(f"   Prioritaeten: {', '.join(priorities)}")
+        else:
+            print("   Keine Prioritaeten gefunden")
+        
+        # 3. Package zusammenstellen
+        print("3️⃣ Stelle Package zusammen...")
+        package = {
+            # Unternehmensinformationen
+            "company_name": company_data.get('name', ''),
+            "campaign_id": campaign_id,
+            "campaign_name": protocol_data.get('name', ''),
+            "created_at": datetime.utcnow().isoformat() + "Z",
+            
+            # Company Metadata
+            "company_info": {
+                "size": company_data.get('size', ''),
+                "address": company_data.get('address', ''),
+                "benefits": company_data.get('benefits', ''),
+                "website": company_data.get('website', ''),
+                "privacy_url": company_data.get('privacy_url', ''),
+                "career_page": company_data.get('career_page', ''),
+            },
+            
+            # Questions Catalog (für ElevenLabs Conversational AI)
+            "questions": questions
+        }
+        
+        # 4. Validierung
+        self._validate_package(package)
+        print("   ✅ Package validiert")
+        
+        return package
+    
     def _extract_priorities(
         self, 
         company: Dict[str, Any], 
