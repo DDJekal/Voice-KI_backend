@@ -1,0 +1,88 @@
+{
+  "id": 999,
+  "name": "Psychologe für Suchttherapie (m/w/d)",
+  "pages": [
+    {
+      "id": 100,
+      "name": "Der Bewerber erfüllt folgende Kriterien:",
+      "position": 1,
+      "prompts": [
+        {
+          "id": 1001,
+          "question": "Bevorzugt: Master/Bachelor Studium Psychologie",
+          "position": 1
+        },
+        {
+          "id": 1002,
+          "question": "Alternativ: Master/Bachelor Studium Sozialpädagogik",
+          "position": 2
+        },
+        {
+          "id": 1003,
+          "question": "Alternativ: Ausbildung Ergotherapeut",
+          "position": 3
+        },
+        {
+          "id": 1004,
+          "question": "Alternativ: Ausbildung Physiotherapeut",
+          "position": 4
+        },
+        {
+          "id": 1005,
+          "question": "Alternativ: Ausbildung Masseur",
+          "position": 5
+        },
+        {
+          "id": 1006,
+          "question": "Alternativ: Sozialarbeiter, Suchttherapeut, Tanz-, Kunsttherapeut",
+          "position": 6
+        },
+        {
+          "id": 1007,
+          "question": "Deutschkenntnisse: C1",
+          "position": 7
+        }
+      ]
+    },
+    {
+      "id": 101,
+      "name": "Der Bewerber akzeptiert folgende Rahmenbedingungen:",
+      "position": 2,
+      "prompts": [
+        {
+          "id": 1008,
+          "question": "Vollzeit (40 Wochenstunden)",
+          "position": 1
+        },
+        {
+          "id": 1009,
+          "question": "Vergütung: 3.500€ - 4.500€ je nach Qualifikation",
+          "position": 2
+        },
+        {
+          "id": 1010,
+          "question": "30 Tage Jahresurlaub",
+          "position": 3
+        }
+      ]
+    },
+    {
+      "id": 102,
+      "name": "Weitere Informationen",
+      "position": 3,
+      "prompts": [
+        {
+          "id": 1011,
+          "question": "Standort: Berlin-Mitte, Therapiezentrum",
+          "position": 1
+        },
+        {
+          "id": 1012,
+          "question": "Ansprechpartner: Herr Dr. Schmidt",
+          "position": 2
+        }
+      ]
+    }
+  ]
+}
+

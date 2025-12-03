@@ -411,7 +411,30 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
     questions: List[Question] = []
     covered_topics: Set[str] = set()  # Track which topics are already covered
     
-    logger.info("Building questions using 3-Tier Hybrid Approach...")
+    logger.info("Building questions using 4-Tier Hybrid Approach...")
+    
+    # ========================================
+    # PRE-SCAN: Qualifikations-Konsolidierung prüfen
+    # ========================================
+    # Prüfe VOR allen anderen Tiers, ob mehrere Qualifikations-Alternativen vorliegen
+    qualification_keywords = ['studium', 'abschluss', 'ausbildung', 'bachelor', 'master', 
+                              'diplom', 'examen', 'zertifikat', 'qualifikation', 'fortbildung']
+    
+    all_qualifications = extract_result.must_have + extract_result.alternatives
+    combined_text = ' '.join(all_qualifications).lower() if all_qualifications else ''
+    
+    # Prüfe ob es primär um Qualifikationen geht
+    has_qualification_terms = any(keyword in combined_text for keyword in qualification_keywords)
+    has_multiple_options = len(all_qualifications) >= 2
+    qualification_consolidated = False
+    
+    if has_qualification_terms and has_multiple_options:
+        logger.info(f"🎯 Detected {len(all_qualifications)} qualification alternatives - will consolidate")
+        qualification_consolidated = True
+        
+        # Markiere Qualifikations-Topics als "geplant für Konsolidierung"
+        # Diese werden bei Tier 1 Protocol Questions übersprungen
+        covered_topics.add("qualifikation_consolidated")
     
     # ========================================
     # TIER 1: Protocol Questions (LLM-extracted)
@@ -423,6 +446,16 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
         if _is_name_or_address_question(pq.text):
             logger.debug(f"Skipping name/address question: {pq.text[:50]}")
             continue
+        
+        # NEU: Skip qualification questions if consolidation is planned
+        if qualification_consolidated:
+            # Prüfe ob diese Frage qualifikationsbezogen ist
+            question_lower = pq.text.lower()
+            is_qualification_question = any(keyword in question_lower for keyword in qualification_keywords)
+            
+            if is_qualification_question:
+                logger.debug(f"Skipping qualification question (will be consolidated): {pq.text[:60]}")
+                continue
         
         # Detect type and group
         q_type = _detect_question_type(pq.text, pq.type)
@@ -638,7 +671,54 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
             ))
             tier3_count += 1
     
-    # 3. Must-Have Kriterien (Gate Questions) - if not already covered
+    # 3. Qualifikations-Konsolidierung (NEU: Intelligente Gruppierung)
+    # Erstelle konsolidierte Frage wenn in PRE-SCAN erkannt
+    if qualification_consolidated and "qualifikation" not in covered_topics:
+        logger.info(f"🎯 Creating consolidated qualification question from {len(all_qualifications)} alternatives")
+        
+        # Bereinige und formatiere Optionen
+        cleaned_options = []
+        for qual in all_qualifications:
+            # Entferne führende Marker wie "Zwingend:", "Alternativ:", etc.
+            cleaned = re.sub(r'^(zwingend|alternativ|wünschenswert|bevorzugt):\s*', '', qual, flags=re.I)
+            cleaned = cleaned.strip()
+            if cleaned and cleaned not in cleaned_options:
+                cleaned_options.append(cleaned)
+        
+        # Füge "Anderer Abschluss" hinzu
+        if "anderer" not in combined_text.lower():
+            cleaned_options.append("Anderer Abschluss")
+        
+        # Erstelle konsolidierte Frage
+        preamble = None
+        if len(cleaned_options) > 3:
+            preamble = "Ich würde gerne Ihre Qualifikation abklären."
+        
+        questions.append(Question(
+            id="qualification_degree_consolidated",
+            preamble=preamble,
+            question="Welchen Abschluss haben Sie?",
+            type=QuestionType.CHOICE,
+            options=cleaned_options,
+            required=True,
+            priority=1,
+            group=QuestionGroup.QUALIFIKATION,
+            help_text="Bitte wählen Sie die Qualifikation, die am besten zu Ihrem Abschluss passt.",
+            context="Konsolidierte Qualifikations-Frage aus Must-Have und Alternativen"
+        ))
+        tier3_count += 1
+        
+        # Markiere alle Qualifikationen als covered
+        covered_topics.add("qualifikation")
+        covered_topics.add("abschluss")
+        covered_topics.add("studium")
+        covered_topics.add("ausbildung")
+        for qual in all_qualifications:
+            covered_topics.add(_slugify(qual))
+        
+        logger.info(f"✓ Created consolidated qualification question with {len(cleaned_options)} options")
+    
+    # 4. Must-Have Kriterien (Gate Questions) - if not already covered
     for must_have in extract_result.must_have:
         slug = _slugify(must_have)
         if slug not in covered_topics:
@@ -674,7 +754,7 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
                 ))
                 tier3_count += 1
     
-    # 4. Alternativen
+    # 5. Alternativen (nur MFA und nicht-Qualifikations-Alternativen)
     for alt in extract_result.alternatives:
         slug = _slugify(alt)
         if slug not in covered_topics:
@@ -693,7 +773,7 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
                 ))
                 tier3_count += 1
     
-    # 5. Prioritäten als Präferenzfragen (if not already covered)
+    # 6. Prioritäten als Präferenzfragen (if not already covered)
     for prio in extract_result.priorities:
         slug = _slugify(prio.label)
         if slug not in covered_topics:
@@ -713,7 +793,7 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
             ))
             tier3_count += 1
     
-    # 6. Arbeitszeit (if not already covered and constraints available)
+    # 7. Arbeitszeit (if not already covered and constraints available)
     if "arbeitszeit" not in covered_topics and extract_result.constraints and extract_result.constraints.arbeitszeit:
         vollzeit = extract_result.constraints.arbeitszeit.vollzeit
         teilzeit = extract_result.constraints.arbeitszeit.teilzeit
