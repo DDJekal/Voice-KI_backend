@@ -201,7 +201,8 @@ FRAGEN FÜR DIESE PHASE
                 kb += self._format_question_section(by_category[cat_key])
         
         # NEU: Context-Rules hinzufügen (wenn Policies angewendet wurden)
-        if questions_json.get("_meta", {}).get("policies_applied"):
+        meta = questions_json.get("_meta") or questions_json.get("meta", {})
+        if meta.get("policies_applied"):
             kb += self._build_conversation_context_rules(questions_json)
         
         return kb

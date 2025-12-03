@@ -1,0 +1,350 @@
+{
+  "meta": {
+    "schema_version": "1.0",
+    "generated_at": "2025-11-03T15:25:08.112215",
+    "generator": "voiceki-python-question-builder@1.0.0",
+    "policies_applied": [
+      "slot_dependency: site_choice -> standort",
+      "slot_dependency: department -> einsatzbereich",
+      "slot_dependency: qualification_nursing -> qualifikation",
+      "slot_dependency: arbeitszeit -> dienstmodell",
+      "keyword_trigger: op_mfa_alternative -> OP",
+      "keyword_trigger: prio_palliativmedizin -> Palliativ",
+      "keyword_trigger: arbeitszeit -> Teilzeit",
+      "diversification: prio_palliativmedizin",
+      "diversification: prio_herzkatheterlabor",
+      "confidence_check: site_choice",
+      "confidence_check: department",
+      "confidence_check: qualification_nursing",
+      "confidence_check: arbeitszeit"
+    ]
+  },
+  "questions": [
+    {
+      "id": "pq_17775_92714",
+      "question": "In welcher Fachabteilung möchten Sie gerne arbeiten?",
+      "type": "choice",
+      "options": [
+        "Anästhesie",
+        "Bronchologie",
+        "Chirurgische Station (Plastisch)",
+        "Dialyse",
+        "Endoskopie",
+        "Gastroenterologie",
+        "Geriatrie",
+        "Gynäkologie (Kreißsaal, Gynäkologische Ambulanz, Mutter-Kind-Zentrum, Gynäkologisch-Onkologisch)",
+        "Herzkatheterlabor",
+        "IMC",
+        "Intensivmedizin",
+        "Kardiologie, Herzchirurgie",
+        "Nephrologie",
+        "OP",
+        "OP und ANÄ (Plastische)",
+        "Onkologie",
+        "Orthopädie & Unfallchirurgie",
+        "Palliativmedizin",
+        "Pneumologie",
+        "Psychosomatik",
+        "Rehabilitation",
+        "Schlaflabor",
+        "Stroke Unit",
+        "Thoraxchirurgie"
+      ],
+      "conversation_flow": null,
+      "required": false,
+      "priority": 2,
+      "group": "Einsatzbereich",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": {
+        "page_id": 17775,
+        "prompt_id": 92714,
+        "verbatim": true
+      },
+      "context": null,
+      "category": "einsatzbereiche",
+      "category_order": 6,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null
+    },
+    {
+      "id": "site_choice",
+      "question": "An welchem unserer Standorte möchten Sie gerne arbeiten?",
+      "type": "choice",
+      "options": [
+        "Auerbachstraße 110, 70376 Stuttgart",
+        "Hohenheimerstraße 21, 70184 Stuttgart",
+        "Gerokstraße 31, 70184 Stuttgart"
+      ],
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Standort",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": null,
+      "category": "standort",
+      "category_order": 5,
+      "slot_config": {
+        "fills_slot": "standort",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": null,
+      "conversation_hints": {
+        "on_unclear_answer": "Verstehe ich richtig, dass Sie {interpretation}? Bitte korrigieren Sie mich, falls das nicht stimmt.",
+        "on_negative_answer": null,
+        "confidence_boost_phrases": null,
+        "diversify_after": null
+      }
+    },
+    {
+      "id": "department",
+      "question": "In welcher Fachabteilung möchten Sie gerne arbeiten?",
+      "type": "choice",
+      "options": [
+        "Anästhesie",
+        "Bronchologie",
+        "Chirurgische Station (Plastisch)",
+        "Dialyse",
+        "Endoskopie",
+        "Gastroenterologie",
+        "Geriatrie",
+        "Gynäkologie (Kreißsaal, Gynäkologische Ambulanz, Mutter-Kind-Zentrum, Gynäkologisch-Onkologisch)",
+        "Herzkatheterlabor",
+        "IMC",
+        "Intensivmedizin",
+        "Kardiologie, Herzchirurgie",
+        "Nephrologie",
+        "OP",
+        "OP und ANÄ (Plastische)",
+        "Onkologie",
+        "Orthopädie & Unfallchirurgie",
+        "Palliativmedizin",
+        "Pneumologie",
+        "Psychosomatik",
+        "Rehabilitation",
+        "Schlaflabor",
+        "Stroke Unit",
+        "Thoraxchirurgie"
+      ],
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Einsatzbereich",
+      "help_text": "Aktuell besonders gesucht: Palliativmedizin, Herzkatheterlabor",
+      "input_hint": "Bitte eine Abteilung nennen.",
+      "conditions": null,
+      "source": null,
+      "context": null,
+      "category": "einsatzbereiche",
+      "category_order": 6,
+      "slot_config": {
+        "fills_slot": "einsatzbereich",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": null,
+      "conversation_hints": {
+        "on_unclear_answer": "Verstehe ich richtig, dass Sie {interpretation}? Bitte korrigieren Sie mich, falls das nicht stimmt.",
+        "on_negative_answer": null,
+        "confidence_boost_phrases": null,
+        "diversify_after": null
+      }
+    },
+    {
+      "id": "qualification_nursing",
+      "question": "Sind Sie examinierte Pflegefachfrau oder Pflegefachmann?",
+      "type": "boolean",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Qualifikation",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Muss-Kriterium: Pflegefachmann/-frau",
+      "category": "standardqualifikationen",
+      "category_order": 3,
+      "slot_config": {
+        "fills_slot": "qualifikation",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": null,
+      "conversation_hints": {
+        "on_unclear_answer": "Verstehe ich richtig, dass Sie {interpretation}? Bitte korrigieren Sie mich, falls das nicht stimmt.",
+        "on_negative_answer": null,
+        "confidence_boost_phrases": [
+          "ja",
+          "definitiv",
+          "sicher",
+          "korrekt",
+          "genau",
+          "nein",
+          "nicht",
+          "keineswegs"
+        ],
+        "diversify_after": null
+      }
+    },
+    {
+      "id": "op_mfa_alternative",
+      "question": "Wären Sie alternativ für den OP-Bereich mit einer MFA-Qualifizierungsmaßnahme offen?",
+      "type": "boolean",
+      "options": null,
+      "conversation_flow": null,
+      "required": false,
+      "priority": 2,
+      "group": "Qualifikation",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": null,
+      "category": "einsatzbereiche",
+      "category_order": 6,
+      "slot_config": null,
+      "gate_config": {
+        "is_gate": false,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": null,
+        "condition": null,
+        "context_triggers": {
+          "keywords_to_follow_up": [
+            "OP",
+            "Operation",
+            "Operationssaal"
+          ]
+        }
+      },
+      "conversation_hints": null
+    },
+    {
+      "id": "prio_palliativmedizin",
+      "question": "Haben Sie besonderes Interesse am Bereich Palliativmedizin?",
+      "type": "boolean",
+      "options": null,
+      "conversation_flow": null,
+      "required": false,
+      "priority": 1,
+      "group": "Präferenzen",
+      "help_text": "Vorrangige Stellenvergabe erfolgt auf der Palliativstation, da dort aktuell Bedarf besteht",
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": null,
+      "category": "einsatzbereiche",
+      "category_order": 6,
+      "slot_config": null,
+      "gate_config": {
+        "is_gate": false,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": null,
+        "condition": null,
+        "context_triggers": {
+          "keywords_to_follow_up": [
+            "Palliativ",
+            "Hospiz"
+          ]
+        }
+      },
+      "conversation_hints": {
+        "on_unclear_answer": null,
+        "on_negative_answer": null,
+        "confidence_boost_phrases": null,
+        "diversify_after": "boolean"
+      }
+    },
+    {
+      "id": "prio_herzkatheterlabor",
+      "question": "Haben Sie besonderes Interesse am Bereich Herzkatheterlabor?",
+      "type": "boolean",
+      "options": null,
+      "conversation_flow": null,
+      "required": false,
+      "priority": 1,
+      "group": "Präferenzen",
+      "help_text": "Wir haben aktuell akuten Bedarf in unserem Herzkatheterlabor",
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": null,
+      "category": "einsatzbereiche",
+      "category_order": 6,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": {
+        "on_unclear_answer": null,
+        "on_negative_answer": null,
+        "confidence_boost_phrases": null,
+        "diversify_after": "boolean"
+      }
+    },
+    {
+      "id": "arbeitszeit",
+      "question": "Suchen Sie eine Vollzeit-Stelle (39 Std/Woche) oder Teilzeit (flexibel)?",
+      "type": "choice",
+      "options": [
+        "Vollzeit",
+        "Teilzeit"
+      ],
+      "conversation_flow": null,
+      "required": true,
+      "priority": 2,
+      "group": "Rahmen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": null,
+      "category": "rahmenbedingungen",
+      "category_order": 7,
+      "slot_config": {
+        "fills_slot": "dienstmodell",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": {
+        "is_gate": false,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": null,
+        "condition": null,
+        "context_triggers": {
+          "keywords_to_follow_up": [
+            "Teilzeit",
+            "Stunden"
+          ]
+        }
+      },
+      "conversation_hints": {
+        "on_unclear_answer": "Verstehe ich richtig, dass Sie {interpretation}? Bitte korrigieren Sie mich, falls das nicht stimmt.",
+        "on_negative_answer": null,
+        "confidence_boost_phrases": null,
+        "diversify_after": null
+      }
+    }
+  ]
+}

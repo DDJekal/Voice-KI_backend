@@ -38,6 +38,42 @@ Beispiel: "alternativ: MFA + Qualifizierungsmaßnahme"
 ### 7. all_departments
 - Deduplizierte Liste ALLER Fachabteilungen/Stationen über alle Standorte
 
+### 8. Motivations-Dimensionen (NEU - für Phase 2)
+
+Identifiziere Themen, zu denen **offene Motivation-Fragen** gestellt werden sollten:
+
+**Zu extrahieren:**
+- `career_development`: Wenn Entwicklung/Karriere/Weiterbildung erwähnt wird
+- `work_life_balance`: Wenn flexible Zeiten/Teilzeit/Familie erwähnt wird
+- `team_culture`: Wenn Team/Kollegiales/Atmosphäre erwähnt wird
+- `specialization`: Wenn Spezialisierung/Fachbereich betont wird
+- `patient_care`: Wenn Patientenversorgung/Qualität zentral ist
+- `innovation`: Wenn moderne Ausstattung/neue Methoden erwähnt werden
+- `job_security`: Wenn Sicherheit/Festanstellung/Unbefristet wichtig ist
+
+**Format:**
+```json
+"motivation_dimensions": ["career_development", "specialization", "team_culture"]
+```
+
+### 9. Werdegang-Anforderungen (NEU - für Phase 5)
+
+Identifiziere, ob detaillierte Werdegang-Informationen benötigt werden:
+
+**career_questions_needed**: `true` wenn:
+- Must-have Erfahrung erwähnt wird ("mehrjährige Berufserfahrung")
+- Spezifische Erfahrung gefordert wird (z.B. "Erfahrung in der Intensivpflege")
+- Leitungserfahrung relevant ist
+
+**career_questions_needed**: `false` wenn:
+- Nur Ausbildung/Abschluss gefordert wird
+- Berufseinsteiger explizit willkommen sind
+
+**Format:**
+```json
+"career_questions_needed": true
+```
+
 ## Output-Format (JSON)
 
 Gib NUR valides JSON zurück, keine zusätzlichen Erklärungen:
@@ -78,7 +114,9 @@ Gib NUR valides JSON zurück, keine zusätzlichen Erklärungen:
       "is_real_question": true
     }
   ],
-  "all_departments": ["Palliativmedizin", "Herzkatheterlabor", "Geriatrie", "OP", "Intensivmedizin"]
+  "all_departments": ["Palliativmedizin", "Herzkatheterlabor", "Geriatrie", "OP", "Intensivmedizin"],
+  "motivation_dimensions": ["career_development", "specialization"],
+  "career_questions_needed": true
 }
 ```
 

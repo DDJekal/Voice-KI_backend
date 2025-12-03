@@ -1,10 +1,11 @@
 """
-Structure Pipeline Stage - 3-Tier Hybrid Approach
+Structure Pipeline Stage - 3-Tier Hybrid Approach mit Phasen-Struktur
 
 Builds questions from three sources in priority order:
 1. Protocol Questions (LLM-extracted from protocol)
 2. Verbatim Candidates (Fallback for uncovered topics)
 3. Generated Questions (Deterministic base questions)
+4. Phase-basierte Standard-Questions (Motivation, Werdegang, Abschluss)
 
 Port of src/pipeline/structure.ts with Hybrid enhancements.
 """
@@ -20,6 +21,12 @@ from ..types import (
     QuestionGroup, 
     QuestionSource,
     ProtocolQuestion
+)
+from .phase_builder import (
+    build_phase_2_questions,
+    build_phase_4_questions,
+    build_phase_5_questions,
+    build_phase_6_questions
 )
 
 logger = logging.getLogger(__name__)
@@ -747,9 +754,33 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
     logger.info(f"✓ Tier 3 (Generated Questions): {tier3_count} questions")
     
     # ========================================
+    # TIER 4: Phasen-basierte Standard-Questions
+    # ========================================
+    logger.info("Building Tier 4 (Phase-based Standard Questions)...")
+    
+    # Phase 2: Motivation & Erwartung
+    phase_2_questions = build_phase_2_questions(extract_result)
+    questions.extend(phase_2_questions)
+    
+    # Phase 4: Präferenzen (zusätzlich zu Tier 1-3)
+    phase_4_questions = build_phase_4_questions(extract_result)
+    questions.extend(phase_4_questions)
+    
+    # Phase 5: Werdegang & Startdatum
+    phase_5_questions = build_phase_5_questions(extract_result)
+    questions.extend(phase_5_questions)
+    
+    # Phase 6: Erreichbarkeit
+    phase_6_questions = build_phase_6_questions()
+    questions.extend(phase_6_questions)
+    
+    tier4_count = len(phase_2_questions) + len(phase_4_questions) + len(phase_5_questions) + len(phase_6_questions)
+    logger.info(f"✓ Tier 4 (Phase-based Questions): {tier4_count} questions")
+    
+    # ========================================
     # Summary
     # ========================================
     total = len(questions)
-    logger.info(f"✓ TOTAL: {total} questions built ({tier1_count} Protocol + {tier2_count} Verbatim + {tier3_count} Generated)")
+    logger.info(f"✓ TOTAL: {total} questions built ({tier1_count} Protocol + {tier2_count} Verbatim + {tier3_count} Generated + {tier4_count} Phase-based)")
     
     return questions

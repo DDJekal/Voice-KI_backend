@@ -116,14 +116,15 @@ async def build_question_catalog(
         # Custom sort key function
         def sort_key(q):
             """
-            Sortierung mit Speziallogik für Basis-Qualifikationen.
+            Phasen-basierte Sortierung mit Speziallogik für Basis-Qualifikationen.
             
             Reihenfolge:
-            1. category_order (niedrigere Nummer = früher)
-            2. required (True = früher als False)
-            3. priority (niedrigere Nummer = wichtiger)
-            4. is_basic_qualification (Basis-Examen VOR Fachweiterbildungen)
-            5. id (alphabetisch für Konsistenz)
+            1. phase (1-6, None am Ende)
+            2. category_order (innerhalb Phase)
+            3. required (True = früher als False)
+            4. priority (niedrigere Nummer = wichtiger)
+            5. is_basic_qualification (Basis-Examen VOR Fachweiterbildungen)
+            6. id (alphabetisch für Konsistenz)
             """
             # Erkenne Basis-Qualifikationsfragen (allgemeines Examen)
             is_basic_qualification = (
@@ -133,16 +134,20 @@ async def build_question_catalog(
                  "weiterbildung" not in q.question.lower())
             )
             
+            # Phase: None-Werte am Ende (7)
+            phase_order = q.phase if q.phase is not None else 7
+            
             return (
-                q.category_order,         # 1. Kategorie-Reihenfolge
-                not q.required,           # 2. Required=True zuerst (not inverted)
-                q.priority,               # 3. Niedrige Priorität = wichtiger
-                not is_basic_qualification,  # 4. Basis-Examen zuerst (not inverted)
-                q.id                      # 5. Alphabetisch bei sonst gleichen
+                phase_order,                  # 1. Phasen-Reihenfolge (1-6, dann None)
+                q.category_order,             # 2. Kategorie-Reihenfolge (innerhalb Phase)
+                not q.required,               # 3. Required=True zuerst (not inverted)
+                q.priority,                   # 4. Niedrige Priorität = wichtiger
+                not is_basic_qualification,   # 5. Basis-Examen zuerst (not inverted)
+                q.id                          # 6. Alphabetisch bei sonst gleichen
             )
         
         policy_enhanced.sort(key=sort_key)
-        logger.info(f"  Sorted {len(policy_enhanced)} questions (with basic qualification priority)")
+        logger.info(f"  Sorted {len(policy_enhanced)} questions (phase-based with qualification priority)")
 
         
         # 7. Wrap with metadata

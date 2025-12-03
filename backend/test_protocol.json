@@ -1,0 +1,103 @@
+{
+  "id": 62,
+  "name": "Leitungskraft für unsere Kita (mwd)",
+  "pages": [
+    {
+      "id": 87,
+      "name": "Der Bewerber erfüllt folgende Kriterien:",
+      "position": 1,
+      "prompts": [
+        {
+          "id": 291,
+          "question": "Alternativ: Erzieher:innen auch weiterleiten, dann aber mit dem Hinweis, für die stellv. Leitung nicht geeignet",
+          "position": 1
+        },
+        {
+          "id": 289,
+          "question": "Zwingend: Deutschkenntnisse B2",
+          "position": 2
+        },
+        {
+          "id": 287,
+          "question": "\r\nWünschenswert: Erfahrung in einer leitenden Stelle",
+          "position": 3
+        },
+        {
+          "id": 285,
+          "question": "Zwingend: mehrjährige Berufserfahrung",
+          "position": 4
+        },
+        {
+          "id": 283,
+          "question": "Nachweis über einschlägige Fortbildungen, Qualifizierungen",
+          "position": 5
+        },
+        {
+          "id": 281,
+          "question": "Zwingend: staatlich anerkannter Abschluss in einem sozialpädagogischen Beruf",
+          "position": 6
+        }
+      ]
+    },
+    {
+      "id": 88,
+      "name": "Der Bewerber akzeptiert folgende Rahmenbedingungen:",
+      "position": 2,
+      "prompts": [
+        {
+          "id": 297,
+          "question": "30 Tage Jahresurlaub",
+          "position": 1
+        },
+        {
+          "id": 295,
+          "question": "Vollzeit (39 Wochenstunden)\r\n\r\n",
+          "position": 2
+        },
+        {
+          "id": 293,
+          "question": "Vergütung nach Haustarif orientiert am TV-L Berlin (EG 10a) 3.475€ (Einstieg ohne einschlägige Leitungserfahrung) bis 5.259€",
+          "position": 3
+        }
+      ]
+    },
+    {
+      "id": 89,
+      "name": "Weitere Informationen",
+      "position": 3,
+      "prompts": [
+        {
+          "id": 309,
+          "question": "!!!Bitte unbedingt erwähnen, dass es sich um die Region Marzahn Hellersdorf handelt!!!",
+          "position": 1
+        },
+        {
+          "id": 307,
+          "question": "Link zur Übersicht der Standorte: https://www.urban-consult.de/kindertagesstaetten/ ( falls der Standort nicht infrage kommt)",
+          "position": 2
+        },
+        {
+          "id": 305,
+          "question": "In unseren Kindertagesstätten bieten wir Kindern im Kleinkind- und Vorschulalter einen Lern- und Lebensort, wo sie in ihrer Entwicklung einfühlsam und individuell begleitet und gefördert werden. Wir sind offen für alle Kinder – unabhängig von ihrer kulturellen Herkunft, ihrer Nationalität oder sozialen Situation, mit oder ohne Beeinträchtigung oder Behinderung.",
+          "position": 3
+        },
+        {
+          "id": 303,
+          "question": "Die enge Zusammenarbeit mit den Familien ist uns ein wichtiges Anliegen. Deshalb bieten wir in Kooperation mit dem Träger FAB e. V. Familien und Alleinerziehenden mit unserem Projekt Zukunft in Marzahn-Hellersdorf ein aufsuchendes Beratungs- und Unterstützungsangebot.",
+          "position": 4
+        },
+        {
+          "id": 301,
+          "question": "Kita Springmäuse, Stollberger Straße 25 - 27, 12627 Berlin",
+          "position": 5
+        },
+        {
+          "id": 299,
+          "question": "Ansprechpartnerin: Frau Nadine Starick",
+          "position": 6
+        }
+      ]
+    }
+  ]
+}
+

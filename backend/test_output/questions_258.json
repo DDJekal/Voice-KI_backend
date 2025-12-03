@@ -1,0 +1,423 @@
+{
+  "meta": {
+    "schema_version": "1.0",
+    "generated_at": "2025-11-03T13:20:44.094499",
+    "generator": "voiceki-python-question-builder@1.0.0",
+    "policies_applied": [
+      "slot_dependency: name_confirmation -> name",
+      "slot_dependency: address_confirmation -> address",
+      "slot_dependency: address_request -> address",
+      "slot_dependency: site_confirmation -> standort",
+      "slot_dependency: department -> einsatzbereich",
+      "slot_dependency: gate_bereitschaft_zu_schichtdienst_und_wochenend_feiertagsarbeit -> schichtmodell",
+      "slot_dependency: arbeitszeit -> dienstmodell",
+      "slot_dependency: start_date -> verfuegbarkeit",
+      "keyword_trigger: gate_examinierter_gesundheits_und_krankenpfleger -> Intensiv",
+      "keyword_trigger: gate_bereitschaft_zu_schichtdienst_und_wochenend_feiertagsarbeit -> Intensiv",
+      "keyword_trigger: arbeitszeit -> Teilzeit",
+      "diversification: address_confirmation",
+      "confidence_check: name_confirmation",
+      "confidence_check: address_confirmation",
+      "confidence_check: address_request",
+      "confidence_check: site_confirmation",
+      "confidence_check: department",
+      "confidence_check: gate_examinierter_gesundheits_und_krankenpfleger",
+      "confidence_check: gate_bereitschaft_zu_schichtdienst_und_wochenend_feiertagsarbeit",
+      "confidence_check: arbeitszeit",
+      "confidence_check: start_date"
+    ]
+  },
+  "questions": [
+    {
+      "id": "name_confirmation",
+      "question": "Spreche ich mit {{first_name}} {{last_name}}?",
+      "type": "boolean",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Kontakt",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Identifikation des Bewerbers",
+      "category": "identifikation",
+      "category_order": 1,
+      "slot_config": {
+        "fills_slot": "name",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": null,
+      "conversation_hints": {
+        "on_unclear_answer": "Verstehe ich richtig, dass Sie {interpretation}? Bitte korrigieren Sie mich, falls das nicht stimmt.",
+        "on_negative_answer": null,
+        "confidence_boost_phrases": [
+          "ja",
+          "definitiv",
+          "sicher",
+          "korrekt",
+          "genau",
+          "nein",
+          "nicht",
+          "keineswegs"
+        ],
+        "diversify_after": null
+      }
+    },
+    {
+      "id": "address_confirmation",
+      "question": "Ich habe Ihre Adresse als {{street}} {{house_number}}, {{postal_code}} {{city}}. Ist das korrekt?",
+      "type": "boolean",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Kontakt",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": [
+        {
+          "when": {
+            "field": "has_address",
+            "op": "eq",
+            "value": true
+          },
+          "then": {
+            "action": "ask",
+            "value": null
+          }
+        }
+      ],
+      "source": null,
+      "context": null,
+      "category": "identifikation",
+      "category_order": 1,
+      "slot_config": {
+        "fills_slot": "address",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": null,
+      "conversation_hints": {
+        "on_unclear_answer": "Verstehe ich richtig, dass Sie {interpretation}? Bitte korrigieren Sie mich, falls das nicht stimmt.",
+        "on_negative_answer": null,
+        "confidence_boost_phrases": [
+          "ja",
+          "definitiv",
+          "sicher",
+          "korrekt",
+          "genau",
+          "nein",
+          "nicht",
+          "keineswegs"
+        ],
+        "diversify_after": "boolean"
+      }
+    },
+    {
+      "id": "address_request",
+      "question": "Nennen Sie mir bitte Ihre vollständige Adresse mit Straße, Hausnummer, PLZ und Ort.",
+      "type": "string",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Kontakt",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": [
+        {
+          "when": {
+            "field": "has_address",
+            "op": "eq",
+            "value": false
+          },
+          "then": {
+            "action": "ask",
+            "value": null
+          }
+        }
+      ],
+      "source": null,
+      "context": null,
+      "category": "kontaktinformationen",
+      "category_order": 2,
+      "slot_config": {
+        "fills_slot": "address",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": null,
+      "conversation_hints": {
+        "on_unclear_answer": "Verstehe ich richtig, dass Sie {interpretation}? Bitte korrigieren Sie mich, falls das nicht stimmt.",
+        "on_negative_answer": null,
+        "confidence_boost_phrases": null,
+        "diversify_after": null
+      }
+    },
+    {
+      "id": "site_confirmation",
+      "question": "Unser Standort ist WEGE Klinik, Villenstr. 8, 53129 Bonn. Passt das für Sie?",
+      "type": "boolean",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Standort",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": null,
+      "category": "standort",
+      "category_order": 5,
+      "slot_config": {
+        "fills_slot": "standort",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": null,
+      "conversation_hints": {
+        "on_unclear_answer": "Verstehe ich richtig, dass Sie {interpretation}? Bitte korrigieren Sie mich, falls das nicht stimmt.",
+        "on_negative_answer": null,
+        "confidence_boost_phrases": [
+          "ja",
+          "definitiv",
+          "sicher",
+          "korrekt",
+          "genau",
+          "nein",
+          "nicht",
+          "keineswegs"
+        ],
+        "diversify_after": null
+      }
+    },
+    {
+      "id": "department",
+      "question": "In welcher Fachabteilung möchten Sie gerne arbeiten?",
+      "type": "choice",
+      "options": [
+        "Onkologische Fachpflege",
+        "Palliative Fachpflege",
+        "Radiologische Fachpflege",
+        "Strahlentherapeutische Fachpflege"
+      ],
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Einsatzbereich",
+      "help_text": null,
+      "input_hint": "Bitte eine Abteilung nennen.",
+      "conditions": null,
+      "source": null,
+      "context": null,
+      "category": "einsatzbereiche",
+      "category_order": 6,
+      "slot_config": {
+        "fills_slot": "einsatzbereich",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": null,
+      "conversation_hints": {
+        "on_unclear_answer": "Verstehe ich richtig, dass Sie {interpretation}? Bitte korrigieren Sie mich, falls das nicht stimmt.",
+        "on_negative_answer": null,
+        "confidence_boost_phrases": null,
+        "diversify_after": null
+      }
+    },
+    {
+      "id": "gate_examinierter_gesundheits_und_krankenpfleger",
+      "question": "Haben Sie: examinierter Gesundheits- und Krankenpfleger?",
+      "type": "boolean",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Qualifikation",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Muss-Kriterium: examinierter Gesundheits- und Krankenpfleger",
+      "category": "zusaetzliche_informationen",
+      "category_order": 9,
+      "slot_config": null,
+      "gate_config": {
+        "is_gate": false,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": null,
+        "condition": null,
+        "context_triggers": {
+          "keywords_to_follow_up": [
+            "IMC",
+            "Intensiv",
+            "ITS",
+            "Intensivstation"
+          ]
+        }
+      },
+      "conversation_hints": {
+        "on_unclear_answer": "Verstehe ich richtig, dass Sie {interpretation}? Bitte korrigieren Sie mich, falls das nicht stimmt.",
+        "on_negative_answer": null,
+        "confidence_boost_phrases": [
+          "ja",
+          "definitiv",
+          "sicher",
+          "korrekt",
+          "genau",
+          "nein",
+          "nicht",
+          "keineswegs"
+        ],
+        "diversify_after": null
+      }
+    },
+    {
+      "id": "gate_bereitschaft_zu_schichtdienst_und_wochenend_feiertagsarbeit",
+      "question": "Haben Sie: Bereitschaft zu Schichtdienst und Wochenend-/Feiertagsarbeit?",
+      "type": "boolean",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Qualifikation",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Muss-Kriterium: Bereitschaft zu Schichtdienst und Wochenend-/Feiertagsarbeit",
+      "category": "rahmenbedingungen",
+      "category_order": 7,
+      "slot_config": {
+        "fills_slot": "schichtmodell",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": {
+        "is_gate": false,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": null,
+        "condition": null,
+        "context_triggers": {
+          "keywords_to_follow_up": [
+            "IMC",
+            "Intensiv",
+            "ITS",
+            "Intensivstation"
+          ]
+        }
+      },
+      "conversation_hints": {
+        "on_unclear_answer": "Verstehe ich richtig, dass Sie {interpretation}? Bitte korrigieren Sie mich, falls das nicht stimmt.",
+        "on_negative_answer": null,
+        "confidence_boost_phrases": [
+          "ja",
+          "definitiv",
+          "sicher",
+          "korrekt",
+          "genau",
+          "nein",
+          "nicht",
+          "keineswegs"
+        ],
+        "diversify_after": null
+      }
+    },
+    {
+      "id": "arbeitszeit",
+      "question": "Suchen Sie eine Vollzeit-Stelle (38,5 Std/Woche) oder Teilzeit (12,5 Std/Woche)?",
+      "type": "choice",
+      "options": [
+        "Vollzeit",
+        "Teilzeit"
+      ],
+      "conversation_flow": null,
+      "required": true,
+      "priority": 2,
+      "group": "Rahmen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": null,
+      "category": "rahmenbedingungen",
+      "category_order": 7,
+      "slot_config": {
+        "fills_slot": "dienstmodell",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": {
+        "is_gate": false,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": null,
+        "condition": null,
+        "context_triggers": {
+          "keywords_to_follow_up": [
+            "Teilzeit",
+            "Stunden"
+          ]
+        }
+      },
+      "conversation_hints": {
+        "on_unclear_answer": "Verstehe ich richtig, dass Sie {interpretation}? Bitte korrigieren Sie mich, falls das nicht stimmt.",
+        "on_negative_answer": null,
+        "confidence_boost_phrases": null,
+        "diversify_after": null
+      }
+    },
+    {
+      "id": "start_date",
+      "question": "Ab wann könnten Sie bei uns anfangen?",
+      "type": "date",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 2,
+      "group": "Rahmen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": null,
+      "category": "rahmenbedingungen",
+      "category_order": 7,
+      "slot_config": {
+        "fills_slot": "verfuegbarkeit",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": null,
+      "conversation_hints": {
+        "on_unclear_answer": "Verstehe ich richtig, dass Sie {interpretation}? Bitte korrigieren Sie mich, falls das nicht stimmt.",
+        "on_negative_answer": null,
+        "confidence_boost_phrases": null,
+        "diversify_after": null
+      }
+    }
+  ]
+}

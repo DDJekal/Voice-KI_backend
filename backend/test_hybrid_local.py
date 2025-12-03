@@ -1,5 +1,5 @@
 """
-Test Script für Question Generator
+Test Script für Question Generator mit lokaler JSON-Datei
 
 Testet die automatische Generierung von questions.json aus Gesprächsprotokollen.
 """
@@ -12,53 +12,36 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from src.config import get_settings
-from src.data_sources.api_loader import APIDataSource
 from src.questions.builder import build_question_catalog
 
 
-async def test_question_generator(campaign_id: str, policy_level: str = "standard"):
+async def test_with_local_protocol(protocol_file: str, policy_level: str = "standard"):
     """
-    Testet Question Generator mit einer Campaign.
+    Testet Question Generator mit einer lokalen Protocol-Datei.
     
     Args:
-        campaign_id: Campaign ID zum Testen
+        protocol_file: Pfad zur Gesprächsprotokoll-JSON
         policy_level: Policy level zum Testen (basic, standard, advanced)
     """
     print("\n" + "="*70)
-    print("TEST: Question Generator")
+    print("TEST: Question Generator (mit lokaler Datei)")
     print("="*70)
-    print(f"Campaign ID: {campaign_id}")
+    print(f"Protocol File: {protocol_file}")
     print(f"Policy Level: {policy_level}")
     print("="*70 + "\n")
     
     try:
-        # Config laden
-        settings = get_settings()
-        
-        if not settings.openai_api_key:
-            print("❌ Fehler: OPENAI_API_KEY nicht gesetzt!")
-            print("   Setze in .env: OPENAI_API_KEY=sk-...")
+        # Lade Protocol
+        protocol_path = Path(protocol_file)
+        if not protocol_path.exists():
+            print(f"Fehler: Datei nicht gefunden: {protocol_file}")
             return
         
-        print(f"OK OpenAI API Key: {settings.openai_api_key[:20]}...")
-        print(f"OK OpenAI Model: {settings.openai_model}")
+        with open(protocol_path, 'r', encoding='utf-8') as f:
+            protocol = json.load(f)
         
-        # API Data Source
-        print("\nInitialisiere API Data Source...")
-        api = APIDataSource(
-            api_url=settings.api_url,
-            api_key=settings.api_key,
-            status="new",
-            filter_test_applicants=True
-        )
-        
-        # Lade Protocol
-        print(f"\nLade Conversation Protocol fuer Campaign {campaign_id}...")
-        protocol = api.get_conversation_protocol(campaign_id)
-        
-        print(f"   OK Protocol: {protocol.get('name', 'Unknown')}")
-        print(f"   OK Pages: {len(protocol.get('pages', []))}")
+        print(f"OK Protocol geladen: {protocol.get('name', 'Unknown')}")
+        print(f"OK Pages: {len(protocol.get('pages', []))}")
         
         # Generiere Questions
         print("\nGeneriere questions.json mit OpenAI...")
@@ -119,14 +102,15 @@ async def test_question_generator(campaign_id: str, policy_level: str = "standar
         for cat, count in sorted(categories.items()):
             print(f"   - {cat}: {count}")
         
-        # Show first 5 questions as preview
-        print(f"\nPreview (erste 5 Fragen):")
-        for q in catalog.questions[:5]:
+        # Show first 10 questions as preview
+        print(f"\nPreview (erste 10 Fragen):")
+        for q in catalog.questions[:10]:
             req_str = "[REQ]" if q.required else "[OPT]"
-            print(f"   {req_str} [{q.id}] {q.question}")
+            tier = "T1" if q.id.startswith('pq_') else ("T2" if q.id.startswith('vc_') else "T3")
+            print(f"   {req_str} [{tier}] {q.question[:70]}")
         
         # Offer to save
-        save_path = Path("test_output") / f"questions_{campaign_id}.json"
+        save_path = Path("test_output") / f"questions_hybrid_test.json"
         save_path.parent.mkdir(exist_ok=True)
         
         with open(save_path, 'w', encoding='utf-8') as f:
@@ -145,8 +129,8 @@ def main():
     """CLI Entry Point"""
     import argparse
     
-    parser = argparse.ArgumentParser(description="Test Question Generator mit Policies")
-    parser.add_argument("campaign_id", type=str, help="Campaign ID zum Testen")
+    parser = argparse.ArgumentParser(description="Test Question Generator mit lokaler Protocol-Datei")
+    parser.add_argument("protocol_file", type=str, help="Pfad zur Gesprächsprotokoll JSON-Datei")
     parser.add_argument(
         "--policy-level",
         choices=["basic", "standard", "advanced", "none"],
@@ -159,7 +143,7 @@ def main():
     policy_level = None if args.policy_level == "none" else args.policy_level
     
     # Run async
-    asyncio.run(test_question_generator(args.campaign_id, policy_level or "standard"))
+    asyncio.run(test_with_local_protocol(args.protocol_file, policy_level or "standard"))
 
 
 if __name__ == "__main__":

@@ -25,8 +25,8 @@ class Settings(BaseSettings):
         description="OpenAI API Key für Question Generator"
     )
     openai_model: str = Field(
-        default="gpt-4o",
-        description="OpenAI Model (gpt-4o, gpt-4-turbo, etc.)"
+        default="gpt-5",
+        description="OpenAI Model (gpt-5, gpt-5-mini, gpt-4o, etc.)"
     )
 
     # ElevenLabs Configuration

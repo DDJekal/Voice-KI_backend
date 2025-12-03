@@ -42,7 +42,7 @@ class CampaignStorage:
             with open(path, 'w', encoding='utf-8') as f:
                 json.dump(package, f, indent=2, ensure_ascii=False)
             
-            print(f"💾 Package gespeichert: {path}")
+            print(f"Package gespeichert: {path}")
             return path
             
         except Exception as e:

@@ -1,0 +1,93 @@
+{
+  "id": 16,
+  "name": "Pflegefachkräfte Recruiting - Robert Bosch Krankenhaus",
+  "pages": [
+    {
+      "id": 1,
+      "name": "Qualifikationen",
+      "position": 1,
+      "prompts": [
+        {
+          "id": 1,
+          "position": 1,
+          "question": "Sind Sie examinierte Pflegefachfrau oder Pflegefachmann?",
+          "checked": true,
+          "information": "Muss-Kriterium"
+        },
+        {
+          "id": 2,
+          "position": 2,
+          "question": "Haben Sie Erfahrung auf der Intensivstation (IMC oder ITS)?",
+          "checked": false
+        },
+        {
+          "id": 3,
+          "position": 3,
+          "question": "Für den OP-Bereich: Sind Sie MFA und interessiert an einer Qualifizierungsmaßnahme?",
+          "checked": false,
+          "information": "Alternative für OP-Bereich"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Standorte",
+      "position": 2,
+      "prompts": [
+        {
+          "id": 4,
+          "position": 1,
+          "question": "An welchem Standort möchten Sie arbeiten?",
+          "checked": true,
+          "information": "Standort Burgholzhof, Hohenheimerstraße oder Gerokstraße"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Einsatzbereiche",
+      "position": 3,
+      "prompts": [
+        {
+          "id": 5,
+          "position": 1,
+          "question": "In welcher Fachabteilung möchten Sie arbeiten?",
+          "checked": true,
+          "information": "Palliativstation hat Vorrang, sonst IMC, ITS, oder Normalstation"
+        },
+        {
+          "id": 6,
+          "position": 2,
+          "question": "Haben Sie Erfahrung in der Palliativpflege?",
+          "checked": false
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Rahmenbedingungen",
+      "position": 4,
+      "prompts": [
+        {
+          "id": 7,
+          "position": 1,
+          "question": "Suchen Sie eine Vollzeit- oder Teilzeitstelle?",
+          "checked": true
+        },
+        {
+          "id": 8,
+          "position": 2,
+          "question": "Wann könnten Sie frühestens anfangen?",
+          "checked": true
+        },
+        {
+          "id": 9,
+          "position": 3,
+          "question": "Sind Sie mit Schichtdienst (Früh, Spät, Nacht) einverstanden?",
+          "checked": true
+        }
+      ]
+    }
+  ]
+}
+

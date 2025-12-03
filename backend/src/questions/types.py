@@ -22,11 +22,14 @@ class QuestionType(str, Enum):
 
 class QuestionGroup(str, Enum):
     """Question groups"""
+    MOTIVATION = "Motivation"
     STANDORT = "Standort"
     EINSATZBEREICH = "Einsatzbereich"
     QUALIFIKATION = "Qualifikation"
     PRAEFERENZEN = "Präferenzen"
     RAHMEN = "Rahmen"
+    WERDEGANG = "Werdegang"
+    VERFUEGBARKEIT = "Verfügbarkeit"
     KONTAKT = "Kontakt"
 
 
@@ -109,6 +112,12 @@ class ExtractResult(BaseModel):
     
     # NEU: Strukturierte Protokoll-Fragen
     protocol_questions: List[ProtocolQuestion] = Field(default_factory=list)
+    
+    # NEU: Motivation-Dimensionen für Phase 2
+    motivation_dimensions: List[str] = Field(default_factory=list)
+    
+    # NEU: Werdegang-Anforderungen für Phase 5
+    career_questions_needed: bool = Field(default=False)
 
 
 # Conversation Flow Models
@@ -217,6 +226,7 @@ class Question(BaseModel):
     id: str
     question: str
     type: QuestionType
+    phase: Optional[Literal[1, 2, 3, 4, 5, 6]] = None  # NEU: Gesprächsphase (1-6)
     preamble: Optional[str] = None  # NEU: Einführung/Kontext vor der Frage
     options: Optional[List[str]] = None
     conversation_flow: Optional[ConversationalFlow] = None

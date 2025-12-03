@@ -1,0 +1,73 @@
+{
+  "protocol_id": 62,
+  "protocol_name": "Leitungskraft für unsere Kita (mwd)",
+  "processed_at": "2025-12-03T12:26:31.253490Z",
+  "question_count": 5,
+  "questions": [
+    {
+      "id": "gate_deutschkenntnisse_b2",
+      "question": "Haben Sie: Deutschkenntnisse B2?",
+      "type": "boolean",
+      "preamble": null,
+      "options": null,
+      "priority": 1,
+      "group": "Qualifikation",
+      "help_text": null,
+      "context": "Muss-Kriterium: Deutschkenntnisse B2",
+      "category": "standardqualifikationen",
+      "category_order": 1
+    },
+    {
+      "id": "gate_mehrjaehrige_berufserfahrung",
+      "question": "Haben Sie: mehrjährige Berufserfahrung?",
+      "type": "boolean",
+      "preamble": null,
+      "options": null,
+      "priority": 1,
+      "group": "Qualifikation",
+      "help_text": null,
+      "context": "Muss-Kriterium: mehrjährige Berufserfahrung",
+      "category": "standardqualifikationen",
+      "category_order": 1
+    },
+    {
+      "id": "gate_staatlich_anerkannter_abschluss_in_einem_sozialpaedagogischen_beruf",
+      "question": "Haben Sie: staatlich anerkannter Abschluss in einem sozialpädagogischen Beruf?",
+      "type": "boolean",
+      "preamble": null,
+      "options": null,
+      "priority": 1,
+      "group": "Qualifikation",
+      "help_text": null,
+      "context": "Muss-Kriterium: staatlich anerkannter Abschluss in einem sozialpädagogischen Beruf",
+      "category": "standardqualifikationen",
+      "category_order": 1
+    },
+    {
+      "id": "vollzeit_confirmation",
+      "question": "Die Stelle ist in Vollzeit (39 Wochenstunden). Ist das für Sie passend?",
+      "type": "boolean",
+      "preamble": "Ich möchte kurz auf das Arbeitszeitmodell eingehen.",
+      "options": null,
+      "priority": 2,
+      "group": "Rahmen",
+      "help_text": null,
+      "context": null,
+      "category": "rahmenbedingungen",
+      "category_order": 2
+    },
+    {
+      "id": "site_confirmation",
+      "question": "Unser Standort ist Kita Springmäuse, Stollberger Straße 25 - 27, 12627 Berlin. Passt das für Sie?",
+      "type": "boolean",
+      "preamble": null,
+      "options": null,
+      "priority": 1,
+      "group": "Standort",
+      "help_text": null,
+      "context": null,
+      "category": "standort",
+      "category_order": 3
+    }
+  ]
+}
