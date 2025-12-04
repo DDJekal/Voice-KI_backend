@@ -1,11 +1,12 @@
 """
-Structure Pipeline Stage - 3-Tier Hybrid Approach mit Phasen-Struktur
+Structure Pipeline Stage - 3-Tier Hybrid Approach (Optimiert für ElevenLabs)
 
 Builds questions from three sources in priority order:
 1. Protocol Questions (LLM-extracted from protocol)
 2. Verbatim Candidates (Fallback for uncovered topics)
 3. Generated Questions (Deterministic base questions)
-4. Phase-basierte Standard-Questions (Motivation, Werdegang, Abschluss)
+
+Phase 2, 5, 6 sind bereits in ElevenLabs verpromptet und werden NICHT generiert.
 
 Port of src/pipeline/structure.ts with Hybrid enhancements.
 """
@@ -22,12 +23,7 @@ from ..types import (
     QuestionSource,
     ProtocolQuestion
 )
-from .phase_builder import (
-    build_phase_2_questions,
-    build_phase_4_questions,
-    build_phase_5_questions,
-    build_phase_6_questions
-)
+# phase_builder ist nicht mehr nötig - Phasen sind in ElevenLabs verpromptet
 
 logger = logging.getLogger(__name__)
 
@@ -231,35 +227,40 @@ def _is_name_or_address_question(text: str) -> bool:
     return False
 
 
-def _extract_street_name(address: str) -> str:
+def _extract_city_from_address(address: str) -> str:
     """
-    Extrahiert nur den Straßennamen aus einer vollständigen Adresse.
+    Extrahiert nur den Ort aus einer vollständigen Adresse.
     
     Args:
-        address: Vollständige Adresse (z.B. "Auerbachstraße 110, 70376 Stuttgart" 
+        address: Vollständige Adresse (z.B. "Am Fichtenkamp 7-9, 70376 Bünde"
                  oder "Standort Burgholzhof (Auerbachstraße 110, 70376 Stuttgart)")
         
     Returns:
-        Nur Straßenname (z.B. "Auerbachstraße")
+        Nur Ortsname (z.B. "Bünde", "Stuttgart")
     """
     import re
     
-    # Fall 1: "Standort XYZ (Straße ...)" → extrahiere nur Straßenname
+    # Fall 1: "Standort XYZ (Straße ...)" → extrahiere Inhalt zwischen Klammern
     if "(" in address and ")" in address:
-        # Extrahiere Inhalt zwischen Klammern
         match = re.search(r'\(([^)]+)\)', address)
         if match:
             address = match.group(1).strip()
     
-    # Fall 2: "Straße Nummer, PLZ Stadt" → entferne alles nach Komma
+    # Fall 2: "Straße Nummer, PLZ Stadt" → extrahiere nur Stadt nach PLZ
     if "," in address:
-        address = address.split(",")[0].strip()
+        # Nach Komma kommt meist "PLZ Stadt"
+        parts = address.split(",")
+        if len(parts) >= 2:
+            plz_stadt = parts[-1].strip()
+            # Entferne PLZ (5 Ziffern oder 4-5 Ziffern)
+            stadt = re.sub(r'^\d{4,5}\s+', '', plz_stadt).strip()
+            if stadt:
+                return stadt
     
-    # Fall 3: Entferne Hausnummer (alles nach erstem Leerzeichen + Zahl)
-    match = re.match(r'^([^\d]+)', address)
-    if match:
-        street = match.group(1).strip()
-        return street
+    # Fall 3: Fallback - versuche letzte Wortgruppe zu extrahieren
+    words = address.split()
+    if words:
+        return words[-1].strip()
     
     return address
 
@@ -279,20 +280,20 @@ def _generate_site_preamble(sites: List) -> Optional[str]:
     
     count = len(sites)
     
-    # Extrahiere nur Straßennamen
-    street_names = [_extract_street_name(site.label) for site in sites]
+    # Extrahiere nur Ortsnamen (nicht Straßen!)
+    city_names = [_extract_city_from_address(site.label) for site in sites]
     
     if count == 2:
-        # Beide nennen - professionell und einladend
-        return f"Wir sind an zwei Standorten vertreten: in der {street_names[0]} und der {street_names[1]}."
+        # Beide nennen - nur Orte
+        return f"Wir sind an zwei Standorten vertreten: in {city_names[0]} und {city_names[1]}."
     elif count == 3:
-        # Alle drei nennen - professionell
-        sites_str = f"{street_names[0]}, {street_names[1]} und {street_names[2]}"
-        return f"Unser Klinikum hat drei Standorte: {sites_str}."
+        # Alle drei nennen - nur Orte
+        cities_str = f"{city_names[0]}, {city_names[1]} und {city_names[2]}"
+        return f"Unser Klinikum hat drei Standorte: {cities_str}."
     else:
-        # Nur Anzahl + erste 2 Beispiele - flexibel
-        sites_str = f"{street_names[0]} und {street_names[1]}"
-        return f"Wir können Ihnen Einsätze an {count} verschiedenen Standorten anbieten, unter anderem {sites_str}."
+        # Nur Anzahl + erste 2 Beispiele - nur Orte
+        cities_str = f"{city_names[0]} und {city_names[1]}"
+        return f"Wir können Ihnen Einsätze an {count} verschiedenen Standorten anbieten, unter anderem in {cities_str}."
 
 
 def _detect_department_terminology(all_departments: List[str]) -> str:
@@ -402,6 +403,9 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
     Tier 2: Verbatim Candidates (Fallback for uncovered topics)
     Tier 3: Generated Questions (Deterministic base questions)
     
+    Phase 2 (Motivation), Phase 5 (Werdegang), Phase 6 (Verfügbarkeit/Kontakt)
+    sind bereits in ElevenLabs verpromptet und werden NICHT generiert.
+    
     Args:
         extract_result: Extracted data from conversation protocol
         
@@ -411,7 +415,7 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
     questions: List[Question] = []
     covered_topics: Set[str] = set()  # Track which topics are already covered
     
-    logger.info("Building questions using 4-Tier Hybrid Approach...")
+    logger.info("Building questions using 3-Tier Hybrid Approach (ElevenLabs-optimiert)...")
     
     # ========================================
     # PRE-SCAN: Qualifikations-Konsolidierung prüfen
@@ -513,6 +517,14 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
                         question_text = "Wären Sie grundsätzlich bereit, im Schichtdienst zu arbeiten?"
                         preamble += " In vielen unserer Bereiche arbeiten wir im Schichtbetrieb."
         
+        # Fall 3: Deutschkenntnisse - systemisch & offen (NEU!)
+        if any(keyword in pq.text.lower() for keyword in ["deutsch", "sprachkenntnisse", "sprachniveau"]):
+            if "b2" in pq.text.lower() or "niveau" in pq.text.lower():
+                # Systemische, offene Formulierung statt geschlossener Boolean-Frage
+                question_text = "Wie würden Sie Ihre Deutschkenntnisse einschätzen? Sind Sie Muttersprachler oder verfügen Sie mindestens über Kenntnisse auf B2-Niveau?"
+                q_type = QuestionType.STRING  # Offene Frage für systemisches Gespräch
+                preamble = "Damit ich Ihren sprachlichen Hintergrund einordnen kann"
+        
         # NEU: Grammatik-Refinement anwenden (Level 2 Optimierung)
         question_text = _refine_question_text(question_text, q_type.value)
         
@@ -546,6 +558,12 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
             covered_topics.add("bereich")
             covered_topics.add("station")
             covered_topics.add("fachabteilung")
+        
+        # NEU: Wenn es eine Vollzeit/Teilzeit-Frage ist, markiere arbeitszeit als covered
+        if "vollzeit" in pq.text.lower() or "teilzeit" in pq.text.lower() or "arbeitszeit" in pq.text.lower():
+            covered_topics.add("arbeitszeit")
+            covered_topics.add("vollzeit")
+            covered_topics.add("teilzeit")
         
         tier1_count += 1
     
@@ -619,29 +637,33 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
             ))
             tier3_count += 1
         elif len(extract_result.sites) == 1:
+            # Extrahiere nur Stadt (nicht Straße!)
+            city = _extract_city_from_address(extract_result.sites[0].label)
+            
             questions.append(Question(
                 id="site_confirmation",
-                question=f"Unser Standort ist {extract_result.sites[0].label}. Passt das für Sie?",
+                question=f"Unser Standort ist in {city}. Passt das für Sie?",
                 type=QuestionType.BOOLEAN,
                 required=True,
                 priority=1,
-                group=QuestionGroup.STANDORT
+                group=QuestionGroup.STANDORT,
+                context=f"Vollständige Adresse: {extract_result.sites[0].label}"  # Für Nachfragen
             ))
             tier3_count += 1
         else:
-            # Multiple sites - generate preamble
+            # Multiple sites - generate preamble (nur Orte!)
             preamble = _generate_site_preamble(extract_result.sites)
             
-            # Verkürze Options auf nur Straßennamen
-            site_options = [_extract_street_name(site.label) for site in extract_result.sites]
+            # Options: Nur Ortsnamen
+            site_options = [_extract_city_from_address(site.label) for site in extract_result.sites]
             
             # Geschlossene Frage statt offener
             questions.append(Question(
                 id="site_choice",
-                preamble=preamble,  # NEU: Kontextuelle Einführung
+                preamble=preamble,
                 question="Haben Sie bereits eine Präferenz für einen bestimmten Standort?",
                 type=QuestionType.CHOICE,
-                options=site_options,  # NEU: Nur Straßennamen
+                options=site_options,  # Nur Ortsnamen
                 required=True,
                 priority=1,
                 group=QuestionGroup.STANDORT
@@ -685,9 +707,8 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
             if cleaned and cleaned not in cleaned_options:
                 cleaned_options.append(cleaned)
         
-        # Füge "Anderer Abschluss" hinzu
-        if "anderer" not in combined_text.lower():
-            cleaned_options.append("Anderer Abschluss")
+        # KEIN "Anderer Abschluss" - zu formal, nicht systemisch
+        # Die KI soll natürlich nachfragen, wenn keine Option passt
         
         # Erstelle konsolidierte Frage
         preamble = None
@@ -703,7 +724,7 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
             required=True,
             priority=1,
             group=QuestionGroup.QUALIFIKATION,
-            help_text="Bitte wählen Sie die Qualifikation, die am besten zu Ihrem Abschluss passt.",
+            # KEIN help_text - passt nicht zum systemischen Gesprächsflow
             context="Konsolidierte Qualifikations-Frage aus Must-Have und Alternativen"
         ))
         tier3_count += 1
@@ -834,33 +855,17 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
     logger.info(f"✓ Tier 3 (Generated Questions): {tier3_count} questions")
     
     # ========================================
-    # TIER 4: Phasen-basierte Standard-Questions
+    # TIER 4: Phasen-basierte Standard-Questions (DEAKTIVIERT)
     # ========================================
-    logger.info("Building Tier 4 (Phase-based Standard Questions)...")
-    
-    # Phase 2: Motivation & Erwartung
-    phase_2_questions = build_phase_2_questions(extract_result)
-    questions.extend(phase_2_questions)
-    
-    # Phase 4: Präferenzen (zusätzlich zu Tier 1-3)
-    phase_4_questions = build_phase_4_questions(extract_result)
-    questions.extend(phase_4_questions)
-    
-    # Phase 5: Werdegang & Startdatum
-    phase_5_questions = build_phase_5_questions(extract_result)
-    questions.extend(phase_5_questions)
-    
-    # Phase 6: Erreichbarkeit
-    phase_6_questions = build_phase_6_questions()
-    questions.extend(phase_6_questions)
-    
-    tier4_count = len(phase_2_questions) + len(phase_4_questions) + len(phase_5_questions) + len(phase_6_questions)
-    logger.info(f"✓ Tier 4 (Phase-based Questions): {tier4_count} questions")
+    # Phase 2, 5, 6 sind bereits in ElevenLabs verpromptet!
+    # Nur Protokoll-relevante Fragen (Tier 1-3) werden generiert.
+    tier4_count = 0
+    logger.info("✓ Tier 4 (Phase-based Questions): DISABLED - phases are hardcoded in ElevenLabs prompts")
     
     # ========================================
     # Summary
     # ========================================
     total = len(questions)
-    logger.info(f"✓ TOTAL: {total} questions built ({tier1_count} Protocol + {tier2_count} Verbatim + {tier3_count} Generated + {tier4_count} Phase-based)")
+    logger.info(f"✓ TOTAL: {total} questions built ({tier1_count} Protocol + {tier2_count} Verbatim + {tier3_count} Generated)")
     
     return questions
