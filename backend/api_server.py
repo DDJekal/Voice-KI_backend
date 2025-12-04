@@ -273,6 +273,18 @@ async def upload_to_hoc(package: dict) -> str:
 
 
 # Endpoints
+@app.get("/")
+async def root():
+    """Root Endpoint - Redirect to docs"""
+    return {
+        "service": "VoiceKI Campaign Setup API",
+        "version": "1.0.0",
+        "status": "online",
+        "docs": "/docs",
+        "health": "/health"
+    }
+
+
 @app.get("/health")
 async def health_check():
     """Health Check Endpoint für Render.com"""
