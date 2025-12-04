@@ -227,18 +227,25 @@ def _is_name_or_address_question(text: str) -> bool:
     return False
 
 
-def _extract_city_from_address(address: str) -> str:
+def _extract_location_info(address: str) -> dict:
     """
-    Extrahiert nur den Ort aus einer vollständigen Adresse.
+    Extrahiert Stadt, Straße und optional Stadtteil aus einer Adresse.
     
     Args:
-        address: Vollständige Adresse (z.B. "Am Fichtenkamp 7-9, 70376 Bünde"
-                 oder "Standort Burgholzhof (Auerbachstraße 110, 70376 Stuttgart)")
+        address: Vollständige Adresse (z.B. "Hohenheimerstraße 21, 70184 Stuttgart"
+                 oder "Standort Burgholzhof (Auerbachstraße 110, 70376 Stuttgart)"
+                 oder "Standortmöglichkeit a) Hohenheimerstraße 21, 70184 Stuttgart. Bereich: Geriatrie")
         
     Returns:
-        Nur Ortsname (z.B. "Bünde", "Stuttgart")
+        Dict mit {"city": "Stuttgart", "street": "Hohenheimerstraße", "district": None, "plz": "70184"}
     """
     import re
+    
+    # Bereinigung: Entferne "Standortmöglichkeit a/b/c)" am Anfang
+    address = re.sub(r'^[Ss]tandortmöglichkeit\s+[a-z]\)\s*', '', address)
+    
+    # Bereinigung: Entferne ". Bereich: ..." am Ende
+    address = re.sub(r'\.\s*Bereich:.*$', '', address)
     
     # Fall 1: "Standort XYZ (Straße ...)" → extrahiere Inhalt zwischen Klammern
     if "(" in address and ")" in address:
@@ -246,54 +253,169 @@ def _extract_city_from_address(address: str) -> str:
         if match:
             address = match.group(1).strip()
     
-    # Fall 2: "Straße Nummer, PLZ Stadt" → extrahiere nur Stadt nach PLZ
-    if "," in address:
-        # Nach Komma kommt meist "PLZ Stadt"
-        parts = address.split(",")
-        if len(parts) >= 2:
-            plz_stadt = parts[-1].strip()
-            # Entferne PLZ (5 Ziffern oder 4-5 Ziffern)
-            stadt = re.sub(r'^\d{4,5}\s+', '', plz_stadt).strip()
-            if stadt:
-                return stadt
+    # Bereinigung: Entferne "Standort XYZ, " am Anfang
+    address = re.sub(r'^Standort\s+[^,]+,\s*', '', address)
     
-    # Fall 3: Fallback - versuche letzte Wortgruppe zu extrahieren
-    words = address.split()
-    if words:
-        return words[-1].strip()
+    # Muster: "Straße Nummer, PLZ Stadt" oder "Straße Nummer, PLZ Stadt-Stadtteil"
+    # Beispiele:
+    # - "Hohenheimerstraße 21, 70184 Stuttgart"
+    # - "Auerbachstraße 110, 70376 Stuttgart"
+    # - "Am Fichtenkamp 7-9, Bünde"
     
-    return address
+    # Versuch 1: Mit PLZ
+    match = re.search(r'^([A-ZÄÖÜa-zäöü\s]+?)\s+[\d\-]+\s*,\s*(\d{5})?\s*(.+?)$', address)
+    if match:
+        street = match.group(1).strip()
+        plz = match.group(2)
+        city_raw = match.group(3).strip() if match.group(3) else ""
+        
+        # Stadtteil aus Stadt extrahieren (z.B. "Stuttgart-Mitte" → Stadt: "Stuttgart", Stadtteil: "Mitte")
+        district = None
+        city = city_raw
+        if '-' in city_raw and not city_raw.startswith('Bad '):  # "Bad Cannstatt" nicht splitten
+            parts = city_raw.split('-', 1)
+            city = parts[0].strip()
+            district = parts[1].strip() if len(parts) > 1 else None
+        
+        return {
+            "city": city, 
+            "street": street, 
+            "district": district, 
+            "plz": plz,
+            "full_address": address
+        }
+    
+    # Versuch 2: Ohne PLZ (z.B. "Am Fichtenkamp 7-9, Bünde")
+    match = re.search(r'^([A-ZÄÖÜa-zäöü\s]+?)\s+[\d\-]+\s*,\s*(.+?)$', address)
+    if match:
+        street = match.group(1).strip()
+        city = match.group(2).strip()
+        
+        return {
+            "city": city,
+            "street": street,
+            "district": None,
+            "plz": None,
+            "full_address": address
+        }
+    
+    # Fallback: Nur Stadt
+    return {
+        "city": address,
+        "street": None,
+        "district": None,
+        "plz": None,
+        "full_address": address
+    }
 
 
-def _generate_site_preamble(sites: List) -> Optional[str]:
+def _generate_smart_site_options(sites: List) -> tuple:
     """
-    Generiert eine kontextuelle Einführung für Standort-Fragen.
+    Intelligente Standort-Optionen basierend auf Städten.
+    
+    Strategie:
+    - Wenn alle Standorte in derselben Stadt: Straßennamen verwenden
+    - Wenn verschiedene Städte: Städtenamen verwenden
+    - Optional mit Stadtteilen, wenn vorhanden
     
     Args:
         sites: Liste der Standorte
         
     Returns:
-        Preamble-Text oder None
+        Tuple (preamble, options, question)
     """
-    if not sites or len(sites) <= 1:
-        return None
+    if not sites:
+        return None, [], "An welchem Standort möchten Sie arbeiten?"
     
-    count = len(sites)
+    # Extrahiere Location-Infos für alle Sites
+    locations = [_extract_location_info(site.label) for site in sites]
     
-    # Extrahiere nur Ortsnamen (nicht Straßen!)
-    city_names = [_extract_city_from_address(site.label) for site in sites]
+    # Prüfe: Sind alle in derselben Stadt?
+    cities = set(loc['city'] for loc in locations if loc['city'] and loc['city'].strip())
     
-    if count == 2:
-        # Beide nennen - nur Orte
-        return f"Wir sind an zwei Standorten vertreten: in {city_names[0]} und {city_names[1]}."
-    elif count == 3:
-        # Alle drei nennen - nur Orte
-        cities_str = f"{city_names[0]}, {city_names[1]} und {city_names[2]}"
-        return f"Unser Klinikum hat drei Standorte: {cities_str}."
+    # Debug-Info
+    logger.debug(f"Site options: {len(sites)} sites, {len(cities)} unique cities: {cities}")
+    logger.debug(f"Extracted streets: {[loc['street'] for loc in locations]}")
+    
+    # Wenn alle Locations eine Stadt haben und es dieselbe ist
+    if len(cities) == 1 and len(sites) > 1:
+        # FALL 1: Alle in derselben Stadt → NUR Straßennamen verwenden
+        city = list(cities)[0]
+        options = [loc['street'] if loc['street'] else loc['city'] for loc in locations]
+        
+        # Entferne Duplikate (falls mehrere Standorte in gleicher Straße)
+        unique_options = []
+        seen = set()
+        for opt in options:
+            if opt and opt.strip() and opt not in seen:
+                unique_options.append(opt)
+                seen.add(opt)
+        options = unique_options
+        
+        # Preamble: Nur Stadt nennen, nicht die einzelnen Straßen auflisten
+        if len(sites) == 2:
+            preamble = f"Wir sind an zwei Standorten in {city} vertreten."
+        elif len(sites) == 3:
+            preamble = f"Wir sind an drei Standorten in {city} vertreten."
+        else:
+            preamble = f"Wir sind an {len(sites)} Standorten in {city} vertreten."
+        
+        question = "Welcher Standort wäre für Sie am besten erreichbar?"
+    
+    # Wenn manche Sites keine Stadt haben oder leer sind, prüfe ob trotzdem alle in gleicher Stadt
+    elif len(cities) <= 1 and len(sites) > 1:
+        # Fallback: Wahrscheinlich Parse-Problem, nutze Straßen wenn vorhanden
+        streets = [loc['street'] for loc in locations if loc['street']]
+        if len(streets) == len(sites):
+            # Alle haben Straßen → nutze die
+            city = list(cities)[0] if cities else "verschiedenen Orten"
+            options = streets
+            
+            if len(sites) == 2:
+                preamble = f"Wir sind an zwei Standorten in {city} vertreten."
+            elif len(sites) == 3:
+                preamble = f"Wir sind an drei Standorten in {city} vertreten."
+            else:
+                preamble = f"Wir sind an {len(sites)} Standorten in {city} vertreten."
+            
+            question = "Welcher Standort wäre für Sie am besten erreichbar?"
+        else:
+            # Fallback auf Originaltext
+            options = [loc['full_address'] for loc in locations]
+            preamble = f"Wir haben {len(sites)} Standorte."
+            question = "Welcher Standort passt für Sie am besten?"
+    
+    elif len(cities) > 1:
+        # FALL 2: Verschiedene Städte → Städte verwenden
+        options = [loc['city'] for loc in locations]
+        
+        # Entferne Duplikate
+        unique_options = []
+        seen = set()
+        for opt in options:
+            if opt not in seen:
+                unique_options.append(opt)
+                seen.add(opt)
+        options = unique_options
+        
+        if len(cities) == 2:
+            cities_list = list(cities)
+            preamble = f"Wir sind an zwei Standorten vertreten: in {cities_list[0]} und {cities_list[1]}."
+        elif len(cities) == 3:
+            cities_list = list(cities)
+            preamble = f"Wir haben drei Standorte: {', '.join(cities_list[:-1])} und {cities_list[-1]}."
+        else:
+            preamble = f"Wir haben {len(cities)} verschiedene Standorte."
+        
+        question = "Haben Sie bereits eine Präferenz für einen bestimmten Standort?"
+    
     else:
-        # Nur Anzahl + erste 2 Beispiele - nur Orte
-        cities_str = f"{city_names[0]} und {city_names[1]}"
-        return f"Wir können Ihnen Einsätze an {count} verschiedenen Standorten anbieten, unter anderem in {cities_str}."
+        # FALL 3: Nur ein Standort (wird eh nicht als Choice gefragt, aber Fallback)
+        options = [locations[0]['city']]
+        preamble = None
+        question = f"Unser Standort ist in {locations[0]['city']}. Passt das für Sie?"
+    
+    return preamble, options, question
 
 
 def _detect_department_terminology(all_departments: List[str]) -> str:
@@ -637,33 +759,29 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
             ))
             tier3_count += 1
         elif len(extract_result.sites) == 1:
-            # Extrahiere nur Stadt (nicht Straße!)
-            city = _extract_city_from_address(extract_result.sites[0].label)
+            # Ein Standort - nur Stadt nennen
+            location = _extract_location_info(extract_result.sites[0].label)
             
             questions.append(Question(
                 id="site_confirmation",
-                question=f"Unser Standort ist in {city}. Passt das für Sie?",
+                question=f"Unser Standort ist in {location['city']}. Passt das für Sie?",
                 type=QuestionType.BOOLEAN,
                 required=True,
                 priority=1,
                 group=QuestionGroup.STANDORT,
-                context=f"Vollständige Adresse: {extract_result.sites[0].label}"  # Für Nachfragen
+                context=f"Vollständige Adresse: {location['full_address']}"  # Für Nachfragen
             ))
             tier3_count += 1
         else:
-            # Multiple sites - generate preamble (nur Orte!)
-            preamble = _generate_site_preamble(extract_result.sites)
+            # Mehrere Standorte - intelligente Optionen
+            preamble, site_options, site_question = _generate_smart_site_options(extract_result.sites)
             
-            # Options: Nur Ortsnamen
-            site_options = [_extract_city_from_address(site.label) for site in extract_result.sites]
-            
-            # Geschlossene Frage statt offener
             questions.append(Question(
                 id="site_choice",
                 preamble=preamble,
-                question="Haben Sie bereits eine Präferenz für einen bestimmten Standort?",
+                question=site_question,
                 type=QuestionType.CHOICE,
-                options=site_options,  # Nur Ortsnamen
+                options=site_options,
                 required=True,
                 priority=1,
                 group=QuestionGroup.STANDORT
