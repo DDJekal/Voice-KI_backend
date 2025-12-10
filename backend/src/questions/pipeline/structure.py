@@ -546,7 +546,22 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
     qualification_keywords = ['studium', 'abschluss', 'ausbildung', 'bachelor', 'master', 
                               'diplom', 'examen', 'zertifikat', 'qualifikation', 'fortbildung']
     
-    all_qualifications = extract_result.must_have + extract_result.alternatives
+    # NEU: Deutschkenntnisse-Keywords separat behandeln
+    german_language_keywords = ['deutsch', 'sprachkenntnisse', 'sprachniveau', 'b2', 'c1', 'c2']
+    
+    # Sammle alle Qualifikationen AUSSER Deutschkenntnisse
+    all_qualifications = []
+    has_german_requirement = False
+    
+    for item in extract_result.must_have + extract_result.alternatives:
+        item_lower = item.lower()
+        # Prüfe ob es um Deutschkenntnisse geht
+        if any(keyword in item_lower for keyword in german_language_keywords):
+            has_german_requirement = True
+            continue  # Skip - wird als separate Frage behandelt
+        # Ansonsten zu Qualifikationen hinzufügen
+        all_qualifications.append(item)
+    
     combined_text = ' '.join(all_qualifications).lower() if all_qualifications else ''
     
     # Prüfe ob es primär um Qualifikationen geht
@@ -561,6 +576,9 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
         # Markiere Qualifikations-Topics als "geplant für Konsolidierung"
         # Diese werden bei Tier 1 Protocol Questions übersprungen
         covered_topics.add("qualifikation_consolidated")
+    
+    if has_german_requirement:
+        logger.info("🎯 Detected German language requirement - will create separate question")
     
     # ========================================
     # TIER 1: Protocol Questions (LLM-extracted)
@@ -581,6 +599,15 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
             
             if is_qualification_question:
                 logger.debug(f"Skipping qualification question (will be consolidated): {pq.text[:60]}")
+                continue
+        
+        # NEU: Skip German language questions if has_german_requirement
+        if has_german_requirement:
+            question_lower = pq.text.lower()
+            is_german_question = any(keyword in question_lower for keyword in german_language_keywords)
+            
+            if is_german_question:
+                logger.debug(f"Skipping German language question (will be handled separately): {pq.text[:60]}")
                 continue
         
         # Detect type and group
@@ -856,6 +883,24 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
             covered_topics.add(_slugify(qual))
         
         logger.info(f"✓ Created consolidated qualification question with {len(cleaned_options)} options")
+    
+    # 3b. Deutschkenntnisse-Frage (separat von Qualifikations-Konsolidierung)
+    if has_german_requirement and "deutschkenntnisse" not in covered_topics:
+        questions.append(Question(
+            id="german_language_skills",
+            preamble="Damit ich Ihren sprachlichen Hintergrund einordnen kann",
+            question="Wie würden Sie Ihre Deutschkenntnisse einschätzen? Sind Sie Muttersprachler oder verfügen Sie mindestens über Kenntnisse auf B2-Niveau?",
+            type=QuestionType.STRING,
+            required=True,
+            priority=1,
+            group=QuestionGroup.QUALIFIKATION,
+            context="Deutschkenntnisse-Anforderung aus Protokoll"
+        ))
+        tier3_count += 1
+        covered_topics.add("deutschkenntnisse")
+        covered_topics.add("deutsch")
+        covered_topics.add("sprachkenntnisse")
+        logger.info(f"✓ Created separate German language skills question")
     
     # 4. Must-Have Kriterien (Gate Questions) - if not already covered
     for must_have in extract_result.must_have:
