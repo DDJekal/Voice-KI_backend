@@ -912,7 +912,15 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
     # 4. Must-Have Kriterien (Gate Questions) - if not already covered
     for must_have in extract_result.must_have:
         slug = _slugify(must_have)
+        
+        # Skip if already covered
         if slug not in covered_topics:
+            # Skip Deutschkenntnisse - werden separat behandelt
+            must_have_lower = must_have.lower()
+            if any(keyword in must_have_lower for keyword in german_language_keywords):
+                logger.debug(f"Skipping German language must-have (handled separately): {must_have}")
+                continue
+            
             if re.search(r'pflegefach', must_have, re.I):
                 # Originalfrage mit Grammatikfehler
                 question_text = "Sind Sie examinierte Pflegefachfrau oder Pflegefachmann?"
@@ -948,7 +956,15 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
     # 5. Alternativen (nur MFA und nicht-Qualifikations-Alternativen)
     for alt in extract_result.alternatives:
         slug = _slugify(alt)
+        
+        # Skip if already covered
         if slug not in covered_topics:
+            # Skip Deutschkenntnisse - werden separat behandelt
+            alt_lower = alt.lower()
+            if any(keyword in alt_lower for keyword in german_language_keywords):
+                logger.debug(f"Skipping German language alternative (handled separately): {alt}")
+                continue
+            
             if re.search(r'MFA', alt, re.I):
                 # Natürlichere Formulierung mit Preamble
                 preamble = "Ich hätte noch eine weitere Möglichkeit für Sie."
