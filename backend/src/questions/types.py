@@ -70,7 +70,7 @@ class Arbeitszeit(BaseModel):
 
 class Constraints(BaseModel):
     """Job constraints"""
-    arbeitszeit: Optional[Arbeitszeit] = None
+    arbeitszeit: Optional[Union[Arbeitszeit, str]] = None  # Can be object or simple string
     tarif: Optional[str] = None
     schichten: Optional[str] = None
 
