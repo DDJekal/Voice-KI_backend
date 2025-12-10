@@ -64,8 +64,8 @@ class Priority(BaseModel):
 # Constraints Models
 class Arbeitszeit(BaseModel):
     """Working time constraints"""
-    vollzeit: Optional[str] = None
-    teilzeit: Optional[str] = None
+    vollzeit: Optional[Union[str, bool]] = None  # Can be string or boolean
+    teilzeit: Optional[Union[str, bool]] = None  # Can be string or boolean
 
 
 class Constraints(BaseModel):
