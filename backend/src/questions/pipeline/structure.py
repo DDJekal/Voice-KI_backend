@@ -562,6 +562,13 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
         # Ansonsten zu Qualifikationen hinzufügen
         all_qualifications.append(item)
     
+    # Prüfe auch protocol_questions auf Deutschkenntnisse
+    for pq in extract_result.protocol_questions:
+        pq_lower = pq.text.lower()
+        if any(keyword in pq_lower for keyword in german_language_keywords):
+            has_german_requirement = True
+            break
+    
     combined_text = ' '.join(all_qualifications).lower() if all_qualifications else ''
     
     # Prüfe ob es primär um Qualifikationen geht
