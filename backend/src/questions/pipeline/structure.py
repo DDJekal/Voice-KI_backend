@@ -981,7 +981,7 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
             # 5. FALLBACK für unbekannte Must-Haves
             else:
                 detected_category = "sonstige_anforderung"
-                detected_group = QuestionGroup.ZUSAETZLICHE_INFORMATIONEN
+                detected_group = QuestionGroup.PRAEFERENZEN  # Präferenzen statt nicht-existierendem ZUSAETZLICHE_INFORMATIONEN
                 
                 # Intelligentere Formulierung statt "Haben Sie: X?"
                 # Verhindert, dass es als Abschluss interpretiert wird
