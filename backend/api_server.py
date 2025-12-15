@@ -188,11 +188,16 @@ def trim_question(question) -> dict:
     EXPORT_FIELDS = {
         'id', 'question', 'preamble', 'group', 'context',
         'category', 'category_order', 'type', 'options',
-        'priority', 'help_text'
+        'priority', 'help_text', 'gate_config'  # NEU: gate_config für ElevenLabs
     }
     
-    q_dict = question.model_dump()
+    try:
+        q_dict = question.model_dump()
+    except Exception as e:
+        # Fallback: Falls model_dump() fehlschlägt, versuche dict()
+        q_dict = dict(question)
     
+    # Filtere nur erlaubte Felder (metadata wird automatisch ausgeschlossen)
     return {
         key: value 
         for key, value in q_dict.items() 
