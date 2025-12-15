@@ -21,7 +21,8 @@ from ..types import (
     QuestionType, 
     QuestionGroup, 
     QuestionSource,
-    ProtocolQuestion
+    ProtocolQuestion,
+    GateConfig
 )
 # phase_builder ist nicht mehr nötig - Phasen sind in ElevenLabs verpromptet
 
@@ -901,6 +902,7 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
         logger.info(f"✓ Created consolidated qualification question with {len(cleaned_options)} options")
     
     # 3b. Deutschkenntnisse-Frage (separat von Qualifikations-Konsolidierung)
+    # WICHTIG: Deutschkenntnisse sind ein Gate-Kriterium (offene Frage)
     if has_german_requirement and "deutschkenntnisse" not in covered_topics:
         questions.append(Question(
             id="german_language_skills",
@@ -910,19 +912,26 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
             required=True,
             priority=1,
             group=QuestionGroup.QUALIFIKATION,
-            context="Deutschkenntnisse-Anforderung aus Protokoll"
+            context="Deutschkenntnisse-Anforderung aus Protokoll",
+            gate_config=GateConfig(
+                is_gate=True,
+                is_alternative=False,
+                has_alternatives=False
+            )
         ))
         tier3_count += 1
         covered_topics.add("deutschkenntnisse")
         covered_topics.add("deutsch")
         covered_topics.add("sprachkenntnisse")
-        logger.info(f"✓ Created separate German language skills question")
+        logger.info(f"✓ Created separate German language skills question (Gate)")
     
     # 4. Must-Have Kriterien mit intelligenter Kategorisierung (Gate Questions)
+    # WICHTIG: Gate Questions werden als OFFENE STRING-Fragen formuliert für Phase 2 (Motivation)
     # Kategorisierungs-Keywords für Must-Have Kriterien
     driving_license_keywords = ['führerschein', 'fahrerlaubnis', 'pkw', 'klasse b', 'führerschein klasse']
     health_keywords = ['impfung', 'impfnachweis', 'masern', 'gesundheit', 'immunisierung', 'impfpass']
     soft_skill_keywords = ['bereitschaft', 'flexibilität', 'teamfähigkeit', 'kommunikation']
+    qualification_keywords = ['ausbildung', 'abschluss', 'qualifikation', 'examen', 'studium', 'fachkraft']
     
     for must_have in extract_result.must_have:
         slug = _slugify(must_have)
@@ -940,67 +949,70 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
             detected_category = None
             detected_group = QuestionGroup.QUALIFIKATION  # Default
             question_text = None
+            preamble = None
+            q_type = QuestionType.STRING  # Default: Offene Fragen für Gates
             
-            # 1. Führerschein
+            # 1. Führerschein - offen formuliert
             if any(keyword in must_have_lower for keyword in driving_license_keywords):
                 detected_category = "fuehrerschein"
                 detected_group = QuestionGroup.QUALIFIKATION
-                question_text = f"Haben Sie {must_have}?"
+                question_text = "Welchen Führerschein haben Sie?"
+                preamble = "Kurz zu den praktischen Voraussetzungen"
                 logger.debug(f"✓ Categorized as driving license: {must_have}")
             
-            # 2. Gesundheit/Impfung
+            # 2. Gesundheit/Impfung - offen formuliert
             elif any(keyword in must_have_lower for keyword in health_keywords):
                 detected_category = "gesundheit"
                 detected_group = QuestionGroup.QUALIFIKATION
-                question_text = f"Verfügen Sie über {must_have}?"
+                
+                if 'masern' in must_have_lower or 'impf' in must_have_lower:
+                    question_text = f"Haben Sie die erforderlichen Impfnachweise, insbesondere für {must_have}?"
+                    preamble = "Für bestimmte Bereiche sind Impfnachweise erforderlich"
+                else:
+                    question_text = f"Wie sieht es aus mit: {must_have}?"
+                    preamble = "Eine kurze Frage zu den gesundheitlichen Anforderungen"
+                
                 logger.debug(f"✓ Categorized as health requirement: {must_have}")
             
-            # 3. Soft Skills / Bereitschaft
+            # 3. Qualifikation/Ausbildung - offen formuliert
+            elif any(keyword in must_have_lower for keyword in qualification_keywords):
+                detected_category = "pflege_qualifikation"
+                detected_group = QuestionGroup.QUALIFIKATION
+                question_text = "Welche Ausbildung oder Qualifikation haben Sie abgeschlossen?"
+                preamble = "Damit ich Ihren fachlichen Hintergrund einordnen kann"
+                logger.debug(f"✓ Categorized as qualification: {must_have}")
+            
+            # 4. Soft Skills / Bereitschaft - als STRING (offen)
             elif any(keyword in must_have_lower for keyword in soft_skill_keywords):
                 detected_category = "soft_skills"
                 detected_group = QuestionGroup.RAHMEN  # Rahmenbedingungen
-                
-                # Natürlichere Formulierung
-                if 'bereitschaft' in must_have_lower:
-                    # "Bereitschaft zu X" → "Wären Sie bereit zu X?"
-                    question_text = must_have.replace('Bereitschaft', 'Wären Sie bereit')
-                    if not question_text.endswith('?'):
-                        question_text += '?'
-                else:
-                    question_text = f"Ist Ihnen wichtig: {must_have}?"
-                
+                question_text = f"Wie stehen Sie zu folgendem Aspekt: {must_have}?"
+                preamble = "Eine Frage zu den Rahmenbedingungen"
                 logger.debug(f"✓ Categorized as soft skill: {must_have}")
             
-            # 4. Pflegefachkraft (Spezialfall)
-            elif re.search(r'pflegefach', must_have, re.I):
-                detected_category = "pflege_qualifikation"
-                detected_group = QuestionGroup.QUALIFIKATION
-                question_text = "Sind Sie examinierte Pflegefachfrau oder Pflegefachmann?"
-                logger.debug(f"✓ Categorized as nursing qualification: {must_have}")
-            
-            # 5. FALLBACK für unbekannte Must-Haves
+            # 5. FALLBACK für unbekannte Must-Haves - offen formuliert
             else:
                 detected_category = "sonstige_anforderung"
-                detected_group = QuestionGroup.PRAEFERENZEN  # Präferenzen statt nicht-existierendem ZUSAETZLICHE_INFORMATIONEN
-                
-                # Intelligentere Formulierung statt "Haben Sie: X?"
-                # Verhindert, dass es als Abschluss interpretiert wird
-                question_text = f"Erfüllen Sie folgende Anforderung: {must_have}?"
-                
+                detected_group = QuestionGroup.PRAEFERENZEN
+                question_text = f"Vielleicht können Sie mir etwas dazu sagen: {must_have}?"
+                preamble = "Eine wichtige Anforderung für die Position"
                 logger.warning(f"⚠️ Uncategorized must-have (using fallback): {must_have}")
             
-            # Level 2 Optimierung: Grammatik-Refinement
-            question_text = _refine_question_text(question_text, "boolean")
-            
-            # Erstelle Frage mit spezifischer Kategorie
+            # Erstelle Gate-Question mit gate_config
             questions.append(Question(
                 id=f"gate_{slug}",
                 question=question_text,
-                type=QuestionType.BOOLEAN,
+                type=q_type,  # STRING für offene Fragen
+                preamble=preamble,
                 required=True,
                 priority=1,
                 group=detected_group,
-                context=f"Muss-Kriterium ({detected_category}): {must_have}"
+                context=f"Muss-Kriterium ({detected_category}): {must_have}",
+                gate_config=GateConfig(
+                    is_gate=True,
+                    is_alternative=False,
+                    has_alternatives=False  # Wird später bei Alternatives angepasst
+                )
             ))
             
             tier3_count += 1

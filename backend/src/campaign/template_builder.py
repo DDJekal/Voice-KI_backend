@@ -1,7 +1,69 @@
 """Template Builder - Erstellt KB Templates mit Variablen-Platzhaltern"""
 
-from typing import Dict, Any
+from typing import Dict, Any, List
 from pathlib import Path
+
+
+def filter_gate_questions(questions_json: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """
+    Filtert Gate-Questions für Phase 2 (Motivation & Erwartung).
+    
+    Gate-Questions sind Must-Have Kriterien die:
+    - gate_config.is_gate = True haben
+    - Als offene STRING-Fragen formuliert sind
+    - In Phase 2 natürlich ins Gespräch eingebettet werden
+    
+    Args:
+        questions_json: Das vollständige questions.json
+        
+    Returns:
+        Liste von Gate-Questions
+    """
+    questions = questions_json.get("questions", [])
+    gate_questions = []
+    
+    for q in questions:
+        if not isinstance(q, dict):
+            continue
+        
+        # Prüfe gate_config
+        gate_config = q.get("gate_config")
+        if gate_config and gate_config.get("is_gate", False):
+            gate_questions.append(q)
+    
+    return gate_questions
+
+
+def filter_preference_questions(questions_json: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """
+    Filtert Preference-Questions für Phase 4 (Präferenzen & Rahmenbedingungen).
+    
+    Preference-Questions sind ALLE Fragen die NICHT Gate-Questions sind:
+    - Standorte, Abteilungen, Arbeitszeit, Gehalt, etc.
+    - Können geschlossen (boolean, choice) oder offen sein
+    - Werden in Phase 4 systematisch abgefragt
+    
+    Args:
+        questions_json: Das vollständige questions.json
+        
+    Returns:
+        Liste von Preference-Questions
+    """
+    questions = questions_json.get("questions", [])
+    preference_questions = []
+    
+    for q in questions:
+        if not isinstance(q, dict):
+            continue
+        
+        # Prüfe gate_config - wenn NICHT gate, dann preference
+        gate_config = q.get("gate_config")
+        is_gate = gate_config and gate_config.get("is_gate", False) if gate_config else False
+        
+        if not is_gate:
+            preference_questions.append(q)
+    
+    return preference_questions
 
 
 class TemplateBuilder:

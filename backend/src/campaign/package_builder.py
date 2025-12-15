@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 
 from ..data_sources.api_loader import APIDataSource
-from .template_builder import TemplateBuilder
+from .template_builder import TemplateBuilder, filter_gate_questions, filter_preference_questions
 from ..questions.builder import build_question_catalog
 
 
@@ -88,8 +88,15 @@ class CampaignPackageBuilder:
         else:
             print("   Keine Prioritaeten gefunden")
         
-        # 4. Package zusammenstellen (KB Templates entfernt - werden in ElevenLabs Dashboard verwaltet)
-        print("4. Stelle Package zusammen...")
+        # 4. Filtere Gate- und Preference-Questions für ElevenLabs
+        print("4. Filtere Gate- und Preference-Questions...")
+        gate_questions = filter_gate_questions(questions)
+        preference_questions = filter_preference_questions(questions)
+        print(f"   Gate-Questions: {len(gate_questions)}")
+        print(f"   Preference-Questions: {len(preference_questions)}")
+        
+        # 5. Package zusammenstellen (KB Templates entfernt - werden in ElevenLabs Dashboard verwaltet)
+        print("5. Stelle Package zusammen...")
         package = {
             # Unternehmensinformationen ZUERST (besser für Lesbarkeit)
             "company_name": company.get('name', ''),
@@ -108,10 +115,14 @@ class CampaignPackageBuilder:
             },
             
             # Questions Catalog (für ElevenLabs Conversational AI)
-            "questions": questions
+            "questions": questions,
+            
+            # NEU: Separate Arrays für ElevenLabs Template-Variablen
+            "gate_questions": gate_questions,
+            "preference_questions": preference_questions
         }
         
-        # 5. Validierung
+        # 6. Validierung
         self._validate_package(package)
         print("   Package validiert")
         
@@ -168,8 +179,15 @@ class CampaignPackageBuilder:
         else:
             print("   Keine Prioritaeten gefunden")
         
-        # 3. Package zusammenstellen
-        print("3️⃣ Stelle Package zusammen...")
+        # 3. Filtere Gate- und Preference-Questions für ElevenLabs
+        print("3️⃣ Filtere Gate- und Preference-Questions...")
+        gate_questions = filter_gate_questions(questions)
+        preference_questions = filter_preference_questions(questions)
+        print(f"   Gate-Questions: {len(gate_questions)}")
+        print(f"   Preference-Questions: {len(preference_questions)}")
+        
+        # 4. Package zusammenstellen
+        print("4️⃣ Stelle Package zusammen...")
         package = {
             # Unternehmensinformationen
             "company_name": company_data.get('name', ''),
@@ -188,10 +206,14 @@ class CampaignPackageBuilder:
             },
             
             # Questions Catalog (für ElevenLabs Conversational AI)
-            "questions": questions
+            "questions": questions,
+            
+            # NEU: Separate Arrays für ElevenLabs Template-Variablen
+            "gate_questions": gate_questions,
+            "preference_questions": preference_questions
         }
         
-        # 4. Validierung
+        # 5. Validierung
         self._validate_package(package)
         print("   ✅ Package validiert")
         
@@ -262,11 +284,11 @@ class CampaignPackageBuilder:
         Behaltene Felder pro Frage:
         - id, question, preamble, group, context
         - category, category_order, type, options
-        - priority, help_text
+        - priority, help_text, gate_config
         
         Entfernte Felder pro Frage:
         - conversation_flow, required, input_hint, conditions
-        - source, slot_config, gate_config, conversation_hints
+        - source, slot_config, conversation_hints
         
         Entfernte Meta-Informationen:
         - meta.schema_version, meta.generated_at, meta.generator
@@ -283,7 +305,7 @@ class CampaignPackageBuilder:
         EXPORT_FIELDS = {
             'id', 'question', 'preamble', 'group', 'context',
             'category', 'category_order', 'type', 'options',
-            'priority', 'help_text'
+            'priority', 'help_text', 'gate_config'  # NEU: für ElevenLabs Gate/Preference Filtering
         }
         
         # Trimme Questions
