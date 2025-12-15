@@ -79,7 +79,10 @@ async def extract_rahmen(protocol: Dict[str, Any]) -> Dict[str, Any]:
         content = response["choices"][0]["message"]["content"]
         data = json.loads(content)
         
+        # Debug: Log what we got
         logger.info(f"  ✓ Found arbeitszeit: {bool(data.get('arbeitszeit'))}, gehalt: {bool(data.get('gehalt'))}, benefits: {len(data.get('benefits', []))}")
+        logger.debug(f"  📊 Raw rahmen data: {json.dumps(data, ensure_ascii=False)[:200]}...")
+        
         return data
     except Exception as e:
         logger.error(f"Rahmen extraction failed: {e}")
@@ -144,12 +147,19 @@ def merge_constraints(rahmen_data: Dict[str, Any]) -> Dict[str, Any]:
     
     if rahmen_data.get("arbeitszeit"):
         constraints["arbeitszeit"] = rahmen_data["arbeitszeit"]
+        logger.debug(f"  → arbeitszeit: {rahmen_data['arbeitszeit']}")
     
     if rahmen_data.get("gehalt"):
         constraints["gehalt"] = rahmen_data["gehalt"]
+        logger.info(f"  💰 gehalt extracted: {rahmen_data['gehalt']}")
+    else:
+        logger.warning("  ⚠️  NO gehalt in rahmen_data!")
     
     if rahmen_data.get("benefits"):
         constraints["benefits"] = rahmen_data["benefits"]
+        logger.info(f"  🎁 benefits extracted: {len(rahmen_data['benefits'])} items")
+    else:
+        logger.warning("  ⚠️  NO benefits in rahmen_data!")
     
     return constraints
 
