@@ -83,7 +83,26 @@ Extrahiere strukturiert:
 ]
 ```
 
-### 5. Protocol Questions (Informations-Fragen)
+### 5. Unternehmenskultur & Soft Facts
+
+**Zu extrahieren:**
+- Kommunikationsstil (z.B. "Gespräch per DU", "Sie-Form")
+- Arbeitsatmosphäre
+- Team-Kultur
+- Dresscode
+- Besondere kulturelle Merkmale
+
+**WICHTIG**: Dies sind INFORMATIONEN (keine Fragen), die in Preambles oder Kontext einfließen
+
+**Format:**
+```json
+"culture_notes": [
+  "Gespräch per DU",
+  "Familiäre Atmosphäre"
+]
+```
+
+### 6. Protocol Questions (Informations-Fragen)
 
 Extrahiere ALLE Fragen zu organisatorischen Themen:
 
@@ -118,6 +137,7 @@ Gib NUR valides JSON zurück:
   "all_departments": [...],
   "priorities": [...],
   "roles": [...],
+  "culture_notes": [...],
   "protocol_questions": [...]
 }
 ```

@@ -16,6 +16,8 @@ Extrahiere strukturiert:
 - Zertifikate (z.B. "Fachweiterbildung Intensiv")
 - Deutschkenntnisse (z.B. "Deutsch B2", "Deutschkenntnisse B2", "Sprachniveau C1")
 - Führerschein (z.B. "Führerschein Klasse B")
+- Arbeitserlaubnis (z.B. "Arbeitserlaubnis in Deutschland", "Aufenthaltserlaubnis")
+- Gesundheitsnachweise (z.B. "Masernimpfung", "Impfnachweis")
 - Berufserfahrung (z.B. "Mindestens 2 Jahre Berufserfahrung")
 
 **Format:**
