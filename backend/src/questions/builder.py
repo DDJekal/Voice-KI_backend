@@ -78,14 +78,12 @@ async def build_question_catalog(
         settings = get_settings()
         use_v2 = getattr(settings, 'use_structure_v2', True)  # DEBUG: V2 aktiviert!
         
-        knowledge_base = None  # Initialize knowledge_base
-        
         if use_v2:
             logger.info("  Using Structure V2 (Generate-First, Filter-Later)")
-            base_questions, knowledge_base = build_questions_v2(extract_result, classified_data)
+            base_questions = build_questions_v2(extract_result, classified_data)
             # #region agent log
             import json, time
-            with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'builder.py:75','message':'V2 returned','data':{'count':len(base_questions),'v2_used':True,'has_kb':knowledge_base is not None},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'E'})+'\n')
+            with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'builder.py:75','message':'V2 returned','data':{'count':len(base_questions),'v2_used':True},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'E'})+'\n')
             # #endregion
         else:
             logger.info("  Using Structure V1 (Legacy)")
@@ -203,8 +201,11 @@ async def build_question_catalog(
         )
         
         # Attach knowledge_base as attribute (bypass Pydantic validation)
-        # Using __dict__ directly to avoid Pydantic field validation
-        object.__setattr__(catalog, 'knowledge_base', knowledge_base)
+        # Get KB from extract_result if V2 was used
+        knowledge_base = getattr(extract_result, '_knowledge_base', None)
+        if knowledge_base:
+            object.__setattr__(catalog, 'knowledge_base', knowledge_base)
+            logger.info(f"  Knowledge-Base attached ({len(knowledge_base)} categories)")
         
         # #region agent log
         try:

@@ -795,22 +795,24 @@ def filter_questions(questions: List[Question]) -> List[Question]:
 # MAIN ENTRY POINT
 # ============================================================================
 
-def build_questions_v2(extract_result: ExtractResult, classified_data: Dict = None) -> tuple[List[Question], Dict]:
+def build_questions_v2(extract_result: ExtractResult, classified_data: Dict = None) -> List[Question]:
     """
-    Hauptfunktion: Neue 4-Stage Pipeline + Knowledge Base
+    Hauptfunktion: Neue 4-Stage Pipeline (V1-kompatibel)
     
     Stage 1: GENERATE - Alle Fragen generieren
     Stage 2: CLUSTER - Ähnliche Fragen gruppieren  
     Stage 3: CONSOLIDATE - Intelligente Zusammenführung
     Stage 4: FILTER - Unerwünschte entfernen
-    + BUILD KB: Knowledge-Base aus Information Items
     
     Args:
         extract_result: Extrahierte Daten aus dem Protokoll
         classified_data: Optional - Klassifizierte Protokoll-Items (from STAGE 0)
         
     Returns:
-        Tuple: (Liste von finalen Fragen, Knowledge-Base Dict)
+        List[Question]: Liste von finalen Fragen (SAME as V1)
+        
+    Note:
+        Knowledge-Base wird separat in extract_result.metadata gespeichert
     """
     # #region agent log
     import json, time
@@ -872,8 +874,7 @@ def build_questions_v2(extract_result: ExtractResult, classified_data: Dict = No
     logger.info(f"✅ Pipeline complete: {len(filtered)} final questions")
     logger.info("=" * 70)
     
-    # Stage 5: Build Knowledge-Base (from classified_data if available)
-    knowledge_base = {}
+    # Stage 5: Build Knowledge-Base (stored in extract_result for later access)
     if classified_data:
         try:
             from .knowledge_base import build_knowledge_base
@@ -881,9 +882,12 @@ def build_questions_v2(extract_result: ExtractResult, classified_data: Dict = No
                 classified_data.get('information_items', []),
                 extract_result.constraints
             )
+            # Store KB in extract_result for later retrieval
+            if not hasattr(extract_result, '_knowledge_base'):
+                object.__setattr__(extract_result, '_knowledge_base', knowledge_base)
         except Exception as e:
             logger.error(f"Failed to build knowledge base: {e}")
-            knowledge_base = {}
     
-    return filtered, knowledge_base
+    # Return ONLY questions list (same as V1)
+    return filtered
 
