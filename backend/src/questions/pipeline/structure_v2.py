@@ -263,16 +263,29 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
     # 1. Must-Haves → Gate Questions
     # ========================================
     for must_have in extract_result.must_have:
+        # VALIDATION: Skip invalid items
+        if not must_have or not must_have.strip():
+            logger.warning(f"  ⚠️  Skipping empty must-have")
+            continue
+        
         slug = _slugify(must_have)
+        if not slug:
+            logger.warning(f"  ⚠️  Skipping must-have with invalid slug: {must_have[:50]}")
+            continue
+        
         question_text = _formulate_question(must_have, is_gate=True)
+        if not question_text:
+            logger.warning(f"  ⚠️  Failed to formulate question for: {must_have[:50]}")
+            continue
+        
         category = _detect_category(must_have, "must-have")
         
         questions.append(Question(
             id=f"mh_{slug}",
             question=question_text,
             type=QuestionType.STRING,  # Gates sind offen
-            required=True,
-            priority=1,
+            required=True,  # EXPLICIT
+            priority=1,     # EXPLICIT
             group=QuestionGroup.QUALIFIKATION if category == "qualifications" else QuestionGroup.RAHMEN,
             context=f"Must-Have: {must_have}",
             gate_config=GateConfig(
@@ -290,16 +303,29 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
     # 2. Alternatives → Preference Questions
     # ========================================
     for alt in extract_result.alternatives:
+        # VALIDATION: Skip invalid items
+        if not alt or not alt.strip():
+            logger.warning(f"  ⚠️  Skipping empty alternative")
+            continue
+        
         slug = _slugify(alt)
+        if not slug:
+            logger.warning(f"  ⚠️  Skipping alternative with invalid slug: {alt[:50]}")
+            continue
+        
         question_text = _formulate_question(alt, is_gate=False)
+        if not question_text:
+            logger.warning(f"  ⚠️  Failed to formulate question for: {alt[:50]}")
+            continue
+        
         category = _detect_category(alt, "alternative")
         
         questions.append(Question(
             id=f"alt_{slug}",
             question=question_text,
             type=QuestionType.BOOLEAN,  # Alternatives als Boolean
-            required=False,
-            priority=2,
+            required=False,  # EXPLICIT
+            priority=2,      # EXPLICIT
             group=QuestionGroup.QUALIFIKATION if category == "qualifications" else QuestionGroup.PRAEFERENZEN,
             context=f"Alternative: {alt}",
             metadata={"source_text": alt, "source_type": "alternative", "category": category}
@@ -425,7 +451,7 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
             ))
         else:
             # Mehrere Standorte
-            site_names = [s.get('name', '') or s.get('address', f"Standort {i+1}") 
+            site_names = [s.label or f"Standort {i+1}" 
                          for i, s in enumerate(extract_result.sites)]
             questions.append(Question(
                 id="site_multiple",
@@ -769,20 +795,22 @@ def filter_questions(questions: List[Question]) -> List[Question]:
 # MAIN ENTRY POINT
 # ============================================================================
 
-def build_questions_v2(extract_result: ExtractResult) -> List[Question]:
+def build_questions_v2(extract_result: ExtractResult, classified_data: Dict = None) -> tuple[List[Question], Dict]:
     """
-    Hauptfunktion: Neue 4-Stage Pipeline
+    Hauptfunktion: Neue 4-Stage Pipeline + Knowledge Base
     
     Stage 1: GENERATE - Alle Fragen generieren
     Stage 2: CLUSTER - Ähnliche Fragen gruppieren  
     Stage 3: CONSOLIDATE - Intelligente Zusammenführung
     Stage 4: FILTER - Unerwünschte entfernen
+    + BUILD KB: Knowledge-Base aus Information Items
     
     Args:
         extract_result: Extrahierte Daten aus dem Protokoll
+        classified_data: Optional - Klassifizierte Protokoll-Items (from STAGE 0)
         
     Returns:
-        Liste von finalen Fragen
+        Tuple: (Liste von finalen Fragen, Knowledge-Base Dict)
     """
     # #region agent log
     import json, time
@@ -844,5 +872,18 @@ def build_questions_v2(extract_result: ExtractResult) -> List[Question]:
     logger.info(f"✅ Pipeline complete: {len(filtered)} final questions")
     logger.info("=" * 70)
     
-    return filtered
+    # Stage 5: Build Knowledge-Base (from classified_data if available)
+    knowledge_base = {}
+    if classified_data:
+        try:
+            from .knowledge_base import build_knowledge_base
+            knowledge_base = build_knowledge_base(
+                classified_data.get('information_items', []),
+                extract_result.constraints
+            )
+        except Exception as e:
+            logger.error(f"Failed to build knowledge base: {e}")
+            knowledge_base = {}
+    
+    return filtered, knowledge_base
 

@@ -57,12 +57,20 @@ async def build_question_catalog(
     logger.info("=" * 70)
     
     try:
+        # 0. Classify Protocol Items (STAGE 0 - NEU!)
+        logger.info("Stage 0/7: Classify protocol items by intent...")
+        from .pipeline.classify import classify_protocol_items
+        classified_data = await classify_protocol_items(conversation_protocol)
+        logger.info(f"  ✓ Classified: {len(classified_data.get('gate_items', []))} gates, "
+                   f"{len(classified_data.get('preference_items', []))} preferences, "
+                   f"{len(classified_data.get('information_items', []))} info items")
+        
         # 1. Extract with LLM
-        logger.info("Stage 1/6: Extract structured data from protocol...")
+        logger.info("Stage 1/7: Extract structured data from protocol...")
         extract_result = await extract(conversation_protocol)
         
         # 2. Build base questions (deterministic)
-        logger.info("Stage 2/6: Build base questions...")
+        logger.info("Stage 2/7: Build base questions...")
         
         # NEU: Nutze V2 Pipeline (Generate-First, Filter-Later)
         # V2 ist robuster und verliert keine Fragen
@@ -70,12 +78,14 @@ async def build_question_catalog(
         settings = get_settings()
         use_v2 = getattr(settings, 'use_structure_v2', True)  # DEBUG: V2 aktiviert!
         
+        knowledge_base = None  # Initialize knowledge_base
+        
         if use_v2:
             logger.info("  Using Structure V2 (Generate-First, Filter-Later)")
-            base_questions = build_questions_v2(extract_result)
+            base_questions, knowledge_base = build_questions_v2(extract_result, classified_data)
             # #region agent log
             import json, time
-            with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'builder.py:75','message':'V2 returned','data':{'count':len(base_questions),'v2_used':True},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'E'})+'\n')
+            with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'builder.py:75','message':'V2 returned','data':{'count':len(base_questions),'v2_used':True,'has_kb':knowledge_base is not None},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'E'})+'\n')
             # #endregion
         else:
             logger.info("  Using Structure V1 (Legacy)")
@@ -191,6 +201,10 @@ async def build_question_catalog(
             ),
             questions=policy_enhanced
         )
+        
+        # Attach knowledge_base as attribute (bypass Pydantic validation)
+        # Using __dict__ directly to avoid Pydantic field validation
+        object.__setattr__(catalog, 'knowledge_base', knowledge_base)
         
         # #region agent log
         try:

@@ -546,13 +546,43 @@ async def process_protocol_webhook(
         
         logger.info("Questions trimmed and ready")
         
-        # 4. Response
+        # 4. Optional: Export questions.json with knowledge_base (for Agent/VoiceKI)
+        # This is saved to file but NOT included in webhook response
+        try:
+            import json
+            from pathlib import Path
+            
+            # Build questions.json structure
+            questions_json = {
+                "_meta": questions_catalog.meta.model_dump(),
+                "questions": trimmed_questions
+            }
+            
+            # Add knowledge_base if exists (from V2)
+            if hasattr(questions_catalog, 'knowledge_base') and questions_catalog.knowledge_base:
+                questions_json['knowledge_base'] = questions_catalog.knowledge_base
+                logger.info(f"Knowledge base attached with {len(questions_catalog.knowledge_base)} categories")
+            
+            # Save to file for Agent/VoiceKI
+            output_dir = Path("output")
+            output_dir.mkdir(exist_ok=True)
+            output_path = output_dir / f"questions_{request.id}.json"
+            
+            with open(output_path, 'w', encoding='utf-8') as f:
+                json.dump(questions_json, f, ensure_ascii=False, indent=2)
+            
+            logger.info(f"Questions.json saved to: {output_path}")
+        except Exception as e:
+            logger.warning(f"Failed to save questions.json: {e}")
+            # Non-critical, continue
+        
+        # 5. Webhook Response (UNVERÄNDERT - nur questions!)
         return ProcessProtocolResponse(
             protocol_id=request.id,
             protocol_name=request.name,
             processed_at=datetime.utcnow().isoformat() + "Z",
             question_count=len(trimmed_questions),
-            questions=trimmed_questions
+            questions=trimmed_questions  # HOC bekommt nur questions!
         )
         
     except Exception as e:

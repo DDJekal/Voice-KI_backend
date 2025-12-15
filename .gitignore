@@ -1,0 +1,28 @@
+# Environment
+.env
+.env.local
+
+# Cursor IDE
+.cursor/
+
+# Output & Test Data
+Output_ordner/
+output_log.txt
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
