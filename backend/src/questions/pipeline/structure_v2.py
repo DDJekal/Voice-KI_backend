@@ -438,7 +438,7 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
         # Einfache Standort-Frage generieren
         if len(extract_result.sites) == 1:
             site = extract_result.sites[0]
-            site_name = site.get('name', '') or site.get('address', 'unbekannter Standort')
+            site_name = site.label or 'unbekannter Standort'
             questions.append(Question(
                 id="site_single",
                 question=f"Unser Standort ist in {site_name}. Passt das für Sie?",
