@@ -1,0 +1,24 @@
+{
+  "id": 1001,
+  "name": "Testfall: Einzelne nicht-MFA Alternative",
+  "pages": [
+    {
+      "id": 300,
+      "name": "Qualifikationen",
+      "position": 1,
+      "prompts": [
+        {
+          "id": 3001,
+          "question": "Zwingend: Master Psychologie",
+          "position": 1
+        },
+        {
+          "id": 3002,
+          "question": "Alternativ: Master Sozialpädagogik",
+          "position": 2
+        }
+      ]
+    }
+  ]
+}
+

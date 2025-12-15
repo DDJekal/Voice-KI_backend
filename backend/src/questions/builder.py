@@ -9,7 +9,7 @@ import logging
 from typing import Dict, Any
 from datetime import datetime
 
-from .pipeline.extract import extract
+from .pipeline.extract_multistage import extract  # Multi-Stage Pipeline
 from .pipeline.structure import build_questions
 from .pipeline.conversational_flow import build_conversational_flow
 from .pipeline.expand import expand_conversational_flow

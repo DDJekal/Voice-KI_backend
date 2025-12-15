@@ -1,0 +1,29 @@
+{
+  "id": 1003,
+  "name": "Testfall: Alternative ohne Frage-Format",
+  "pages": [
+    {
+      "id": 500,
+      "name": "Anforderungen",
+      "position": 1,
+      "prompts": [
+        {
+          "id": 5001,
+          "question": "Bevorzugt: Erfahrung in der Intensivpflege",
+          "position": 1
+        },
+        {
+          "id": 5002,
+          "question": "Alternativ: Bereitschaft zur Einarbeitung in Intensivpflege",
+          "position": 2
+        },
+        {
+          "id": 5003,
+          "question": "Auch geeignet: Quereinsteiger mit Pflegebasis",
+          "position": 3
+        }
+      ]
+    }
+  ]
+}
+

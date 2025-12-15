@@ -1,0 +1,24 @@
+{
+  "id": 1002,
+  "name": "Testfall: Nicht-Qualifikations-Alternative",
+  "pages": [
+    {
+      "id": 400,
+      "name": "Anforderungen",
+      "position": 1,
+      "prompts": [
+        {
+          "id": 4001,
+          "question": "Zwingend: Führerschein Klasse B",
+          "position": 1
+        },
+        {
+          "id": 4002,
+          "question": "Alternativ: Bereitschaft, Führerschein zu erwerben",
+          "position": 2
+        }
+      ]
+    }
+  ]
+}
+

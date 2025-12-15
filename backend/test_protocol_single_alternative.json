@@ -1,0 +1,24 @@
+{
+  "id": 1000,
+  "name": "Testfall: Einzelne Alternative ohne Konsolidierung",
+  "pages": [
+    {
+      "id": 200,
+      "name": "Qualifikationen",
+      "position": 1,
+      "prompts": [
+        {
+          "id": 2001,
+          "question": "Zwingend: Pflegefachkraft (examiniert)",
+          "position": 1
+        },
+        {
+          "id": 2002,
+          "question": "Alternativ: MFA mit Weiterbildung",
+          "position": 2
+        }
+      ]
+    }
+  ]
+}
+
