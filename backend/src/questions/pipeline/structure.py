@@ -598,6 +598,42 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
         logger.info("🎯 Detected German language requirement - will create separate question")
     
     # ========================================
+    # PRE-SCAN 2: Arbeitszeit/Schicht-Konsolidierung prüfen
+    # ========================================
+    # Erkenne wenn mehrere arbeitszeit-bezogene Protocol-Questions existieren
+    # und konsolidiere sie zu 1-2 sinnvollen Fragen
+    arbeitszeit_keywords = ['vollzeit', 'teilzeit', 'stunden', 'wochenstunden', 'std', 'woche']
+    schicht_keywords = ['nachtdienst', 'frühdienst', 'spätdienst', 'tagdienst', 'schicht', 'dienst']
+    
+    arbeitszeit_items = []
+    schicht_items = []
+    
+    for pq in extract_result.protocol_questions:
+        pq_lower = pq.text.lower()
+        
+        # Prüfe ob es um Arbeitszeit geht (aber keine echte Frage)
+        if any(keyword in pq_lower for keyword in arbeitszeit_keywords):
+            # Wenn es KEINE Frage ist (kein "?" und kein Fragewort), ist es ein Fragment
+            if '?' not in pq.text and not any(fw in pq_lower for fw in ['welche', 'wie', 'wann', 'haben', 'sind', 'können']):
+                arbeitszeit_items.append(pq)
+                logger.debug(f"Detected arbeitszeit fragment: {pq.text}")
+        
+        # Prüfe ob es um Schichten geht (aber keine echte Frage)
+        if any(keyword in pq_lower for keyword in schicht_keywords):
+            if '?' not in pq.text and not any(fw in pq_lower for fw in ['welche', 'wie', 'wann', 'haben', 'sind', 'können']):
+                schicht_items.append(pq)
+                logger.debug(f"Detected schicht fragment: {pq.text}")
+    
+    arbeitszeit_consolidated = len(arbeitszeit_items) >= 2
+    schicht_consolidated = len(schicht_items) >= 2
+    
+    if arbeitszeit_consolidated:
+        logger.info(f"🎯 Detected {len(arbeitszeit_items)} arbeitszeit fragments - will consolidate")
+    
+    if schicht_consolidated:
+        logger.info(f"🎯 Detected {len(schicht_items)} schicht fragments - will consolidate")
+    
+    # ========================================
     # TIER 1: Protocol Questions (LLM-extracted)
     # ========================================
     tier1_count = 0
@@ -626,6 +662,15 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
             if is_german_question:
                 logger.debug(f"Skipping German language question (will be handled separately): {pq.text[:60]}")
                 continue
+        
+        # NEU: Skip arbeitszeit/schicht fragments if consolidation is planned
+        if arbeitszeit_consolidated and pq in arbeitszeit_items:
+            logger.debug(f"Skipping arbeitszeit fragment (will be consolidated): {pq.text[:60]}")
+            continue
+        
+        if schicht_consolidated and pq in schicht_items:
+            logger.debug(f"Skipping schicht fragment (will be consolidated): {pq.text[:60]}")
+            continue
         
         # Detect type and group
         q_type = _detect_question_type(pq.text, pq.type)
@@ -924,6 +969,88 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
         covered_topics.add("deutsch")
         covered_topics.add("sprachkenntnisse")
         logger.info(f"✓ Created separate German language skills question (Gate)")
+    
+    # 3c. Arbeitszeit-Konsolidierung (wenn Fragmente erkannt wurden)
+    if arbeitszeit_consolidated and "arbeitszeit" not in covered_topics:
+        # Extrahiere Details aus den Fragmenten
+        vollzeit_info = None
+        teilzeit_info = None
+        
+        for item in arbeitszeit_items:
+            text_lower = item.text.lower()
+            if 'vollzeit' in text_lower:
+                vollzeit_info = item.text
+            elif 'teilzeit' in text_lower:
+                teilzeit_info = item.text
+        
+        # Baue konsolidierte Frage
+        options = []
+        preamble_parts = []
+        
+        if vollzeit_info:
+            options.append("Vollzeit")
+            preamble_parts.append(vollzeit_info)
+        
+        if teilzeit_info:
+            options.append("Teilzeit")
+            preamble_parts.append(teilzeit_info)
+        
+        if options:
+            preamble = "Ich würde nun gerne zum Arbeitszeitmodell kommen. " + " und ".join(preamble_parts) + "."
+            
+            questions.append(Question(
+                id="arbeitszeit_consolidated",
+                preamble=preamble,
+                question="Haben Sie bereits eine Präferenz bezüglich des Arbeitszeitmodells?",
+                type=QuestionType.CHOICE,
+                options=options + ["Bin noch flexibel"],
+                required=True,
+                priority=2,
+                group=QuestionGroup.RAHMEN,
+                context="Konsolidierte Arbeitszeit-Frage aus Protocol Fragments"
+            ))
+            tier3_count += 1
+            covered_topics.add("arbeitszeit")
+            covered_topics.add("vollzeit")
+            covered_topics.add("teilzeit")
+            logger.info(f"✓ Created consolidated arbeitszeit question from {len(arbeitszeit_items)} fragments")
+    
+    # 3d. Schicht-Konsolidierung (wenn Fragmente erkannt wurden)
+    if schicht_consolidated and "schichtmodell" not in covered_topics:
+        # Extrahiere Schichtinfos
+        schicht_options = []
+        
+        for item in schicht_items:
+            # Versuche Schichtart zu extrahieren
+            text = item.text
+            if 'nachtdienst' in text.lower():
+                schicht_options.append(text)  # "Nachtdienst: 21:15 - 06:30"
+            elif 'frühdienst' in text.lower():
+                schicht_options.append(text)
+            elif 'spätdienst' in text.lower():
+                schicht_options.append(text)
+            elif 'tagdienst' in text.lower():
+                schicht_options.append(text)
+        
+        if schicht_options:
+            preamble = "Wir arbeiten in verschiedenen Schichtmodellen."
+            
+            questions.append(Question(
+                id="schichtmodell_consolidated",
+                preamble=preamble,
+                question="Welche Schichtmodelle kommen für Sie in Frage? Sie können auch mehrere nennen.",
+                type=QuestionType.MULTI_CHOICE,
+                options=schicht_options,
+                required=False,
+                priority=2,
+                group=QuestionGroup.RAHMEN,
+                context="Konsolidierte Schicht-Frage aus Protocol Fragments"
+            ))
+            tier3_count += 1
+            covered_topics.add("schichtmodell")
+            covered_topics.add("schicht")
+            covered_topics.add("dienst")
+            logger.info(f"✓ Created consolidated schichtmodell question from {len(schicht_items)} fragments")
     
     # 4. Must-Have Kriterien mit intelligenter Kategorisierung (Gate Questions)
     # WICHTIG: Gate Questions werden als OFFENE STRING-Fragen formuliert für Phase 2 (Motivation)
