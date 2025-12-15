@@ -11,12 +11,14 @@ from datetime import datetime
 
 from .pipeline.extract_multistage import extract  # Multi-Stage Pipeline
 from .pipeline.structure import build_questions
+from .pipeline.structure_v2 import build_questions_v2  # NEU: V2 Pipeline
 from .pipeline.conversational_flow import build_conversational_flow
 from .pipeline.expand import expand_conversational_flow
 from .pipeline.validate import validate_and_finalize
 from .categorizer import categorize_question
 from .types import QuestionCatalog, CatalogMeta
 from .schemas import validate_question_catalog
+from ..config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +63,18 @@ async def build_question_catalog(
         
         # 2. Build base questions (deterministic)
         logger.info("Stage 2/6: Build base questions...")
-        base_questions = build_questions(extract_result)
+        
+        # NEU: Nutze V2 Pipeline (Generate-First, Filter-Later)
+        # V2 ist robuster und verliert keine Fragen
+        settings = get_settings()
+        use_v2 = getattr(settings, 'use_structure_v2', True)  # Default: V2
+        
+        if use_v2:
+            logger.info("  Using Structure V2 (Generate-First, Filter-Later)")
+            base_questions = build_questions_v2(extract_result)
+        else:
+            logger.info("  Using Structure V1 (Legacy)")
+            base_questions = build_questions(extract_result)
         
         # 3. Build conversational flows (LLM - simplified for now)
         logger.info("Stage 3/6: Build conversational flows...")

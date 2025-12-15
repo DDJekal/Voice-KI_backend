@@ -249,6 +249,9 @@ class Question(BaseModel):
     slot_config: Optional[SlotConfig] = None
     gate_config: Optional[GateConfig] = None
     conversation_hints: Optional[ConversationHints] = None
+    
+    # Added by structure_v2 - For tracking and debugging
+    metadata: Optional[Dict[str, Any]] = None
 
 
 # Question Catalog
