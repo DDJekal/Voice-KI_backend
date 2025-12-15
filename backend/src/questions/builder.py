@@ -66,8 +66,9 @@ async def build_question_catalog(
         
         # NEU: Nutze V2 Pipeline (Generate-First, Filter-Later)
         # V2 ist robuster und verliert keine Fragen
+        # TEMPORÄR DEAKTIVIERT: Bis Kompatibilitätsprobleme gelöst sind
         settings = get_settings()
-        use_v2 = getattr(settings, 'use_structure_v2', True)  # Default: V2
+        use_v2 = getattr(settings, 'use_structure_v2', False)  # Default: V1 (STABLE)
         
         if use_v2:
             logger.info("  Using Structure V2 (Generate-First, Filter-Later)")
