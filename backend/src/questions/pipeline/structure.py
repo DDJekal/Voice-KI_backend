@@ -1095,6 +1095,45 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
             ))
             tier3_count += 1
     
+    # 8. Gehalt (if constraints.gehalt available)
+    if extract_result.constraints and extract_result.constraints.gehalt:
+        gehalt_data = extract_result.constraints.gehalt
+        
+        # Extrahiere Betrag
+        betrag = gehalt_data.get("betrag") if isinstance(gehalt_data, dict) else None
+        
+        if betrag:
+            # Baue Preamble mit Benefits wenn vorhanden
+            preamble_parts = []
+            
+            # Benefits hinzufügen wenn vorhanden
+            if extract_result.constraints.benefits:
+                benefits = extract_result.constraints.benefits
+                if len(benefits) > 0:
+                    # Nimm die ersten 2-3 Benefits
+                    benefit_text = ", ".join(benefits[:3])
+                    preamble_parts.append(f"Wir bieten Ihnen: {benefit_text}.")
+            
+            # Gehalt-Preamble
+            if preamble_parts:
+                preamble = " ".join(preamble_parts)
+            else:
+                preamble = None
+            
+            # Gehaltsfrage
+            questions.append(Question(
+                id="salary_expectation",
+                preamble=preamble,
+                question=f"Unser Gehaltsrahmen liegt bei {betrag} monatlich. Passt das für Ihre Vorstellungen?",
+                type=QuestionType.BOOLEAN,
+                required=False,
+                priority=2,
+                group=QuestionGroup.RAHMEN
+            ))
+            tier3_count += 1
+            
+            logger.info(f"  ℹ️  Added salary question (betrag: {betrag})")
+    
     logger.info(f"✓ Tier 3 (Generated Questions): {tier3_count} questions")
     
     # ========================================
