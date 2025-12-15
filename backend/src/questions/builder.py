@@ -66,13 +66,17 @@ async def build_question_catalog(
         
         # NEU: Nutze V2 Pipeline (Generate-First, Filter-Later)
         # V2 ist robuster und verliert keine Fragen
-        # TEMPORÄR DEAKTIVIERT: Bis Kompatibilitätsprobleme gelöst sind
+        # DEBUG MODE: V2 aktiviert für Debugging
         settings = get_settings()
-        use_v2 = getattr(settings, 'use_structure_v2', False)  # Default: V1 (STABLE)
+        use_v2 = getattr(settings, 'use_structure_v2', True)  # DEBUG: V2 aktiviert!
         
         if use_v2:
             logger.info("  Using Structure V2 (Generate-First, Filter-Later)")
             base_questions = build_questions_v2(extract_result)
+            # #region agent log
+            import json, time
+            with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'builder.py:75','message':'V2 returned','data':{'count':len(base_questions),'v2_used':True},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'E'})+'\n')
+            # #endregion
         else:
             logger.info("  Using Structure V1 (Legacy)")
             base_questions = build_questions(extract_result)
@@ -99,11 +103,24 @@ async def build_question_catalog(
         # 6. Categorize
         logger.info("Stage 6/7: Categorize questions...")
         categorized = []
+        # #region agent log
+        import json, time
+        categorize_errors = []
+        # #endregion
         for q in validated:
-            cat = categorize_question(q)
-            q.category = cat.category
-            q.category_order = cat.order
-            categorized.append(q)
+            # #region agent log
+            try:
+                cat = categorize_question(q)
+                q.category = cat.category
+                q.category_order = cat.order
+                categorized.append(q)
+            except Exception as e:
+                categorize_errors.append({'q_id':q.id,'error':str(e)})
+                raise
+            # #endregion
+        # #region agent log
+        with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'builder.py:107','message':'After Categorize','data':{'count':len(categorized),'errors':categorize_errors},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'F'})+'\n')
+        # #endregion
         
         # 6.5. Apply Policies (NEU!)
         policy_level = context.get("policy_level")
@@ -175,9 +192,24 @@ async def build_question_catalog(
             questions=policy_enhanced
         )
         
+        # #region agent log
+        try:
+            catalog_dump = catalog.model_dump(by_alias=True)
+            dump_success = True
+            dump_error = None
+        except Exception as e:
+            dump_success = False
+            dump_error = str(e)
+            catalog_dump = None
+        with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'builder.py:197','message':'Catalog model_dump','data':{'success':dump_success,'error':dump_error,'question_count':len(catalog.questions) if catalog else 0},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'A,F'})+'\n')
+        # #endregion
+        
         # 8. Validate catalog
         # Use by_alias=True to serialize with "_meta" for backward compatibility
-        validate_question_catalog(catalog.model_dump(by_alias=True))
+        if dump_success:
+            validate_question_catalog(catalog_dump)
+        else:
+            raise Exception(f"Catalog model_dump failed: {dump_error}")
         
         logger.info("=" * 70)
         logger.info(f"✅ Question Catalog Built Successfully!")

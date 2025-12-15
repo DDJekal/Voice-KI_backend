@@ -784,12 +784,21 @@ def build_questions_v2(extract_result: ExtractResult) -> List[Question]:
     Returns:
         Liste von finalen Fragen
     """
+    # #region agent log
+    import json, time
+    with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'structure_v2.py:773','message':'V2 Entry','data':{'must_haves':len(extract_result.must_have),'alternatives':len(extract_result.alternatives),'protocol_questions':len(extract_result.protocol_questions)},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'E'})+'\n')
+    # #endregion
+    
     logger.info("=" * 70)
     logger.info("🚀 Starting Question Builder V2 (Generate-First, Filter-Later)")
     logger.info("=" * 70)
     
     # Stage 1: Generate ALL
     all_questions = generate_all_questions(extract_result)
+    
+    # #region agent log
+    with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'structure_v2.py:806','message':'After GENERATE','data':{'count':len(all_questions),'has_metadata':all_questions[0].metadata is not None if all_questions else False},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'E'})+'\n')
+    # #endregion
     
     # Stage 2: Cluster
     clusters = cluster_questions(all_questions)
@@ -799,6 +808,37 @@ def build_questions_v2(extract_result: ExtractResult) -> List[Question]:
     
     # Stage 4: Filter
     filtered = filter_questions(consolidated)
+    
+    # #region agent log - VALIDATION CHECK (Hypothese F)
+    validation_results = []
+    for idx, q in enumerate(filtered[:3]):  # Check first 3 questions
+        try:
+            # Check all required fields
+            validation = {
+                'idx': idx,
+                'id': q.id,
+                'question': q.question[:50] if q.question else None,
+                'type': str(q.type),
+                'required': q.required,
+                'priority': q.priority,
+                'group': str(q.group) if q.group else None,
+                'has_metadata': q.metadata is not None,
+                'has_gate_config': q.gate_config is not None,
+                'valid': True
+            }
+            # Try model_dump to see if it works
+            try:
+                q.model_dump()
+                validation['model_dump_ok'] = True
+            except Exception as e:
+                validation['model_dump_ok'] = False
+                validation['model_dump_error'] = str(e)
+        except Exception as e:
+            validation = {'idx': idx, 'valid': False, 'error': str(e)}
+        validation_results.append(validation)
+    
+    with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'structure_v2.py:820','message':'V2 Exit with Validation','data':{'count':len(filtered),'validation_results':validation_results},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'A,B,C,D,F'})+'\n')
+    # #endregion
     
     logger.info("=" * 70)
     logger.info(f"✅ Pipeline complete: {len(filtered)} final questions")

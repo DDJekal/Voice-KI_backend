@@ -191,11 +191,19 @@ def trim_question(question) -> dict:
         'priority', 'help_text', 'gate_config'  # NEU: gate_config für ElevenLabs
     }
     
+    # #region agent log
+    import json, time
     try:
         q_dict = question.model_dump()
+        success = True
+        error_msg = None
     except Exception as e:
         # Fallback: Falls model_dump() fehlschlägt, versuche dict()
         q_dict = dict(question)
+        success = False
+        error_msg = str(e)
+    with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'api_server.py:195','message':'trim_question model_dump','data':{'success':success,'error':error_msg,'q_id':getattr(question,'id','unknown'),'has_metadata':hasattr(question,'metadata'),'has_gate_config':hasattr(question,'gate_config')},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'A,B'})+'\n')
+    # #endregion
     
     # Filtere nur erlaubte Felder (metadata wird automatisch ausgeschlossen)
     return {
