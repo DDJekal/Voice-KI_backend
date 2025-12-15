@@ -71,6 +71,8 @@ class Arbeitszeit(BaseModel):
 class Constraints(BaseModel):
     """Job constraints"""
     arbeitszeit: Optional[Union[Arbeitszeit, str]] = None  # Can be object or simple string
+    gehalt: Optional[Dict[str, Any]] = None  # Salary information (betrag, range, etc.)
+    benefits: Optional[List[str]] = None  # List of benefits
     tarif: Optional[str] = None
     schichten: Optional[str] = None
 
