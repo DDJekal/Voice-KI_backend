@@ -549,11 +549,13 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
     # NEU: Deutschkenntnisse-Keywords separat behandeln
     german_language_keywords = ['deutsch', 'sprachkenntnisse', 'sprachniveau', 'b2', 'c1', 'c2']
     
-    # Sammle alle Qualifikationen AUSSER Deutschkenntnisse
+    # Sammle NUR Alternatives für Konsolidierung (NICHT Must-Haves!)
     all_qualifications = []
     has_german_requirement = False
     
-    for item in extract_result.must_have + extract_result.alternatives:
+    # Must-Haves werden NICHT konsolidiert - jedes wird zur eigenen Gate-Question
+    # NUR Alternatives werden konsolidiert
+    for item in extract_result.alternatives:
         item_lower = item.lower()
         # Prüfe ob es um Deutschkenntnisse geht
         if any(keyword in item_lower for keyword in german_language_keywords):
@@ -561,6 +563,13 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
             continue  # Skip - wird als separate Frage behandelt
         # Ansonsten zu Qualifikationen hinzufügen
         all_qualifications.append(item)
+    
+    # Prüfe Must-Haves separat auf Deutschkenntnisse
+    for item in extract_result.must_have:
+        item_lower = item.lower()
+        if any(keyword in item_lower for keyword in german_language_keywords):
+            has_german_requirement = True
+            break
     
     # Prüfe auch protocol_questions auf Deutschkenntnisse
     for pq in extract_result.protocol_questions:
@@ -577,7 +586,7 @@ def build_questions(extract_result: ExtractResult) -> List[Question]:
     qualification_consolidated = False
     
     if has_qualification_terms and has_multiple_options:
-        logger.info(f"🎯 Detected {len(all_qualifications)} qualification alternatives - will consolidate")
+        logger.info(f"🎯 Detected {len(all_qualifications)} qualification ALTERNATIVES - will consolidate (Must-Haves stay separate)")
         qualification_consolidated = True
         
         # Markiere Qualifikations-Topics als "geplant für Konsolidierung"
