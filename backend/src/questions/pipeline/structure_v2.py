@@ -819,12 +819,21 @@ def build_questions_v2(extract_result: ExtractResult, classified_data: Dict = No
     with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'structure_v2.py:773','message':'V2 Entry','data':{'must_haves':len(extract_result.must_have),'alternatives':len(extract_result.alternatives),'protocol_questions':len(extract_result.protocol_questions)},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'E'})+'\n')
     # #endregion
     
+    # #region agent log
+    import json, time
+    with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'structure_v2.py:800','message':'V2 Entry','data':{'must_haves':len(extract_result.must_have),'alternatives':len(extract_result.alternatives),'sites':len(extract_result.sites),'has_classified_data':classified_data is not None},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'C'})+'\n')
+    # #endregion
+    
     logger.info("=" * 70)
     logger.info("🚀 Starting Question Builder V2 (Generate-First, Filter-Later)")
     logger.info("=" * 70)
     
     # Stage 1: Generate ALL
     all_questions = generate_all_questions(extract_result)
+    
+    # #region agent log
+    with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'structure_v2.py:812','message':'After Generate Stage','data':{'generated_count':len(all_questions)},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'C'})+'\n')
+    # #endregion
     
     # #region agent log
     with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'structure_v2.py:806','message':'After GENERATE','data':{'count':len(all_questions),'has_metadata':all_questions[0].metadata is not None if all_questions else False},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'E'})+'\n')
@@ -887,6 +896,10 @@ def build_questions_v2(extract_result: ExtractResult, classified_data: Dict = No
                 object.__setattr__(extract_result, '_knowledge_base', knowledge_base)
         except Exception as e:
             logger.error(f"Failed to build knowledge base: {e}")
+    
+    # #region agent log
+    with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'structure_v2.py:873','message':'V2 Exit','data':{'final_count':len(filtered),'return_type':str(type(filtered))},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'C'})+'\n')
+    # #endregion
     
     # Return ONLY questions list (same as V1)
     return filtered

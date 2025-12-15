@@ -59,8 +59,19 @@ async def build_question_catalog(
     try:
         # 0. Classify Protocol Items (STAGE 0 - NEU!)
         logger.info("Stage 0/7: Classify protocol items by intent...")
+        
+        # #region agent log
+        import json, time
+        with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'builder.py:62','message':'Before STAGE 0 Classification','data':{'has_pages':len(conversation_protocol.get('pages',[]))},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'B'})+'\n')
+        # #endregion
+        
         from .pipeline.classify import classify_protocol_items
         classified_data = await classify_protocol_items(conversation_protocol)
+        
+        # #region agent log
+        with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'builder.py:70','message':'After STAGE 0 Classification','data':{'gate_items':len(classified_data.get('gate_items',[])),'preference_items':len(classified_data.get('preference_items',[])),'information_items':len(classified_data.get('information_items',[]))},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'B'})+'\n')
+        # #endregion
+        
         logger.info(f"  ✓ Classified: {len(classified_data.get('gate_items', []))} gates, "
                    f"{len(classified_data.get('preference_items', []))} preferences, "
                    f"{len(classified_data.get('information_items', []))} info items")

@@ -518,14 +518,27 @@ async def process_protocol_webhook(
         HTTPException: Bei Fehlern (401, 500)
     """
     
+    # #region agent log
+    import json, time
+    with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'api_server.py:521','message':'Webhook Entry BEFORE auth','data':{'protocol_id':request.id,'protocol_name':request.name,'has_auth':authorization is not None},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'A'})+'\n')
+    # #endregion
+    
     # 1. Auth prüfen
     verify_webhook_auth(authorization)
+    
+    # #region agent log
+    with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'api_server.py:524','message':'Auth passed','data':{'protocol_id':request.id},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'A'})+'\n')
+    # #endregion
     
     logger.info(f"Protocol processing triggered for: {request.name} (ID: {request.id})")
     
     try:
         # 2. Questions generieren mit OpenAI
         logger.info("Generating questions with OpenAI...")
+        
+        # #region agent log
+        with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'api_server.py:542','message':'Before build_question_catalog','data':{'protocol_id':request.id},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'B,C'})+'\n')
+        # #endregion
         
         build_context = {
             "policy_level": "standard"  # Standard policies
@@ -535,6 +548,10 @@ async def process_protocol_webhook(
             request.model_dump(),
             build_context
         )
+        
+        # #region agent log
+        with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'api_server.py:554','message':'After build_question_catalog','data':{'question_count':len(questions_catalog.questions),'has_kb':hasattr(questions_catalog,'knowledge_base')},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'B,C'})+'\n')
+        # #endregion
         
         logger.info(f"Generated {len(questions_catalog.questions)} questions")
         
@@ -577,7 +594,7 @@ async def process_protocol_webhook(
             # Non-critical, continue
         
         # 5. Webhook Response (UNVERÄNDERT - nur questions!)
-        return ProcessProtocolResponse(
+        response_obj = ProcessProtocolResponse(
             protocol_id=request.id,
             protocol_name=request.name,
             processed_at=datetime.utcnow().isoformat() + "Z",
@@ -585,7 +602,18 @@ async def process_protocol_webhook(
             questions=trimmed_questions  # HOC bekommt nur questions!
         )
         
+        # #region agent log
+        response_dict = response_obj.model_dump()
+        with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'api_server.py:599','message':'Webhook Response Built','data':{'has_questions_key':'questions' in response_dict,'question_count':len(response_dict.get('questions',[])),'response_keys':list(response_dict.keys())},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'D'})+'\n')
+        # #endregion
+        
+        return response_obj
+        
     except Exception as e:
+        # #region agent log
+        import traceback
+        with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'api_server.py:614','message':'Exception caught','data':{'error_type':type(e).__name__,'error_msg':str(e),'traceback':traceback.format_exc()[:500]},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'B,C,D'})+'\n')
+        # #endregion
         logger.error(f"Protocol processing failed: {e}", exc_info=True)
         raise HTTPException(
             status_code=500,
