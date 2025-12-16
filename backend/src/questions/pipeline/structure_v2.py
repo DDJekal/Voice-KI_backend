@@ -433,7 +433,12 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
         if _is_name_or_address_question(pq.text):
             continue
         
-        q_type = QuestionType(pq.type) if pq.type else _detect_question_type(pq.text)
+        # Robuste Type-Konvertierung (LLM kann ungültige Types wie "information" zurückgeben)
+        try:
+            q_type = QuestionType(pq.type) if pq.type else _detect_question_type(pq.text)
+        except ValueError:
+            logger.warning(f"  Invalid question type '{pq.type}' for question: {pq.text[:50]}... Using STRING")
+            q_type = QuestionType.STRING
         category = _detect_category(pq.text, pq.category or "")
         
         questions.append(Question(
