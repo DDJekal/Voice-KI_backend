@@ -616,12 +616,23 @@ async def process_protocol_webhook(
     except Exception as e:
         # #region agent log
         import traceback
-        with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'api_server.py:614','message':'Exception caught','data':{'error_type':type(e).__name__,'error_msg':str(e),'traceback':traceback.format_exc()[:500]},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'B,C,D'})+'\n')
+        error_tb = traceback.format_exc()
+        with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'api_server.py:614','message':'Exception caught','data':{'error_type':type(e).__name__,'error_msg':str(e),'traceback':error_tb[:500]},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'B,C,D'})+'\n')
         # #endregion
         logger.error(f"Protocol processing failed: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Protocol processing error: {str(e)}"
+        
+        # Robuster Fallback: Gib eine valide Response mit leeren questions zurück
+        # anstatt HTTPException zu werfen, damit HOC nicht crasht
+        return ProcessProtocolResponse(
+            protocol_id=request.id,
+            protocol_name=request.name,
+            processed_at=datetime.utcnow().isoformat() + "Z",
+            question_count=0,
+            questions=[],
+            knowledge_base={
+                "error": str(e),
+                "error_type": type(e).__name__
+            }
         )
 
 
