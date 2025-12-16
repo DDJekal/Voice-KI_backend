@@ -12,13 +12,22 @@ from typing import Any, Dict, List
 logger = logging.getLogger(__name__)
 
 
-def build_knowledge_base(information_items: List[Dict], constraints: Any = None) -> Dict[str, Any]:
+def build_knowledge_base(
+    information_items: List[Dict], 
+    constraints: Any = None,
+    priority_items: List[Dict] = None,
+    internal_note_items: List[Dict] = None,
+    metadata_items: List[Dict] = None
+) -> Dict[str, Any]:
     """
     Baut Knowledge-Base aus Information-Items und Constraints.
     
     Args:
         information_items: Klassifizierte Information Items vom Classifier
         constraints: Optional - ExtractResult.constraints für zusätzliche Info
+        priority_items: Optional - PRIORITY Items vom Classifier
+        internal_note_items: Optional - INTERNAL_NOTE Items vom Classifier
+        metadata_items: Optional - METADATA Items vom Classifier
         
     Returns:
         {
@@ -26,7 +35,11 @@ def build_knowledge_base(information_items: List[Dict], constraints: Any = None)
             'salary_info': {...},
             'special_benefits': [...],
             'location_priorities': [...],
-            'general_info': [...]
+            'work_conditions': [...],
+            'company_culture': [...],
+            'general_info': [...],
+            'internal_notes': [...],
+            'job_context': {...}
         }
     """
     logger.info("🏗️  Building Knowledge Base...")
@@ -38,7 +51,9 @@ def build_knowledge_base(information_items: List[Dict], constraints: Any = None)
         'location_priorities': [],
         'work_conditions': [],
         'company_culture': [],
-        'general_info': []
+        'general_info': [],
+        'internal_notes': [],  # NEU
+        'job_context': {}      # NEU
     }
     
     # 1. Verarbeite Information Items
@@ -92,13 +107,51 @@ def build_knowledge_base(information_items: List[Dict], constraints: Any = None)
     if constraints:
         _add_constraints_to_kb(kb, constraints)
     
-    # 3. Log Results
+    # 3. Verarbeite Priority Items
+    if priority_items:
+        for item in priority_items:
+            text = item.get('text', '').strip()
+            if text:
+                kb['location_priorities'].append({
+                    'location': text,
+                    'level': _extract_priority_level(item),
+                    'reason': item.get('reason', ''),
+                    'source': 'protocol'
+                })
+    
+    # 4. Verarbeite Internal Note Items
+    if internal_note_items:
+        for item in internal_note_items:
+            text = item.get('text', '').strip()
+            if text:
+                kb['internal_notes'].append({
+                    'text': text,
+                    'category': _detect_note_category(text),
+                    'source': 'protocol'
+                })
+    
+    # 5. Verarbeite Metadata Items
+    if metadata_items:
+        for item in metadata_items:
+            text = item.get('text', '').strip()
+            if text:
+                # Job ID extrahieren
+                if job_id := _extract_job_id(text):
+                    kb['job_context']['job_id'] = job_id
+                # Raw metadata speichern
+                if 'raw' not in kb['job_context']:
+                    kb['job_context']['raw'] = []
+                kb['job_context']['raw'].append(text)
+    
+    # 6. Log Results
     logger.info(f"  ✓ Knowledge Base built:")
     logger.info(f"    - Benefits: {len(kb['company_benefits'])}")
     logger.info(f"    - Salary Info: {bool(kb['salary_info'])}")
     logger.info(f"    - Work Conditions: {len(kb['work_conditions'])}")
     logger.info(f"    - Company Culture: {len(kb['company_culture'])}")
     logger.info(f"    - General Info: {len(kb['general_info'])}")
+    logger.info(f"    - Internal Notes: {len(kb['internal_notes'])}")
+    logger.info(f"    - Job Context: {bool(kb['job_context'])}")
     
     return kb
 
@@ -246,4 +299,68 @@ def _add_constraints_to_kb(kb: Dict, constraints: Any) -> None:
                 'text': text,
                 'source': 'extracted_constraints'
             })
+
+
+def _extract_priority_level(item: Dict) -> int:
+    """
+    Extrahiert das Priority-Level aus einem Item.
+    
+    Returns:
+        1 (hoch), 2 (mittel), oder 3 (niedrig)
+    """
+    text = item.get('text', '').lower()
+    
+    if any(kw in text for kw in ['dringend', 'priorität 1', 'sehr wichtig', 'sofort']):
+        return 1
+    elif any(kw in text for kw in ['bevorzugt', 'priorität 2', 'wichtig']):
+        return 2
+    else:
+        return 3
+
+
+def _detect_note_category(text: str) -> str:
+    """
+    Erkennt die Kategorie einer Internal Note.
+    
+    Returns:
+        'contact', 'process', 'hint' oder 'general'
+    """
+    text_lower = text.lower()
+    
+    # Kontakt-Information (E-Mail, Telefon, Ansprechpartner)
+    if any(kw in text_lower for kw in ['ap:', 'ansprechpartner', '@', 'tel:', 'telefon', 'mail']):
+        return 'contact'
+    
+    # Prozess-Notiz
+    if any(kw in text_lower for kw in ['prozess', 'ablauf', 'hinweis', 'beachten', 'wichtig']):
+        return 'process'
+    
+    # Recruiter-Hint
+    if any(kw in text_lower for kw in ['tipp', 'achtung', 'info']):
+        return 'hint'
+    
+    return 'general'
+
+
+def _extract_job_id(text: str) -> str:
+    """
+    Extrahiert eine Job-ID aus einem Text.
+    
+    Returns:
+        Job-ID als String oder None
+    """
+    # Pattern: JOB-123, Job-ID: 456, etc.
+    patterns = [
+        r'JOB-?(\d+)',
+        r'Job-?ID:?\s*(\d+)',
+        r'Stellen-?ID:?\s*(\d+)',
+        r'Position-?ID:?\s*(\d+)'
+    ]
+    
+    for pattern in patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            return match.group(1)
+    
+    return None
 

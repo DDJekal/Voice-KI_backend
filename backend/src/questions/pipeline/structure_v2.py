@@ -43,69 +43,158 @@ def _slugify(text: str) -> str:
     return text.strip('_')
 
 
+# Keywords für Fragetyp-Unterscheidung
+BINARY_KEYWORDS = [
+    'arbeitserlaubnis', 'aufenthaltserlaubnis',
+    'impfung', 'impfnachweis', 'masern',
+    'gesundheitszeugnis', 'einverstanden',
+    'zustimmung', 'consent'
+]
+
+OPEN_KEYWORDS = [
+    'ausbildung', 'qualifikation', 'abschluss',
+    'studium', 'deutsch', 'sprach',
+    'berufserfahrung', 'erfahrung', 'weiterbildung',
+    'fortbildung', 'führerschein'
+]
+
+# Preambles für systemische Gesprächsführung
+GATE_PREAMBLES = {
+    "qualifications": "Damit ich Ihren fachlichen Hintergrund einordnen kann:",
+    "german_language": "Kurz zur Einordnung bezüglich der Sprachkenntnisse:",
+    "experience": "Um Ihre Berufserfahrung besser zu verstehen:",
+    "license": "Zum Thema Mobilität:",
+    "health": "Eine kurze organisatorische Frage:"
+}
+
+PREFERENCE_PREAMBLES = {
+    "location": "Was ist Ihnen bei der Wahl des Standorts wichtig:",
+    "department": "Welcher Bereich kommt für Sie in Frage:",
+    "working_hours": "Zum Thema Arbeitszeit:",
+    "shifts": "Bezüglich der Schichtplanung:"
+}
+
+
+def _get_preamble(category: str, is_gate: bool = False) -> Optional[str]:
+    """
+    Gibt den passenden Preamble für eine Kategorie zurück.
+    
+    Args:
+        category: Kategorie der Frage (z.B. "qualifications", "location")
+        is_gate: Ob es eine Gate-Question ist
+        
+    Returns:
+        Preamble-Text oder None
+    """
+    if is_gate:
+        return GATE_PREAMBLES.get(category)
+    else:
+        return PREFERENCE_PREAMBLES.get(category)
+
+
 def _formulate_question(text: str, is_gate: bool = False) -> str:
     """
     Formuliert aus einem Kriterium eine natürliche Frage.
     
+    Logik:
+    - Binäre Fakten (Ja/Nein) → Geschlossene Frage (BOOLEAN)
+    - Mehrere Werte möglich → Offene Frage (STRING)
+    
     Beispiele:
-    - "Führerschein" → "Welchen Führerschein haben Sie?"
-    - "Deutsch B2" → "Wie würden Sie Ihre Deutschkenntnisse einschätzen?"
-    - "Examinierte Pflegefachkraft" → "Sind Sie examinierte Pflegefachkraft?"
+    - "Führerschein" → "Welchen Führerschein haben Sie?" (offen)
+    - "Arbeitserlaubnis" → "Haben Sie eine gültige Arbeitserlaubnis?" (geschlossen)
+    - "Deutsch B2" → "Wie würden Sie Ihre Deutschkenntnisse einschätzen?" (offen)
     """
     text_lower = text.lower()
     
     # Entferne Präfixe wie "zwingend:", "alternativ:", etc.
     text = re.sub(r'^(zwingend|alternativ|wünschenswert):\s*', '', text, flags=re.IGNORECASE).strip()
+    text_lower = text.lower()
     
-    # Spezifische Patterns
+    # === OFFEN (STRING) - Mehrere Werte möglich ===
+    
+    # Führerschein (verschiedene Klassen)
     if 'führerschein' in text_lower:
         return "Welchen Führerschein haben Sie?"
     
-    if 'deutsch' in text_lower and any(level in text_lower for level in ['b2', 'c1', 'c2', 'b1']):
-        return "Wie würden Sie Ihre Deutschkenntnisse einschätzen? Sind Sie Muttersprachler oder verfügen Sie mindestens über Kenntnisse auf B2-Niveau?"
+    # Deutschkenntnisse (verschiedene Level)
+    if 'deutsch' in text_lower:
+        return "Wie würden Sie Ihre Deutschkenntnisse selbst einschätzen?"
     
-    if 'arbeitserlaubnis' in text_lower:
-        return "Haben Sie eine gültige Arbeitserlaubnis für Deutschland?"
-    
-    if 'impfung' in text_lower or 'impfnachweis' in text_lower:
-        return f"Haben Sie die erforderlichen Impfnachweise, insbesondere für {text}?"
-    
-    # Ausbildungs/Qualifikations-Pattern
-    if any(kw in text_lower for kw in ['ausbildung', 'examen', 'abschluss', 'studium', 'qualifikation']):
-        # Bei "examinierte X" direkt fragen
+    # Ausbildung/Qualifikation (verschiedene möglich)
+    if any(kw in text_lower for kw in ['ausbildung', 'abschluss', 'studium']):
+        # Spezielle Behandlung für "examiniert"
         if 'examinierte' in text_lower or 'examinierter' in text_lower:
             return f"Sind Sie {text.lower()}?"
-        # Bei Ausbildungstyp
-        return f"Haben Sie folgende Qualifikation: {text}?"
+        return "Welche Ausbildung haben Sie abgeschlossen?"
     
-    # Berufserfahrungs-Pattern
-    if 'berufserfahrung' in text_lower or 'jahre' in text_lower and 'erfahrung' in text_lower:
-        return f"Erfüllen Sie folgendes Kriterium: {text}?"
+    # Qualifikation generisch
+    if 'qualifikation' in text_lower:
+        return "Welche Qualifikation haben Sie in diesem Bereich?"
     
-    # Fallback: Offene Formulierung
+    # Berufserfahrung (zeitlich variabel)
+    if 'berufserfahrung' in text_lower or ('jahre' in text_lower and 'erfahrung' in text_lower):
+        return "Wie lange arbeiten Sie schon in diesem Bereich?"
+    
+    # Weiterbildung (verschiedene möglich)
+    if 'weiterbildung' in text_lower or 'fortbildung' in text_lower:
+        return "Welche Weiterbildungen haben Sie absolviert?"
+    
+    # === GESCHLOSSEN (BOOLEAN) - Binäre Fakten ===
+    
+    # Arbeitserlaubnis (vorhanden oder nicht)
+    if 'arbeitserlaubnis' in text_lower or 'aufenthaltserlaubnis' in text_lower:
+        return "Haben Sie eine gültige Arbeitserlaubnis für Deutschland?"
+    
+    # Impfnachweise (vorhanden oder nicht)
+    if 'impfung' in text_lower or 'impfnachweis' in text_lower or 'masern' in text_lower:
+        return "Haben Sie die erforderlichen Impfnachweise?"
+    
+    # Gesundheitszeugnis (vorhanden oder nicht)
+    if 'gesundheitszeugnis' in text_lower:
+        return "Haben Sie ein gültiges Gesundheitszeugnis?"
+    
+    # Zustimmung/Consent (Ja/Nein)
+    if any(kw in text_lower for kw in ['einverstanden', 'zustimmung', 'consent']):
+        return f"Sind Sie einverstanden mit: {text}?"
+    
+    # === FALLBACK ===
+    
+    # Bei Gates: Offene Formulierung bevorzugen
     if is_gate:
-        return f"Können Sie mir etwas dazu sagen: {text}?"
+        return f"Können Sie mir etwas zu folgendem Punkt sagen: {text}?"
     else:
-        return f"Haben Sie Erfahrung mit: {text}?"
+        return f"Wie sieht Ihre Erfahrung mit {text} aus?"
 
 
 def _detect_question_type(text: str) -> QuestionType:
-    """Erkennt den Frage-Typ basierend auf dem Text"""
+    """
+    Erkennt den Frage-Typ basierend auf dem Text.
+    
+    Logik:
+    - BINARY Keywords → BOOLEAN
+    - OPEN Keywords → STRING
+    - Formulierung mit "Haben Sie", "Sind Sie" → BOOLEAN
+    - Formulierung mit "Welche", "Wie" → STRING
+    """
     text_lower = text.lower()
     
-    # Boolean-Indikatoren
-    if any(kw in text_lower for kw in ['haben sie', 'sind sie', 'können sie', 'möchten sie', 'ist das']):
+    # Binäre Keywords → BOOLEAN
+    if any(kw in text_lower for kw in BINARY_KEYWORDS):
         return QuestionType.BOOLEAN
     
-    # Choice-Indikatoren
-    if any(kw in text_lower for kw in ['welche', 'welcher', 'welches', 'präferenz']):
-        return QuestionType.CHOICE
-    
-    # String (offene Frage)
-    if any(kw in text_lower for kw in ['wie', 'warum', 'beschreiben sie', 'erzählen sie']):
+    # Offene Keywords → STRING
+    if any(kw in text_lower for kw in OPEN_KEYWORDS):
         return QuestionType.STRING
     
-    # Default: String für Gates, Boolean für Rest
+    # Formulierung prüfen
+    if any(kw in text_lower for kw in ['haben sie', 'sind sie', 'ist das', 'einverstanden']):
+        return QuestionType.BOOLEAN
+    
+    if any(kw in text_lower for kw in ['welche', 'welcher', 'welches', 'wie würden', 'wie lange']):
+        return QuestionType.STRING
+    
+    # Default: STRING (offene Frage)
     return QuestionType.STRING
 
 
@@ -279,6 +368,7 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
             continue
         
         category = _detect_category(must_have, "must-have")
+        preamble = _get_preamble(category, is_gate=True)
         
         questions.append(Question(
             id=f"mh_{slug}",
@@ -288,6 +378,7 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
             priority=1,     # EXPLICIT
             group=QuestionGroup.QUALIFIKATION if category == "qualifications" else QuestionGroup.RAHMEN,
             context=f"Must-Have: {must_have}",
+            preamble=preamble,
             gate_config=GateConfig(
                 is_gate=True,
                 is_alternative=False,
@@ -368,6 +459,7 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
     # 4a. Arbeitszeit
     if extract_result.constraints and extract_result.constraints.arbeitszeit:
         az = extract_result.constraints.arbeitszeit
+        working_hours_preamble = _get_preamble("working_hours", is_gate=False)
         
         # Wenn es ein Arbeitszeit-Objekt ist
         if isinstance(az, dict) or hasattr(az, 'vollzeit'):
@@ -380,6 +472,7 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
                 priority=2,
                 group=QuestionGroup.RAHMEN,
                 context="Arbeitszeitmodell aus Constraints",
+                preamble=working_hours_preamble,
                 metadata={"source_text": str(az), "source_type": "constraint", "category": "arbeitszeit"}
             ))
             question_id_counter += 1
@@ -393,6 +486,7 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
                 priority=2,
                 group=QuestionGroup.RAHMEN,
                 context=f"Arbeitszeit: {az}",
+                preamble=working_hours_preamble,
                 metadata={"source_text": az, "source_type": "constraint", "category": "arbeitszeit"}
             ))
             question_id_counter += 1
@@ -417,6 +511,8 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
     
     # 4c. Schichten
     if extract_result.constraints and extract_result.constraints.schichten:
+        shifts_preamble = _get_preamble("shifts", is_gate=False)
+        
         questions.append(Question(
             id="constraint_schichten",
             question="Sind Sie bereit, im Schichtdienst zu arbeiten?",
@@ -425,6 +521,7 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
             priority=2,
             group=QuestionGroup.RAHMEN,
             context=f"Schichtdienst: {extract_result.constraints.schichten}",
+            preamble=shifts_preamble,
             metadata={"source_text": extract_result.constraints.schichten, "source_type": "constraint", "category": "schichten"}
         ))
         question_id_counter += 1
@@ -435,6 +532,8 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
     # 5. Standorte → Frage generieren
     # ========================================
     if extract_result.sites and len(extract_result.sites) > 0:
+        location_preamble = _get_preamble("location", is_gate=False)
+        
         # Einfache Standort-Frage generieren
         if len(extract_result.sites) == 1:
             site = extract_result.sites[0]
@@ -447,6 +546,7 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
                 priority=1,
                 group=QuestionGroup.STANDORT,
                 context=f"Standort: {site_name}",
+                preamble=location_preamble,
                 metadata={"source_text": site_name, "source_type": "site", "category": "location"}
             ))
         else:
@@ -462,6 +562,7 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
                 priority=1,
                 group=QuestionGroup.STANDORT,
                 context=f"{len(site_names)} Standorte verfügbar",
+                preamble=location_preamble,
                 metadata={"source_text": ', '.join(site_names), "source_type": "site", "category": "location"}
             ))
         question_id_counter += 1
@@ -472,6 +573,8 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
     # 6. Abteilungen → Frage generieren
     # ========================================
     if extract_result.all_departments and len(extract_result.all_departments) > 1:
+        department_preamble = _get_preamble("department", is_gate=False)
+        
         questions.append(Question(
             id="departments",
             question="In welchem Bereich möchten Sie gerne arbeiten?",
@@ -481,6 +584,7 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
             priority=2,
             group=QuestionGroup.EINSATZBEREICHE,
             context=f"{len(extract_result.all_departments)} Abteilungen verfügbar",
+            preamble=department_preamble,
             metadata={"source_text": ', '.join(extract_result.all_departments), "source_type": "departments", "category": "departments"}
         ))
         question_id_counter += 1
@@ -888,8 +992,11 @@ def build_questions_v2(extract_result: ExtractResult, classified_data: Dict = No
         try:
             from .knowledge_base import build_knowledge_base
             knowledge_base = build_knowledge_base(
-                classified_data.get('information_items', []),
-                extract_result.constraints
+                information_items=classified_data.get('information_items', []),
+                constraints=extract_result.constraints,
+                priority_items=classified_data.get('priorities', []),
+                internal_note_items=classified_data.get('internal_notes', []),
+                metadata_items=classified_data.get('metadata', [])
             )
             # Store KB in extract_result for later retrieval
             if not hasattr(extract_result, '_knowledge_base'):
