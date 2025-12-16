@@ -176,7 +176,12 @@ def _is_benefit(text: str) -> bool:
         'urlaub', 'urlaubstage', 'weiterbildung', 'fortbildung',
         'prämie', 'bonus', 'vergünstig', 'kostenlos', 'gratis',
         'zuschuss', 'zusatz', 'benefit', 'vorteil', 'sonderzahlung',
-        'weihnachtsgeld', 'urlaubsgeld', 'akademie', 'schulung'
+        'weihnachtsgeld', 'urlaubsgeld', 'akademie',
+        # Erweiterte Keywords
+        'kostenübernahme', 'vergütungsanstieg', 'entwicklungsmöglichkeit',
+        'übernahme', 'jobrad', 'dienstwagen', 'homeoffice', 'remote',
+        'flexible arbeitszeit', 'gleitzeit', 'betriebsrente', 'altersvorsorge',
+        'kinderbetreuung', 'kantine', 'parkplatz', 'mitarbeiterrabatt'
     ]
     text_lower = text.lower()
     return any(keyword in text_lower for keyword in benefit_keywords)
@@ -188,7 +193,11 @@ def _is_salary_info(text: str) -> bool:
     """
     salary_keywords = [
         'gehalt', 'verdienst', 'entgelt', 'vergütung',
-        'tv-öd', 'tvöd', 'tarif', '€', 'euro'
+        'tv-öd', 'tvöd', 'tarif', '€', 'euro',
+        # Erweiterte Keywords
+        'haustarif', 'tarifvertrag', 'grundgehalt', 'brutto',
+        'netto', 'stundenlohn', 'monatsgehalt', 'jahresgehalt',
+        'einstiegsgehalt', 'gehaltsvorstellung'
     ]
     text_lower = text.lower()
     return any(keyword in text_lower for keyword in salary_keywords)
@@ -215,7 +224,11 @@ def _is_culture_info(text: str) -> bool:
         'kultur', 'atmosphäre', 'team', 'kollegial',
         'wertschätzung', 'tradition', 'familienunternehmen',
         'startup', 'innovation', 'flache hierarchien',
-        'dresscode', 'kommunikation', 'du-kultur', 'sie-kultur'
+        'dresscode', 'kommunikation', 'du-kultur', 'sie-kultur',
+        # Erweiterte Keywords
+        'eingearbeitet', 'schnittmenge', 'berufsgruppen', 'verlass',
+        'zusammenhalt', 'miteinander', 'kolleg', 'unterstützung untereinander',
+        'arbeitsklima', 'betriebsklima', 'gemeinschaft', 'zusammenarbeit'
     ]
     text_lower = text.lower()
     return any(keyword in text_lower for keyword in culture_keywords)
@@ -234,9 +247,14 @@ def _is_job_task(text: str) -> bool:
     # Keywords für Tätigkeiten/Aufgaben
     task_keywords = [
         'aufgabe', 'verantwortung', 'zuständig',
-        'betreuung', 'durchführung', 'planung', 'zusammenarbeit',
-        'erledigung', 'begleitung', 'unterstützung', 'koordination',
-        'organisation', 'mitarbeit', 'mitwirkung', 'gestaltung'
+        'betreuung', 'durchführung', 'planung',
+        'erledigung', 'begleitung', 'koordination',
+        'organisation', 'mitarbeit', 'mitwirkung', 'gestaltung',
+        # Medizinische/therapeutische Keywords
+        'mobilisation', 'maßnahmen', 'versorgung', 'beratung', 'therapie',
+        'kräftigung', 'schulung', 'training', 'prävention', 'aktivitäten',
+        'behandlung', 'pflege', 'diagnostik', 'rehabilitation',
+        'hilfsmittel', 'erarbeitung', 'u.v.m', 'tätigkeiten'
     ]
     return any(keyword in text_lower for keyword in task_keywords)
 

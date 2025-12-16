@@ -299,6 +299,101 @@ def _detect_category(text: str, context: str = "") -> str:
     return "other"
 
 
+def _extract_profession(text: str) -> Optional[str]:
+    """
+    Extrahiert die Berufsbezeichnung aus einem Qualifikations-Text.
+    
+    Beispiele:
+    - "Abgeschlossene Ausbildung als Ergotherapeut" → "Ergotherapeut"
+    - "Alternativ: Abgeschlossene Ausbildung als Physiotherapeut" → "Physiotherapeut"
+    - "Examinierte Pflegefachkraft" → "Pflegefachkraft"
+    """
+    text = text.strip()
+    
+    # Entferne Präfixe
+    prefixes_to_remove = [
+        r'^alternativ:\s*', r'^zwingend:\s*', r'^optional:\s*',
+        r'^abgeschlossene\s+ausbildung\s+als\s+', r'^abgeschlossenes?\s+studium\s+',
+        r'^ausbildung\s+als\s+', r'^ausbildung\s+zum\s+', r'^ausbildung\s+zur\s+',
+        r'^examinierte[r]?\s+', r'^staatlich\s+anerkannte[r]?\s+'
+    ]
+    
+    cleaned = text
+    for pattern in prefixes_to_remove:
+        cleaned = re.sub(pattern, '', cleaned, flags=re.IGNORECASE)
+    
+    # Nimm das erste signifikante Wort/Phrase
+    cleaned = cleaned.strip()
+    if cleaned:
+        # Bis zum ersten Komma, Klammer oder "oder"
+        match = re.match(r'^([^,(]+)', cleaned)
+        if match:
+            return match.group(1).strip()
+    
+    return None
+
+
+def _group_qualifications_with_alternatives(
+    must_haves: List[str], 
+    alternatives: List[str]
+) -> Tuple[List[Dict], List[str], List[str]]:
+    """
+    Gruppiert Ausbildungs-Must-Haves mit ihren Alternativen.
+    
+    Returns:
+        (grouped_qualifications, remaining_must_haves, remaining_alternatives)
+        
+    grouped_qualifications: [{'main': 'Ergotherapeut', 'alternatives': ['Physiotherapeut'], 'original_must_have': '...'}]
+    """
+    grouped = []
+    remaining_must_haves = []
+    used_alternatives = set()
+    
+    for mh in must_haves:
+        mh_lower = mh.lower()
+        
+        # Ist das eine Ausbildung/Qualifikation?
+        if not any(kw in mh_lower for kw in ['ausbildung', 'abschluss', 'studium', 'examiniert']):
+            remaining_must_haves.append(mh)
+            continue
+        
+        # Extrahiere die Berufsbezeichnung
+        main_profession = _extract_profession(mh)
+        if not main_profession:
+            remaining_must_haves.append(mh)
+            continue
+        
+        # Suche passende Alternativen
+        found_alternatives = []
+        for i, alt in enumerate(alternatives):
+            alt_lower = alt.lower()
+            
+            # Ist die Alternative auch eine Ausbildung?
+            if any(kw in alt_lower for kw in ['ausbildung', 'abschluss', 'studium', 'examiniert']):
+                alt_profession = _extract_profession(alt)
+                if alt_profession and i not in used_alternatives:
+                    found_alternatives.append(alt_profession)
+                    used_alternatives.add(i)
+        
+        if found_alternatives:
+            grouped.append({
+                'main': main_profession,
+                'alternatives': found_alternatives,
+                'original_must_have': mh
+            })
+        else:
+            # Keine Alternativen gefunden → als normale Frage
+            remaining_must_haves.append(mh)
+    
+    # Verbleibende Alternativen
+    remaining_alternatives = [
+        alt for i, alt in enumerate(alternatives) 
+        if i not in used_alternatives
+    ]
+    
+    return grouped, remaining_must_haves, remaining_alternatives
+
+
 # ============================================================================
 # DATACLASSES FOR PIPELINE
 # ============================================================================
@@ -349,9 +444,60 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
     logger.info("🎯 Stage 1: GENERATE - Creating questions from all sources...")
     
     # ========================================
-    # 1. Must-Haves → Gate Questions
+    # 0. Gruppiere Qualifikationen mit Alternativen
     # ========================================
-    for must_have in extract_result.must_have:
+    grouped_quals, remaining_must_haves, remaining_alternatives = _group_qualifications_with_alternatives(
+        extract_result.must_have,
+        extract_result.alternatives
+    )
+    
+    if grouped_quals:
+        logger.info(f"  📦 Gruppierte {len(grouped_quals)} Qualifikationen mit Alternativen")
+    
+    # ========================================
+    # 1a. Gruppierte Qualifikationen → CHOICE mit Options
+    # ========================================
+    for qual_group in grouped_quals:
+        main = qual_group['main']
+        alts = qual_group['alternatives']
+        original = qual_group['original_must_have']
+        
+        # Erstelle Options: Hauptqualifikation + Alternativen + "Andere"
+        options = [main] + alts + ["Andere"]
+        
+        slug = _slugify(main)
+        preamble = GATE_PREAMBLES.get("qualifications", "Damit ich Ihren fachlichen Hintergrund einordnen kann:")
+        
+        questions.append(Question(
+            id=f"qual_{slug}",
+            question="Welche Ausbildung haben Sie abgeschlossen?",
+            type=QuestionType.CHOICE,  # CHOICE mit Options!
+            options=options,
+            required=True,
+            priority=1,
+            group=QuestionGroup.QUALIFIKATION,
+            context=f"Qualifikation: {main} (Alternativen: {', '.join(alts)})",
+            preamble=preamble,
+            gate_config=GateConfig(
+                is_gate=True,
+                is_alternative=False,
+                has_alternatives=True  # Hat Alternativen!
+            ),
+            metadata={
+                "source_text": original, 
+                "source_type": "grouped_qualification",
+                "main_qualification": main,
+                "alternatives": alts,
+                "category": "qualifications"
+            }
+        ))
+        question_id_counter += 1
+        logger.info(f"    ✓ Qualifikation mit Options: {main} + {alts}")
+    
+    # ========================================
+    # 1b. Verbleibende Must-Haves → Gate Questions
+    # ========================================
+    for must_have in remaining_must_haves:
         # VALIDATION: Skip invalid items
         if not must_have or not must_have.strip():
             logger.warning(f"  ⚠️  Skipping empty must-have")
@@ -388,12 +534,12 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
         ))
         question_id_counter += 1
     
-    logger.info(f"  ✓ Generated {len(extract_result.must_have)} questions from must-haves")
+    logger.info(f"  ✓ Generated {len(grouped_quals)} grouped + {len(remaining_must_haves)} single must-have questions")
     
     # ========================================
-    # 2. Alternatives → Preference Questions
+    # 2. Verbleibende Alternatives → Preference Questions
     # ========================================
-    for alt in extract_result.alternatives:
+    for alt in remaining_alternatives:
         # VALIDATION: Skip invalid items
         if not alt or not alt.strip():
             logger.warning(f"  ⚠️  Skipping empty alternative")
