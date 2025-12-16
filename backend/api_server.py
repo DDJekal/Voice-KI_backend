@@ -119,6 +119,7 @@ class ProcessProtocolResponse(BaseModel):
     processed_at: str
     question_count: int
     questions: list[dict]  # Simplified question format
+    knowledge_base: Optional[dict] = None  # Knowledge Base für VoiceKI
 
 
 # Logging Middleware
@@ -564,7 +565,7 @@ async def process_protocol_webhook(
         logger.info("Questions trimmed and ready")
         
         # 4. Optional: Export questions.json with knowledge_base (for Agent/VoiceKI)
-        # This is saved to file but NOT included in webhook response
+        # This is saved to file AND included in webhook response
         try:
             import json
             from pathlib import Path
@@ -593,13 +594,16 @@ async def process_protocol_webhook(
             logger.warning(f"Failed to save questions.json: {e}")
             # Non-critical, continue
         
-        # 5. Webhook Response (UNVERÄNDERT - nur questions!)
+        # 5. Webhook Response mit knowledge_base
+        knowledge_base = getattr(questions_catalog, 'knowledge_base', None)
+        
         response_obj = ProcessProtocolResponse(
             protocol_id=request.id,
             protocol_name=request.name,
             processed_at=datetime.utcnow().isoformat() + "Z",
             question_count=len(trimmed_questions),
-            questions=trimmed_questions  # HOC bekommt nur questions!
+            questions=trimmed_questions,
+            knowledge_base=knowledge_base
         )
         
         # #region agent log
