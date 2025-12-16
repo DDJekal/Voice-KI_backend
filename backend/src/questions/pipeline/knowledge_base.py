@@ -52,8 +52,9 @@ def build_knowledge_base(
         'work_conditions': [],
         'company_culture': [],
         'general_info': [],
-        'internal_notes': [],  # NEU
-        'job_context': {}      # NEU
+        'internal_notes': [],
+        'job_context': {},
+        'job_tasks': []  # NEU: Tätigkeiten/Aufgaben
     }
     
     # 1. Verarbeite Information Items
@@ -92,6 +93,16 @@ def build_knowledge_base(
         if _is_culture_info(text):
             kb['company_culture'].append({
                 'text': text,
+                'source': 'protocol_information'
+            })
+            categorized = True
+        
+        # Tätigkeiten/Aufgaben
+        if _is_job_task(text):
+            # Entferne "Tätigkeit:" Prefix falls vorhanden
+            clean_text = re.sub(r'^t[aä]tigkeit:\s*', '', text, flags=re.IGNORECASE).strip()
+            kb['job_tasks'].append({
+                'text': clean_text,
                 'source': 'protocol_information'
             })
             categorized = True
@@ -152,6 +163,7 @@ def build_knowledge_base(
     logger.info(f"    - General Info: {len(kb['general_info'])}")
     logger.info(f"    - Internal Notes: {len(kb['internal_notes'])}")
     logger.info(f"    - Job Context: {bool(kb['job_context'])}")
+    logger.info(f"    - Job Tasks: {len(kb['job_tasks'])}")
     
     return kb
 
@@ -207,6 +219,26 @@ def _is_culture_info(text: str) -> bool:
     ]
     text_lower = text.lower()
     return any(keyword in text_lower for keyword in culture_keywords)
+
+
+def _is_job_task(text: str) -> bool:
+    """
+    Prüft, ob Text eine Tätigkeit/Aufgabe beschreibt.
+    """
+    text_lower = text.lower()
+    
+    # Explizit "Tätigkeit:" Prefix
+    if text_lower.startswith('tätigkeit:') or text_lower.startswith('taetigkeit:'):
+        return True
+    
+    # Keywords für Tätigkeiten/Aufgaben
+    task_keywords = [
+        'aufgabe', 'verantwortung', 'zuständig',
+        'betreuung', 'durchführung', 'planung', 'zusammenarbeit',
+        'erledigung', 'begleitung', 'unterstützung', 'koordination',
+        'organisation', 'mitarbeit', 'mitwirkung', 'gestaltung'
+    ]
+    return any(keyword in text_lower for keyword in task_keywords)
 
 
 def _extract_salary_info(text: str) -> Dict[str, Any]:
