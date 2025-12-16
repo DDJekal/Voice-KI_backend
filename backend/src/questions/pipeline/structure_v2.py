@@ -733,7 +733,7 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
             options=extract_result.all_departments,
             required=False,
             priority=2,
-            group=QuestionGroup.EINSATZBEREICHE,
+            group=QuestionGroup.EINSATZBEREICH,
             context=f"{len(extract_result.all_departments)} Abteilungen verfügbar",
             preamble=department_preamble,
             metadata={"source_text": ', '.join(extract_result.all_departments), "source_type": "departments", "category": "departments"}
