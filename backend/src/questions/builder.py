@@ -57,28 +57,52 @@ async def build_question_catalog(
     logger.info("=" * 70)
     
     try:
-        # 0. Classify Protocol Items (STAGE 0 - NEU!)
-        logger.info("Stage 0/7: Classify protocol items by intent...")
+        # ================================================================
+        # PARALLEL STAGE: Classify + Extract gleichzeitig starten
+        # Spart ~10 Sekunden durch parallele LLM-Aufrufe
+        # ================================================================
+        import asyncio
         
-        # #region agent log
-        import json, time
-        with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'builder.py:62','message':'Before STAGE 0 Classification','data':{'has_pages':len(conversation_protocol.get('pages',[]))},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'B'})+'\n')
-        # #endregion
+        logger.info("Stage 0+1/7: Classify + Extract PARALLEL...")
         
         from .pipeline.classify import classify_protocol_items
-        classified_data = await classify_protocol_items(conversation_protocol)
         
-        # #region agent log
-        with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'builder.py:70','message':'After STAGE 0 Classification','data':{'gate_items':len(classified_data.get('gate_items',[])),'preference_items':len(classified_data.get('preference_items',[])),'information_items':len(classified_data.get('information_items',[]))},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'B'})+'\n')
-        # #endregion
+        # Starte beide Tasks parallel
+        classify_task = asyncio.create_task(classify_protocol_items(conversation_protocol))
+        extract_task = asyncio.create_task(extract(conversation_protocol))
+        
+        # Warte auf beide Ergebnisse gleichzeitig
+        classified_data, extract_result = await asyncio.gather(
+            classify_task,
+            extract_task,
+            return_exceptions=True
+        )
+        
+        # Handle Classify-Fehler
+        if isinstance(classified_data, Exception):
+            logger.error(f"Classification failed: {classified_data}")
+            classified_data = {
+                'gate_items': [],
+                'preference_items': [],
+                'information_items': [],
+                'consent_items': [],
+                'internal_notes': [],
+                'blacklist': [],
+                'priorities': [],
+                'metadata': [],
+                'alternatives': []
+            }
+        
+        # Handle Extract-Fehler
+        if isinstance(extract_result, Exception):
+            logger.error(f"Extraction failed: {extract_result}")
+            raise extract_result
         
         logger.info(f"  ✓ Classified: {len(classified_data.get('gate_items', []))} gates, "
                    f"{len(classified_data.get('preference_items', []))} preferences, "
                    f"{len(classified_data.get('information_items', []))} info items")
-        
-        # 1. Extract with LLM
-        logger.info("Stage 1/7: Extract structured data from protocol...")
-        extract_result = await extract(conversation_protocol)
+        logger.info(f"  ✓ Extracted: {len(extract_result.must_have)} must-haves, "
+                   f"{len(extract_result.sites)} sites")
         
         # 2. Build base questions (deterministic)
         logger.info("Stage 2/7: Build base questions...")
