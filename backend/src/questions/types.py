@@ -117,6 +117,10 @@ class ExtractResult(BaseModel):
     verbatim_candidates: List[VerbatimCandidate] = Field(default_factory=list)
     all_departments: List[str]
     
+    # NEU: Unternehmenskultur und Ansprechpartner
+    culture_notes: List[str] = Field(default_factory=list)  # "Gespräch per DU", etc.
+    department_contacts: Dict[str, str] = Field(default_factory=dict)  # Fachbereich → AP Name
+    
     # NEU: Strukturierte Protokoll-Fragen
     protocol_questions: List[ProtocolQuestion] = Field(default_factory=list)
     

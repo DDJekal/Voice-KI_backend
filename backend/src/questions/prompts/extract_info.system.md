@@ -38,13 +38,29 @@ Extrahiere strukturiert:
 - Einsatzbereiche
 - Normalisiere nummerierte Listen: "18. Stroke Unit" → "Stroke Unit"
 
+**WICHTIG: AP-Muster (Ansprechpartner mit Fachbereich)**
+
+Wenn Items mit "AP:" oder "Ansprechpartner:" beginnen, extrahiere NUR den Fachbereich:
+
+| Input | Extrahierter Fachbereich |
+|-------|--------------------------|
+| `AP: Frau Beeck: Verwaltung Buchhaltung/Personal` | `Verwaltung Buchhaltung/Personal` |
+| `AP: Frau Lubenow: Fachbereich Inobhutnahme` | `Inobhutnahme` |
+| `AP: Herr Klöppels: Fachbereich Ambulante Hilfen` | `Ambulante Hilfen` |
+| `AP: Frau Pazur: Stiftungsprojekt Mönchengladbach` | `Stiftungsprojekt Mönchengladbach` |
+
+**Regeln:**
+- Namen der Ansprechpartner (Frau Beeck, Herr Klöppels) → IGNORIEREN für all_departments
+- "Fachbereich" Präfix entfernen wenn vorhanden
+- Nur den eigentlichen Bereichsnamen in all_departments aufnehmen
+
 **Format:**
 ```json
 "all_departments": [
-  "Geriatrie",
-  "Herzkatheterlabor",
-  "Intensivmedizin",
-  "Palliativmedizin"
+  "Verwaltung Buchhaltung/Personal",
+  "Inobhutnahme",
+  "Ambulante Hilfen",
+  "Stiftungsprojekt Mönchengladbach"
 ]
 ```
 
@@ -127,6 +143,23 @@ Extrahiere ALLE Fragen zu organisatorischen Themen:
 ]
 ```
 
+### 7. Ansprechpartner-Zuordnung (Optional)
+
+Wenn AP-Muster erkannt werden, speichere die Zuordnung Fachbereich → Ansprechpartner:
+
+**Format:**
+```json
+"department_contacts": {
+  "Verwaltung Buchhaltung/Personal": "Frau Beeck",
+  "Inobhutnahme": "Frau Lubenow",
+  "Ambulante Hilfen": "Herr Klöppels"
+}
+```
+
+Diese Info ist für interne Zwecke (Knowledge-Base), nicht für Bewerber-Fragen.
+
+---
+
 ## Output-Format (JSON)
 
 Gib NUR valides JSON zurück:
@@ -138,6 +171,7 @@ Gib NUR valides JSON zurück:
   "priorities": [...],
   "roles": [...],
   "culture_notes": [...],
+  "department_contacts": {...},
   "protocol_questions": [...]
 }
 ```

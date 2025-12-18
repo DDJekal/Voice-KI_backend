@@ -17,7 +17,9 @@ def build_knowledge_base(
     constraints: Any = None,
     priority_items: List[Dict] = None,
     internal_note_items: List[Dict] = None,
-    metadata_items: List[Dict] = None
+    metadata_items: List[Dict] = None,
+    culture_notes: List[str] = None,
+    department_contacts: Dict[str, str] = None
 ) -> Dict[str, Any]:
     """
     Baut Knowledge-Base aus Information-Items und Constraints.
@@ -28,6 +30,8 @@ def build_knowledge_base(
         priority_items: Optional - PRIORITY Items vom Classifier
         internal_note_items: Optional - INTERNAL_NOTE Items vom Classifier
         metadata_items: Optional - METADATA Items vom Classifier
+        culture_notes: Optional - Unternehmenskultur-Notizen aus dem Extractor
+        department_contacts: Optional - Zuordnung Fachbereich → Ansprechpartner
         
     Returns:
         {
@@ -39,7 +43,8 @@ def build_knowledge_base(
             'company_culture': [...],
             'general_info': [...],
             'internal_notes': [...],
-            'job_context': {...}
+            'job_context': {...},
+            'department_contacts': {...}
         }
     """
     logger.info("🏗️  Building Knowledge Base...")
@@ -54,8 +59,24 @@ def build_knowledge_base(
         'general_info': [],
         'internal_notes': [],
         'job_context': {},
-        'job_tasks': []  # NEU: Tätigkeiten/Aufgaben
+        'job_tasks': [],
+        'department_contacts': {}  # NEU: Fachbereich → AP Zuordnung
     }
+    
+    # 0. Verarbeite department_contacts (falls vorhanden)
+    if department_contacts:
+        kb['department_contacts'] = department_contacts
+        logger.info(f"  ✓ Added {len(department_contacts)} department contacts")
+    
+    # 0b. Verarbeite culture_notes (falls vorhanden)
+    if culture_notes:
+        for note in culture_notes:
+            if note and note.strip():
+                kb['company_culture'].append({
+                    'text': note.strip(),
+                    'source': 'extract_culture_notes'
+                })
+        logger.info(f"  ✓ Added {len(culture_notes)} culture notes")
     
     # 1. Verarbeite Information Items
     for item in information_items:

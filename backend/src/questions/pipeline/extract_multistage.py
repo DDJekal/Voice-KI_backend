@@ -237,6 +237,8 @@ async def extract_multi_stage(protocol: Dict[str, Any]) -> ExtractResult:
         "all_departments": sorted(set(info_data.get("all_departments", []))),
         "priorities": info_data.get("priorities", []),
         "roles": info_data.get("roles", []),
+        "culture_notes": info_data.get("culture_notes", []),
+        "department_contacts": info_data.get("department_contacts", {}),
         
         # From rahmen
         "constraints": merge_constraints(rahmen_data),

@@ -1248,7 +1248,10 @@ def build_questions_v2(extract_result: ExtractResult, classified_data: Dict = No
                 constraints=extract_result.constraints,
                 priority_items=classified_data.get('priorities', []),
                 internal_note_items=classified_data.get('internal_notes', []),
-                metadata_items=classified_data.get('metadata', [])
+                metadata_items=classified_data.get('metadata', []),
+                # NEU: Kultur-Notizen und AP-Zuordnung aus Extractor
+                culture_notes=getattr(extract_result, 'culture_notes', []) or [],
+                department_contacts=getattr(extract_result, 'department_contacts', {}) or {}
             )
             # Store KB in extract_result for later retrieval
             if not hasattr(extract_result, '_knowledge_base'):
