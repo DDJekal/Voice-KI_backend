@@ -14,16 +14,36 @@ Extrahiere strukturiert:
 - Gebäudebezeichnungen
 - Zugehörige Stationen/Abteilungen pro Standort
 
+**WICHTIG: Eleganter Display-Name für Standort-Fragen**
+
+Extrahiere zusätzlich einen `display_name` - das ist ein kurzer, eleganter Name für die Standort-Frage an Bewerber.
+
+| Original-Adresse | display_name |
+|------------------|--------------|
+| `Martinistraße 78 20251 Hamburg` | `Hamburg-Eppendorf` |
+| `Friedrich-Engels-Bogen 4, 81735 München` | `München-Neuperlach` |
+| `Hauptstraße 1, 10115 Berlin` | `Berlin-Mitte` |
+| `Musterweg 5, 50667 Köln` | `Köln-Altstadt` |
+| `Haus Marienhof Glan-Münchweiler (66907)` | `Glan-Münchweiler` |
+
+**Regeln für display_name:**
+- Nutze Stadt + Stadtteil wenn PLZ bekannt (z.B. "Hamburg-Eppendorf")
+- Bei unbekannter PLZ nur Stadtname (z.B. "Hamburg")
+- Bei Einrichtungsnamen den Ort extrahieren (z.B. "Haus Marienhof Glan-Münchweiler" → "Glan-Münchweiler")
+- Kurz und prägnant, max. 25 Zeichen
+
 **Format:**
 ```json
 "sites": [
   {
-    "label": "Haus am Giesinger Bahnhof München-Giesing",
+    "label": "Haus am Giesinger Bahnhof, München-Giesing",
+    "display_name": "München-Giesing",
     "stations": ["Palliativmedizin", "Intensivstation"],
     "source": {"page_id": 3, "prompt_id": 9}
   },
   {
-    "label": "Friedrich-Engels-Bogen 4, 81735 München (Neuperlach)",
+    "label": "Friedrich-Engels-Bogen 4, 81735 München",
+    "display_name": "München-Neuperlach",
     "stations": [],
     "source": {"page_id": 3, "prompt_id": 11}
   }

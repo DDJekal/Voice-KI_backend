@@ -42,7 +42,8 @@ class SiteSource(BaseModel):
 class Site(BaseModel):
     """Site/Location with stations"""
     label: str
-    stations: List[str]
+    display_name: Optional[str] = None  # NEU: Eleganter Name für Standort-Fragen
+    stations: List[str] = Field(default_factory=list)
     source: Optional[SiteSource] = None
 
 

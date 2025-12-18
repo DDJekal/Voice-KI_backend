@@ -58,6 +58,46 @@ OPEN_KEYWORDS = [
     'fortbildung', 'führerschein'
 ]
 
+def _get_site_display_name(site) -> str:
+    """
+    Gibt den eleganten Display-Namen für einen Standort zurück.
+    
+    Verwendet primär das LLM-generierte display_name Feld.
+    Fallback auf label wenn display_name nicht vorhanden.
+    
+    Args:
+        site: Site-Objekt mit label und optional display_name
+        
+    Returns:
+        Eleganter Stadtname für die Frage
+    """
+    # Primär: display_name vom LLM (falls vorhanden)
+    display_name = getattr(site, 'display_name', None)
+    if display_name and display_name.strip():
+        return display_name.strip()
+    
+    # Fallback: label verwenden, aber versuchen Stadt zu extrahieren
+    label = getattr(site, 'label', '') or ''
+    
+    if not label:
+        return 'unbekannter Standort'
+    
+    # Simple Fallback: Stadt aus "PLZ Stadt" Pattern
+    plz_city_match = re.search(r'\d{5}\s+([A-Za-zäöüÄÖÜß\-]+(?:\s+[A-Za-zäöüÄÖÜß\-]+)*)\s*$', label)
+    if plz_city_match:
+        return plz_city_match.group(1).strip()
+    
+    # Stadt in Klammern
+    parens_match = re.search(r'\(([A-Za-zäöüÄÖÜß\-]+)\)\s*$', label)
+    if parens_match:
+        return parens_match.group(1)
+    
+    # Letzter Fallback: Label kürzen wenn zu lang
+    if len(label) > 40:
+        return label[:37] + "..."
+    
+    return label
+
 # Preambles für systemische Gesprächsführung
 GATE_PREAMBLES = {
     "qualifications": "Damit ich Ihren fachlichen Hintergrund einordnen kann:",
@@ -750,7 +790,7 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
     logger.info(f"  ✓ Generated questions from constraints")
     
     # ========================================
-    # 5. Standorte → Frage generieren
+    # 5. Standorte → Frage generieren (mit LLM-basierter Stadt-Extraktion)
     # ========================================
     if extract_result.sites and len(extract_result.sites) > 0:
         location_preamble = _get_preamble("location", is_gate=False)
@@ -758,34 +798,57 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
         # Einfache Standort-Frage generieren
         if len(extract_result.sites) == 1:
             site = extract_result.sites[0]
-            site_name = site.label or 'unbekannter Standort'
+            site_raw = site.label or 'unbekannter Standort'
+            
+            # NEU: Nutze LLM-generiertes display_name
+            site_display = _get_site_display_name(site)
+            
             questions.append(Question(
                 id="site_single",
-                question=f"Unser Standort ist in {site_name}. Passt das für Sie?",
+                question=f"Unser Standort ist in {site_display}. Passt das für Sie?",
                 type=QuestionType.BOOLEAN,
                 required=True,
                 priority=1,
                 group=QuestionGroup.STANDORT,
-                context=f"Standort: {site_name}",
+                context=f"Standort: {site_raw}",  # Volle Adresse im Kontext behalten
                 preamble=location_preamble,
-                metadata={"source_text": site_name, "source_type": "site", "category": "location"}
+                metadata={
+                    "source_text": site_raw, 
+                    "display_name": site_display,
+                    "source_type": "site", 
+                    "category": "location"
+                }
             ))
+            logger.info(f"  ✓ Site: '{site_raw}' → Display: '{site_display}'")
         else:
-            # Mehrere Standorte
-            site_names = [s.label or f"Standort {i+1}" 
-                         for i, s in enumerate(extract_result.sites)]
+            # Mehrere Standorte - nutze LLM-generierte display_names
+            site_names_display = []
+            site_names_raw = []
+            
+            for i, s in enumerate(extract_result.sites):
+                raw = s.label or f"Standort {i+1}"
+                display = _get_site_display_name(s)
+                site_names_raw.append(raw)
+                site_names_display.append(display)
+            
             questions.append(Question(
                 id="site_multiple",
                 question="Haben Sie bereits eine Präferenz für einen bestimmten Standort?",
                 type=QuestionType.CHOICE,
-                options=site_names,
+                options=site_names_display,  # LLM-generierte elegante Namen
                 required=True,
                 priority=1,
                 group=QuestionGroup.STANDORT,
-                context=f"{len(site_names)} Standorte verfügbar",
+                context=f"{len(site_names_display)} Standorte verfügbar",
                 preamble=location_preamble,
-                metadata={"source_text": ', '.join(site_names), "source_type": "site", "category": "location"}
+                metadata={
+                    "source_text": ', '.join(site_names_raw),
+                    "display_names": site_names_display,
+                    "source_type": "site", 
+                    "category": "location"
+                }
             ))
+            logger.info(f"  ✓ Sites: {len(site_names_display)} locations with LLM display names")
         question_id_counter += 1
     
     logger.info(f"  ✓ Generated location questions")
