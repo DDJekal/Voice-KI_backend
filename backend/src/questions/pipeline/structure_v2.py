@@ -444,60 +444,105 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
     logger.info("🎯 Stage 1: GENERATE - Creating questions from all sources...")
     
     # ========================================
-    # 0. Gruppiere Qualifikationen mit Alternativen
+    # 0. NEU: Bevorzugte + Alternative Qualifikationen → EINE CHOICE-Frage
     # ========================================
-    grouped_quals, remaining_must_haves, remaining_alternatives = _group_qualifications_with_alternatives(
-        extract_result.must_have,
-        extract_result.alternatives
-    )
+    preferred = getattr(extract_result, 'preferred', []) or []
+    alternatives = getattr(extract_result, 'alternatives', []) or []
+    optional_quals = getattr(extract_result, 'optional_qualifications', []) or []
     
-    if grouped_quals:
-        logger.info(f"  📦 Gruppierte {len(grouped_quals)} Qualifikationen mit Alternativen")
+    # Wenn es bevorzugte oder alternative Qualifikationen gibt → CHOICE-Frage
+    if preferred or alternatives:
+        # Sammle alle Optionen
+        all_options = []
+        
+        # Bevorzugte zuerst
+        for pref in preferred:
+            if pref and pref.strip():
+                all_options.append(pref.strip())
+        
+        # Dann Alternativen
+        for alt in alternatives:
+            if alt and alt.strip() and alt.strip() not in all_options:
+                all_options.append(alt.strip())
+        
+        # "Andere" Option am Ende
+        if all_options:
+            all_options.append("Andere")
+            
+            main_qual = all_options[0] if all_options else "Qualifikation"
+            slug = _slugify(main_qual)
+            preamble = GATE_PREAMBLES.get("qualifications", "Damit ich Ihren fachlichen Hintergrund einordnen kann:")
+            
+            questions.append(Question(
+                id=f"qual_{slug}",
+                question="Welche Ausbildung haben Sie abgeschlossen?",
+                type=QuestionType.CHOICE,
+                options=all_options,
+                required=True,
+                priority=1,
+                group=QuestionGroup.QUALIFIKATION,
+                context=f"Qualifikation: Bevorzugt {preferred}, Alternativen: {alternatives}",
+                preamble=preamble,
+                gate_config=GateConfig(
+                    is_gate=True,
+                    is_alternative=False,
+                    has_alternatives=len(alternatives) > 0
+                ),
+                metadata={
+                    "source_type": "unified_qualification",
+                    "preferred": preferred,
+                    "alternatives": alternatives,
+                    "category": "qualifications"
+                }
+            ))
+            question_id_counter += 1
+            logger.info(f"  ✓ Einheitliche Qualifikations-Frage mit {len(all_options)} Optionen")
     
     # ========================================
-    # 1a. Gruppierte Qualifikationen → CHOICE mit Options
+    # 0b. NEU: Optionale Qualifikationen → Eigene Fragen mit Preamble
     # ========================================
-    for qual_group in grouped_quals:
-        main = qual_group['main']
-        alts = qual_group['alternatives']
-        original = qual_group['original_must_have']
+    for opt_qual in optional_quals:
+        if not opt_qual or not opt_qual.strip():
+            continue
+            
+        slug = _slugify(opt_qual)
         
-        # Erstelle Options: Hauptqualifikation + Alternativen + "Andere"
-        options = [main] + alts + ["Andere"]
-        
-        slug = _slugify(main)
-        preamble = GATE_PREAMBLES.get("qualifications", "Damit ich Ihren fachlichen Hintergrund einordnen kann:")
+        # Spezielle Formulierung für optionale Items
+        if 'führerschein' in opt_qual.lower():
+            question_text = f"Haben Sie einen {opt_qual}?"
+        else:
+            question_text = f"Haben Sie {opt_qual}?"
         
         questions.append(Question(
-            id=f"qual_{slug}",
-            question="Welche Ausbildung haben Sie abgeschlossen?",
-            type=QuestionType.CHOICE,  # CHOICE mit Options!
-            options=options,
-            required=True,
-            priority=1,
-            group=QuestionGroup.QUALIFIKATION,
-            context=f"Qualifikation: {main} (Alternativen: {', '.join(alts)})",
-            preamble=preamble,
+            id=f"opt_{slug}",
+            question=question_text,
+            type=QuestionType.BOOLEAN,
+            required=False,
+            priority=3,  # Niedrigere Priorität
+            group=QuestionGroup.PRAEFERENZEN,
+            context=f"Optional: {opt_qual}",
+            preamble="Das ist keine Voraussetzung, aber",  # NEUER PREAMBLE!
             gate_config=GateConfig(
-                is_gate=True,
+                is_gate=False,
                 is_alternative=False,
-                has_alternatives=True  # Hat Alternativen!
+                has_alternatives=False
             ),
             metadata={
-                "source_text": original, 
-                "source_type": "grouped_qualification",
-                "main_qualification": main,
-                "alternatives": alts,
-                "category": "qualifications"
+                "source_text": opt_qual,
+                "source_type": "optional_qualification",
+                "category": "optional"
             }
         ))
         question_id_counter += 1
-        logger.info(f"    ✓ Qualifikation mit Options: {main} + {alts}")
+        logger.info(f"  ✓ Optionale Frage: {opt_qual}")
+    
+    logger.info(f"  ✓ Generated qualification questions (preferred + alternatives + optional)")
     
     # ========================================
-    # 1b. Verbleibende Must-Haves → Gate Questions
+    # 1. Must-Haves (zwingende Anforderungen) → Gate Questions
     # ========================================
-    for must_have in remaining_must_haves:
+    must_have_count = 0
+    for must_have in extract_result.must_have:
         # VALIDATION: Skip invalid items
         if not must_have or not must_have.strip():
             logger.warning(f"  ⚠️  Skipping empty must-have")
@@ -533,43 +578,15 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
             metadata={"source_text": must_have, "source_type": "must_have", "category": category}
         ))
         question_id_counter += 1
+        must_have_count += 1
     
-    logger.info(f"  ✓ Generated {len(grouped_quals)} grouped + {len(remaining_must_haves)} single must-have questions")
+    logger.info(f"  ✓ Generated {must_have_count} must-have gate questions")
     
     # ========================================
-    # 2. Verbleibende Alternatives → Preference Questions
+    # 2. ENTFERNT: Alternatives werden jetzt in der CHOICE-Frage behandelt
+    # (siehe Schritt 0 oben)
     # ========================================
-    for alt in remaining_alternatives:
-        # VALIDATION: Skip invalid items
-        if not alt or not alt.strip():
-            logger.warning(f"  ⚠️  Skipping empty alternative")
-            continue
-        
-        slug = _slugify(alt)
-        if not slug:
-            logger.warning(f"  ⚠️  Skipping alternative with invalid slug: {alt[:50]}")
-            continue
-        
-        question_text = _formulate_question(alt, is_gate=False)
-        if not question_text:
-            logger.warning(f"  ⚠️  Failed to formulate question for: {alt[:50]}")
-            continue
-        
-        category = _detect_category(alt, "alternative")
-        
-        questions.append(Question(
-            id=f"alt_{slug}",
-            question=question_text,
-            type=QuestionType.BOOLEAN,  # Alternatives als Boolean
-            required=False,  # EXPLICIT
-            priority=2,      # EXPLICIT
-            group=QuestionGroup.QUALIFIKATION if category == "qualifications" else QuestionGroup.PRAEFERENZEN,
-            context=f"Alternative: {alt}",
-            metadata={"source_text": alt, "source_type": "alternative", "category": category}
-        ))
-        question_id_counter += 1
-    
-    logger.info(f"  ✓ Generated {len(extract_result.alternatives)} questions from alternatives")
+    logger.info(f"  ✓ Alternatives already included in CHOICE question")
     
     # ========================================
     # 3. Protocol Questions → direkt übernehmen
@@ -607,40 +624,93 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
     # 4. Constraints → Fragen generieren
     # ========================================
     
-    # 4a. Arbeitszeit
+    # 4a. Arbeitszeit - NEU: Unterscheidung Zwingend vs. Optional
     if extract_result.constraints and extract_result.constraints.arbeitszeit:
         az = extract_result.constraints.arbeitszeit
-        working_hours_preamble = _get_preamble("working_hours", is_gate=False)
+        az_str = str(az) if az else ""
+        az_lower = az_str.lower()
         
-        # Wenn es ein Arbeitszeit-Objekt ist
-        if isinstance(az, dict) or hasattr(az, 'vollzeit'):
+        # Prüfe ob "zwingend" markiert (z.B. "Zwingend: Vollzeit 39,5 Stunden")
+        is_mandatory = any(kw in az_lower for kw in ['zwingend', 'erforderlich', 'muss', 'pflicht'])
+        
+        # Extrahiere die eigentliche Arbeitszeit-Info (ohne "Zwingend:")
+        arbeitszeit_info = re.sub(r'^zwingend\s*:\s*', '', az_str, flags=re.IGNORECASE).strip()
+        
+        if is_mandatory:
+            # ZWINGEND: Gate-Frage mit speziellem Preamble
+            # "Die Stelle ist für Vollzeit 39,5 Stunden die Woche ausgeschrieben"
+            preamble = f"Die Stelle ist für {arbeitszeit_info} ausgeschrieben."
+            
             questions.append(Question(
-                id="constraint_arbeitszeit",
-                question="Haben Sie eine Präferenz bezüglich des Arbeitszeitmodells?",
-                type=QuestionType.CHOICE,
-                options=["Vollzeit", "Teilzeit", "Bin flexibel"],
-                required=True,
-                priority=2,
-                group=QuestionGroup.RAHMEN,
-                context="Arbeitszeitmodell aus Constraints",
-                preamble=working_hours_preamble,
-                metadata={"source_text": str(az), "source_type": "constraint", "category": "arbeitszeit"}
-            ))
-            question_id_counter += 1
-        # Wenn es ein String ist (z.B. "38-40 Wochenstunden")
-        elif isinstance(az, str):
-            questions.append(Question(
-                id="constraint_arbeitszeit_str",
-                question=f"Die Stelle ist in {az}. Passt das für Sie?",
+                id="constraint_arbeitszeit_mandatory",
+                question="Passt das für Sie?",
                 type=QuestionType.BOOLEAN,
                 required=True,
-                priority=2,
+                priority=1,  # Höhere Priorität bei zwingend
                 group=QuestionGroup.RAHMEN,
-                context=f"Arbeitszeit: {az}",
-                preamble=working_hours_preamble,
-                metadata={"source_text": az, "source_type": "constraint", "category": "arbeitszeit"}
+                context=f"Zwingende Arbeitszeit: {arbeitszeit_info}",
+                preamble=preamble,
+                gate_config=GateConfig(
+                    is_gate=True,  # Gate bei zwingend!
+                    is_alternative=False,
+                    has_alternatives=False
+                ),
+                metadata={
+                    "source_text": az_str, 
+                    "source_type": "constraint_mandatory", 
+                    "category": "arbeitszeit",
+                    "is_mandatory": True
+                }
             ))
             question_id_counter += 1
+            logger.info(f"  ✓ Zwingende Arbeitszeit-Frage: {arbeitszeit_info}")
+        else:
+            # OPTIONAL: Auswahl-Frage wie bisher
+            working_hours_preamble = "Ich möchte kurz auf das Arbeitszeitmodell eingehen."
+            
+            # Wenn es ein Arbeitszeit-Objekt ist
+            if isinstance(az, dict) or hasattr(az, 'vollzeit'):
+                az_obj = az if isinstance(az, dict) else az.model_dump() if hasattr(az, 'model_dump') else {}
+                vollzeit = az_obj.get('vollzeit', '')
+                teilzeit = az_obj.get('teilzeit', '')
+                
+                # Baue Preamble mit Details
+                detail_parts = []
+                if vollzeit:
+                    detail_parts.append(f"Vollzeit={vollzeit}")
+                if teilzeit:
+                    detail_parts.append(f"Teilzeit={teilzeit}")
+                
+                if detail_parts:
+                    working_hours_preamble += f" {'. '.join(detail_parts)}."
+                
+                questions.append(Question(
+                    id="constraint_arbeitszeit",
+                    question="Haben Sie eine Präferenz bezüglich des Arbeitszeitmodells?",
+                    type=QuestionType.CHOICE,
+                    options=["Vollzeit", "Teilzeit", "Bin flexibel"],
+                    required=True,
+                    priority=2,
+                    group=QuestionGroup.RAHMEN,
+                    context="Arbeitszeitmodell aus Constraints",
+                    preamble=working_hours_preamble,
+                    metadata={"source_text": str(az), "source_type": "constraint", "category": "arbeitszeit"}
+                ))
+                question_id_counter += 1
+            # Wenn es ein einfacher String ist
+            elif isinstance(az, str) and arbeitszeit_info:
+                questions.append(Question(
+                    id="constraint_arbeitszeit_str",
+                    question=f"Die ausgeschriebene Arbeitszeit ist {arbeitszeit_info}. Passt das für Sie?",
+                    type=QuestionType.BOOLEAN,
+                    required=True,
+                    priority=2,
+                    group=QuestionGroup.RAHMEN,
+                    context=f"Arbeitszeit: {arbeitszeit_info}",
+                    preamble=working_hours_preamble,
+                    metadata={"source_text": az_str, "source_type": "constraint", "category": "arbeitszeit"}
+                ))
+                question_id_counter += 1
     
     # 4b. Gehalt
     if extract_result.constraints and extract_result.constraints.gehalt:
@@ -1007,6 +1077,8 @@ def filter_questions(questions: List[Question]) -> List[Question]:
     1. Name/Adresse-Fragen
     2. Exakte Duplikate (identischer Text)
     3. Zu generische Fragen ohne Kontext
+    4. NEU: Kategorie-Deduplizierung (nur eine Standort-Frage, etc.)
+    5. NEU: Informationen statt Fragen (z.B. "Standort: X" ohne Fragezeichen)
     
     Args:
         questions: Konsolidierte Fragen
@@ -1018,6 +1090,10 @@ def filter_questions(questions: List[Question]) -> List[Question]:
     
     filtered = []
     seen_texts = set()
+    seen_categories = {}  # NEU: Tracke bereits gesehene Kategorien
+    
+    # Kategorien die nur einmal vorkommen sollten
+    SINGLE_CATEGORY_TYPES = {'location', 'departments', 'arbeitszeit', 'gehalt'}
     
     for q in questions:
         # Filter 1: Name/Adresse
@@ -1035,6 +1111,31 @@ def filter_questions(questions: List[Question]) -> List[Question]:
         if len(q.question) < 10 and not q.context:
             logger.debug(f"  🗑️  Filtered (too generic): {q.question[:50]}")
             continue
+        
+        # Filter 4: NEU - Informationen statt Fragen (kein Fragezeichen, keine echte Frage)
+        if not q.question.endswith('?') and not any(kw in q.question.lower() for kw in 
+            ['haben sie', 'können sie', 'möchten sie', 'passt', 'welche', 'wie', 'sind sie']):
+            # Prüfe ob es eine Information ist (z.B. "Standort: X")
+            if ':' in q.question and len(q.question.split(':')) == 2:
+                logger.debug(f"  🗑️  Filtered (info not question): {q.question[:50]}")
+                continue
+        
+        # Filter 5: NEU - Kategorie-Deduplizierung
+        category = q.metadata.get('category', '') if q.metadata else ''
+        if category in SINGLE_CATEGORY_TYPES:
+            if category in seen_categories:
+                # Behalte die Frage mit höherer Priorität (niedrigere Zahl = höher)
+                existing_q = seen_categories[category]
+                if q.priority < existing_q.priority:
+                    # Diese Frage hat höhere Priorität → ersetze
+                    filtered.remove(existing_q)
+                    seen_categories[category] = q
+                    filtered.append(q)
+                    logger.debug(f"  🔄 Replaced lower-priority {category} question")
+                else:
+                    logger.debug(f"  🗑️  Filtered (duplicate category {category}): {q.question[:50]}")
+                continue
+            seen_categories[category] = q
         
         # Behalten!
         filtered.append(q)

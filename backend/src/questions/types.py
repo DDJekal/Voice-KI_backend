@@ -106,8 +106,13 @@ class ExtractResult(BaseModel):
     sites: List[Site]
     roles: List[str] = Field(default_factory=list)
     priorities: List[Priority]
-    must_have: List[str]
-    alternatives: List[str] = Field(default_factory=list)
+    
+    # Qualifikationen - NEU: Unterscheidung Bevorzugt/Alternativ/Optional
+    preferred: List[str] = Field(default_factory=list)  # Bevorzugte Haupt-Qualifikation
+    must_have: List[str] = Field(default_factory=list)  # Zwingende Qualifikationen (Gate)
+    alternatives: List[str] = Field(default_factory=list)  # Alternative Qualifikationen
+    optional_qualifications: List[str] = Field(default_factory=list)  # Nice-to-have (z.B. Führerschein)
+    
     constraints: Constraints = Field(default_factory=Constraints)
     verbatim_candidates: List[VerbatimCandidate] = Field(default_factory=list)
     all_departments: List[str]

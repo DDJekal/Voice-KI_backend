@@ -45,11 +45,24 @@ async def extract_qualifications(protocol: Dict[str, Any]) -> Dict[str, Any]:
         content = response["choices"][0]["message"]["content"]
         data = json.loads(content)
         
-        logger.info(f"  ✓ Found {len(data.get('must_have', []))} must-haves, {len(data.get('alternatives', []))} alternatives")
+        # Log alle Kategorien
+        preferred = data.get('preferred', [])
+        alternatives = data.get('alternatives', [])
+        must_have = data.get('must_have', [])
+        optional = data.get('optional', [])
+        
+        logger.info(f"  ✓ Found {len(preferred)} preferred, {len(alternatives)} alternatives, "
+                   f"{len(must_have)} must-haves, {len(optional)} optional")
         return data
     except Exception as e:
         logger.error(f"Qualifications extraction failed: {e}")
-        return {"must_have": [], "alternatives": [], "protocol_questions": []}
+        return {
+            "preferred": [],
+            "must_have": [], 
+            "alternatives": [], 
+            "optional": [],
+            "protocol_questions": []
+        }
 
 
 async def extract_rahmen(protocol: Dict[str, Any]) -> Dict[str, Any]:
@@ -193,7 +206,13 @@ async def extract_multi_stage(protocol: Dict[str, Any]) -> ExtractResult:
     # Handle exceptions
     if isinstance(qual_data, Exception):
         logger.error(f"Qualifications extraction failed: {qual_data}")
-        qual_data = {"must_have": [], "alternatives": [], "protocol_questions": []}
+        qual_data = {
+            "preferred": [],
+            "must_have": [], 
+            "alternatives": [], 
+            "optional": [],
+            "protocol_questions": []
+        }
     
     if isinstance(rahmen_data, Exception):
         logger.error(f"Rahmen extraction failed: {rahmen_data}")
@@ -207,9 +226,11 @@ async def extract_multi_stage(protocol: Dict[str, Any]) -> ExtractResult:
     logger.info("📦 Merging results from all extractors...")
     
     merged_data = {
-        # From qualifications
+        # From qualifications - NEU: Bevorzugt/Alternativ/Optional unterschieden
+        "preferred": qual_data.get("preferred", []),
         "must_have": qual_data.get("must_have", []),
         "alternatives": qual_data.get("alternatives", []),
+        "optional_qualifications": qual_data.get("optional", []),
         
         # From info
         "sites": info_data.get("sites", []),

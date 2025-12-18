@@ -13,13 +13,23 @@ Extrahiere strukturiert:
 - Teilzeit (mit Flexibilitäts-Info wenn genannt)
 - Schichtmodelle (Früh/Spät/Nacht, Bereitschaft)
 
+**WICHTIG: "Zwingend:" Markierung beibehalten!**
+Wenn im Protokoll steht "Zwingend: Vollzeit 39,5 Stunden / Woche", dann:
+- Behalte das "Zwingend:" in der Ausgabe!
+- `"vollzeit": "Zwingend: Vollzeit 39,5 Stunden / Woche"`
+
 **Format:**
 ```json
 "arbeitszeit": {
-  "vollzeit": "40 Std/Woche",
+  "vollzeit": "Zwingend: Vollzeit 39,5 Stunden / Woche",
   "teilzeit": "flexibel",
   "schichten": "Schichtdienst erforderlich"
 }
+```
+
+**Alternativ (wenn nur ein String):**
+```json
+"arbeitszeit": "Zwingend: Vollzeit 39,5 Stunden / Woche"
 ```
 
 ### 2. Gehalt & Vergütung
