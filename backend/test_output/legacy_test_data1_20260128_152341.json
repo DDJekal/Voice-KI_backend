@@ -1,0 +1,299 @@
+{
+  "pipeline": "LEGACY",
+  "protocol_file": "test_data1.json",
+  "protocol_name": "Projektleiter",
+  "questions": [
+    {
+      "id": "mh_studium_elektrotechnik_oder_in_einem_eng_verwandten_bereich",
+      "question": "Welche Ausbildung haben Sie abgeschlossen?",
+      "type": "string",
+      "phase": null,
+      "preamble": "Damit ich Ihren fachlichen Hintergrund einordnen kann:",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Qualifikation",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Must-Have: Studium Elektrotechnik oder in einem eng verwandten Bereich",
+      "category": "standardqualifikationen",
+      "category_order": 1,
+      "slot_config": {
+        "fills_slot": "qualifikation",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": {
+        "is_gate": true,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": [
+          "qualifikation"
+        ],
+        "condition": null,
+        "context_triggers": null
+      },
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "Studium Elektrotechnik oder in einem eng verwandten Bereich",
+        "source_type": "must_have",
+        "category": "qualifications"
+      }
+    },
+    {
+      "id": "arbeitszeit_consolidated",
+      "question": "Haben Sie eine Präferenz bezüglich des Arbeitszeitmodells?",
+      "type": "choice",
+      "phase": null,
+      "preamble": "Ich möchte kurz auf das Arbeitszeitmodell eingehen. Vollzeit. vollzeit='Vollzeit' teilzeit=None.",
+      "options": [
+        "Vollzeit",
+        "Teilzeit",
+        "Bin flexibel"
+      ],
+      "conversation_flow": null,
+      "required": true,
+      "priority": 2,
+      "group": "Rahmen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Konsolidierte Arbeitszeit-Frage",
+      "category": "rahmenbedingungen",
+      "category_order": 2,
+      "slot_config": {
+        "fills_slot": "dienstmodell",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": {
+        "is_gate": false,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": null,
+        "condition": null,
+        "context_triggers": {
+          "keywords_to_follow_up": [
+            "IMC",
+            "Intensiv",
+            "ITS",
+            "Intensivstation"
+          ]
+        }
+      },
+      "conversation_hints": null,
+      "metadata": {
+        "category": "arbeitszeit",
+        "source_type": "consolidated"
+      }
+    },
+    {
+      "id": "mh_mindestens_2_jahre_berufserfahrung_in_deutschland",
+      "question": "Wie würden Sie Ihre Deutschkenntnisse selbst einschätzen?",
+      "type": "string",
+      "phase": null,
+      "preamble": "Kurz zur Einordnung bezüglich der Sprachkenntnisse:",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Rahmen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Must-Have: Mindestens 2 Jahre Berufserfahrung in Deutschland",
+      "category": "standardqualifikationen",
+      "category_order": 3,
+      "slot_config": {
+        "fills_slot": "gate_mh_mindestens_2_jahre_berufserfahrung_in_deutschland",
+        "required": true,
+        "confidence_threshold": 0.9,
+        "validation": null
+      },
+      "gate_config": {
+        "is_gate": true,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": [
+          "gate_mh_mindestens_2_jahre_berufserfahrung_in_deutschland"
+        ],
+        "condition": null,
+        "context_triggers": null
+      },
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "Mindestens 2 Jahre Berufserfahrung in Deutschland",
+        "source_type": "must_have",
+        "category": "german_language"
+      }
+    },
+    {
+      "id": "site_single",
+      "question": "Unser Standort ist in Bünde. Passt das für Sie?",
+      "type": "boolean",
+      "phase": null,
+      "preamble": "Was ist Ihnen bei der Wahl des Standorts wichtig:",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Standort",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Vollständige Adresse: Faber E-TEC, Am Fichtenkamp 7-9, Bünde",
+      "category": "standort",
+      "category_order": 3,
+      "slot_config": {
+        "fills_slot": "standort",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "Faber E-TEC, Am Fichtenkamp 7-9, Bünde",
+        "source_type": "site",
+        "category": "location"
+      }
+    },
+    {
+      "id": "departments",
+      "question": "In welchem Bereich möchten Sie gerne arbeiten?",
+      "type": "choice",
+      "phase": null,
+      "preamble": "Welcher Bereich kommt für Sie in Frage:",
+      "options": [
+        "E-Mobilität",
+        "Netzbetreiber",
+        "Photovoltaik",
+        "Windkraft"
+      ],
+      "conversation_flow": null,
+      "required": false,
+      "priority": 2,
+      "group": "Einsatzbereich",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "4 Abteilungen verfügbar",
+      "category": "einsatzbereiche",
+      "category_order": 4,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "E-Mobilität, Netzbetreiber, Photovoltaik, Windkraft",
+        "source_type": "departments",
+        "category": "departments"
+      }
+    },
+    {
+      "id": "pq_91_325",
+      "question": "Attraktives Grundgehalt plus leistungsabhängige Erfolgsbeteiligung möglich( Gaber zahlt min. 10 % mehr als der jetzige Arbeitgeber!",
+      "type": "boolean",
+      "phase": null,
+      "preamble": null,
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 2,
+      "group": "Präferenzen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Protocol Question (Page 91)",
+      "category": "zusaetzliche_informationen",
+      "category_order": 6,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "Attraktives Grundgehalt plus leistungsabhängige Erfolgsbeteiligung möglich( Gaber zahlt min. 10 % mehr als der jetzige Arbeitgeber!",
+        "source_type": "protocol_question",
+        "category": "gehalt"
+      }
+    },
+    {
+      "id": "pq_91_327",
+      "question": "Unbefristeter Arbeitsvertrag bei einem zuverlässigen Arbeitgeber",
+      "type": "boolean",
+      "phase": null,
+      "preamble": null,
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 2,
+      "group": "Präferenzen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Protocol Question (Page 91)",
+      "category": "zusaetzliche_informationen",
+      "category_order": 6,
+      "slot_config": null,
+      "gate_config": {
+        "is_gate": false,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": null,
+        "condition": null,
+        "context_triggers": {
+          "keywords_to_follow_up": [
+            "IMC",
+            "Intensiv",
+            "ITS",
+            "Intensivstation"
+          ]
+        }
+      },
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "Unbefristeter Arbeitsvertrag bei einem zuverlässigen Arbeitgeber",
+        "source_type": "protocol_question",
+        "category": "other"
+      }
+    }
+  ],
+  "meta": {
+    "schema_version": "1.0",
+    "generated_at": "2026-01-28T15:24:01.680843",
+    "generator": "voiceki-python-question-builder@1.0.0",
+    "policies_applied": [
+      "slot_dependency: mh_studium_elektrotechnik_oder_in_einem_eng_verwandten_bereich -> qualifikation",
+      "slot_dependency: arbeitszeit_consolidated -> dienstmodell",
+      "slot_dependency: site_single -> standort",
+      "gate_sequence: mh_mindestens_2_jahre_berufserfahrung_in_deutschland",
+      "gate_sequence: mh_studium_elektrotechnik_oder_in_einem_eng_verwandten_bereich",
+      "keyword_trigger: arbeitszeit_consolidated -> Intensiv",
+      "keyword_trigger: pq_91_327 -> Intensiv"
+    ]
+  },
+  "_duration": 20.4,
+  "_question_count": 7,
+  "_generated_at": "2026-01-28T15:24:01.696210"
+}

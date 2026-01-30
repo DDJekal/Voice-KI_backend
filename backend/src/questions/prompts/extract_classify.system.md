@@ -34,12 +34,27 @@ Informationen FÜR den Kandidaten (nicht als Frage):
 - Allgemeine Unternehmensinformationen
 
 ### INTERNAL_NOTE
-Interne Notizen für Recruiter (nicht für Kandidat):
-- Ansprechpartner
+Interne Notizen für Recruiter (NICHT für Kandidat, KEINE Frage daraus generieren):
+
+**Erkennungsmerkmale:**
+- Text mit "!!!" am Anfang oder Ende (z.B. "!!!Bitte erwähnen...!!!")
+- "Bitte erwähnen", "Bitte beachten", "Hinweis für Recruiter"
+- Imperative für Recruiter: "Erwähnen Sie...", "Fragen Sie nach..."
+- Ansprechpartner-Infos: "AP:", "Kontakt:", "Ansprechpartner:"
 - E-Mail-Adressen
-- Interne Codes
-- Hinweise für Recruiter
-- Prozessnotizen
+- Interne Codes und Prozessnotizen
+- Telefonnummern für interne Nutzung
+
+**WICHTIG - Region/Ort als Kontext:**
+Wenn eine Notiz eine Region/Stadt/Gebiet erwähnt (z.B. "!!!Region Hellersdorf erwähnen!!!"):
+- Das ist KEINE separate Standort-Option!
+- Die Region-Info soll als KONTEXT in der Standort-Frage verwendet werden
+- Extrahiere: `"context_info": "Region Hellersdorf"` für spätere Verwendung
+
+**Beispiele:**
+- "!!!Bitte unbedingt erwähnen, dass es Region Marzahn ist!!!" → INTERNAL_NOTE
+- "Ansprechpartnerin: Frau Müller" → INTERNAL_NOTE
+- "AP: mueller@firma.de" → INTERNAL_NOTE
 
 ### BLACKLIST
 Personen oder Kriterien, die ausgeschlossen werden sollen:
@@ -161,6 +176,64 @@ Alternative Qualifikationen (werden zu Choice-Questions):
   }
 }
 ```
+
+## KRITISCH: Häufige Fehler vermeiden
+
+### Fehler 1: Region als Standort interpretieren ❌
+
+**Input:**
+```
+- !!!Bitte unbedingt erwähnen, dass es sich um die Region Marzahn Hellersdorf handelt!!!
+- Kita Springmäuse, Stollberger Straße 25-27, 12627 Berlin
+```
+
+**FALSCHE Klassifizierung:**
+```json
+{
+  "item_1": {"intent": "PREFERENCE_QUESTION", "sites": ["Region Marzahn Hellersdorf"]},
+  "item_2": {"intent": "PREFERENCE_QUESTION", "sites": ["Kita Springmäuse"]}
+}
+```
+→ FALSCH! "Region Marzahn Hellersdorf" ist KEINE separate Standort-Option!
+
+**RICHTIGE Klassifizierung:**
+```json
+{
+  "item_1": {
+    "intent": "INTERNAL_NOTE",
+    "original_text": "!!!Bitte unbedingt erwähnen, dass es sich um die Region Marzahn Hellersdorf handelt!!!",
+    "context_info": "Region Marzahn Hellersdorf",
+    "reason": "Recruiter-Hinweis mit !!! - Region als Kontext für Preamble"
+  },
+  "item_2": {
+    "intent": "PREFERENCE_QUESTION",
+    "original_text": "Kita Springmäuse, Stollberger Straße 25-27, 12627 Berlin",
+    "confidence": "high",
+    "reason": "Echte Adresse = echter Standort"
+  }
+}
+```
+
+### Fehler 2: Informationen als Fragen interpretieren ❌
+
+**Input:**
+```
+- 30 Tage Jahresurlaub
+- Vergütung nach TV-L Berlin
+```
+
+**FALSCH:** Diese als Boolean-Fragen generieren ("Sind 30 Tage Urlaub ok?")
+**RICHTIG:** Als INFORMATION klassifizieren → Kandidat informieren, nicht fragen
+
+### Fehler 3: Interne Links als Standort-Optionen ❌
+
+**Input:**
+```
+- Link zur Übersicht der Standorte: https://example.de/standorte/
+```
+
+**FALSCH:** Als Standort-Option behandeln
+**RICHTIG:** Als INFORMATION (Fallback-Link wenn Standort nicht passt)
 
 ## Verarbeitung
 

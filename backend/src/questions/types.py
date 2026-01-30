@@ -42,7 +42,8 @@ class SiteSource(BaseModel):
 class Site(BaseModel):
     """Site/Location with stations"""
     label: str
-    display_name: Optional[str] = None  # NEU: Eleganter Name für Standort-Fragen
+    address: Optional[str] = None  # Vollständige Adresse
+    region_context: Optional[str] = None  # Region/Bezirk für Preamble
     stations: List[str] = Field(default_factory=list)
     source: Optional[SiteSource] = None
 
@@ -130,6 +131,10 @@ class ExtractResult(BaseModel):
     
     # NEU: Werdegang-Anforderungen für Phase 5
     career_questions_needed: bool = Field(default=False)
+    
+    # NEU: Region-Kontext für Standort-Fragen
+    region_context: Optional[str] = None
+    standort_fallback_url: Optional[str] = None
 
 
 # Conversation Flow Models

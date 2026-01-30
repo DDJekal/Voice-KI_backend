@@ -10,7 +10,7 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, List
 
-from ..openai_adapter import call_openai_async
+from ..llm_adapter import call_llm_async
 
 logger = logging.getLogger(__name__)
 
@@ -62,10 +62,9 @@ async def classify_protocol_items(protocol: Dict[str, Any]) -> Dict[str, List]:
         {"role": "user", "content": user_message}
     ]
     
-    response = await call_openai_async(
-        model=settings.openai_model,
-        temperature=0.3,  # Niedrig für konsistente Klassifizierung
+    response = await call_llm_async(
         messages=messages,
+        temperature=0.3,  # Niedrig für konsistente Klassifizierung
         response_format={"type": "json_object"}
     )
     

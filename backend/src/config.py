@@ -19,14 +19,40 @@ class Settings(BaseSettings):
         case_sensitive=False
     )
 
-    # OpenAI Configuration (für Question Generator)
+    # OpenAI Configuration (Fallback Provider)
     openai_api_key: str = Field(
         default="",
-        description="OpenAI API Key für Question Generator"
+        description="OpenAI API Key (Fallback wenn Claude fehlt)"
     )
     openai_model: str = Field(
         default="gpt-4o",
-        description="OpenAI Model (gpt-4o, gpt-4o-mini, gpt-5, etc.)"
+        description="OpenAI Model (gpt-4o, gpt-4o-mini, etc.)"
+    )
+
+    # Anthropic Configuration (Primary Provider)
+    anthropic_api_key: str = Field(
+        default="",
+        description="Anthropic API Key für Claude (Primary)"
+    )
+    anthropic_model: str = Field(
+        default="claude-sonnet-4-20250514",
+        description="Claude Model (claude-sonnet-4, claude-opus-4, etc.)"
+    )
+
+    # LLM Provider Settings
+    use_claude_first: bool = Field(
+        default=True,
+        description="Claude als Primary, OpenAI als Fallback"
+    )
+    llm_timeout_seconds: int = Field(
+        default=120,
+        description="Timeout für LLM API Calls in Sekunden"
+    )
+    
+    # Question Generation Pipeline Settings
+    use_unified_pipeline: bool = Field(
+        default=False,
+        description="Nutze Unified 3-Prompt Pipeline (konsolidierte Fragen)"
     )
 
     # ElevenLabs Configuration

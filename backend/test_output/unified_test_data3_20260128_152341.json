@@ -1,0 +1,304 @@
+{
+  "pipeline": "UNIFIED",
+  "protocol_file": "test_data3.json",
+  "protocol_name": "Pflegefachkräfte",
+  "questions": [
+    {
+      "id": "fachabteilung",
+      "question": "In welcher Fachabteilung möchten Sie gerne arbeiten?",
+      "type": "string",
+      "phase": null,
+      "preamble": "Bezüglich des Einsatzbereichs:",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Einsatzbereich",
+      "help_text": "Antwort im Kommentarfeld eintragen. Bei Interesse an anderen Bereichen erwähnen: 'Palliativstation hat Priorität, aber wir prüfen gerne Alternativen.'",
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "WICHTIG: Vorrangige Stellenvergabe erfolgt auf der Palliativstation (aktuell höchster Bedarf). Alternative Einsatzmöglichkeiten in anderen Bereichen werden geprüft.",
+      "category": null,
+      "category_order": null,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "prioritaet": "Palliativstation",
+        "grund": "aktuell höchster Bedarf",
+        "alternativen": "andere Bereiche nach Prüfung möglich",
+        "info_pool": {
+          "schichtzeiten": {},
+          "verguetung": {
+            "basis": "Angelehnt an TV-ÖD P Tabelle"
+          },
+          "benefits": [],
+          "prioritaeten": [
+            {
+              "bereich": "Herzkatheterlabor",
+              "prio_level": 1,
+              "grund": "Akuter Bedarf",
+              "standort": "Auerbachstraße 110, 70376 Stuttgart",
+              "ki_anweisung": "Bei Interesse am Herzkatheterlabor bevorzugt behandeln - akuter Bedarf"
+            },
+            {
+              "bereich": "Palliativmedizin",
+              "prio_level": 2,
+              "grund": "Brandneue Station",
+              "ki_anweisung": "Neue Palliativstation als Chance hervorheben"
+            }
+          ],
+          "unternehmen": [],
+          "ausnahmen": []
+        }
+      }
+    },
+    {
+      "id": "qualifikation",
+      "question": "Welche Ausbildung haben Sie abgeschlossen?",
+      "type": "string",
+      "phase": null,
+      "preamble": "Damit ich Ihren fachlichen Hintergrund einordnen kann:",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Qualifikation",
+      "help_text": "Bei MFA nachfragen: 'Haben Sie Interesse am OP-Bereich? Dort können wir eine Qualifizierung anbieten.'",
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "VALIDIERUNG: Zwingend: Pflegefachmann/-frau. ALTERNATIV für OP-Bereich: MFA mit Qualifizierungsmaßnahme nach Curriculum der Bundesärztekammer (wird im Hause angeboten).",
+      "category": null,
+      "category_order": null,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "konsolidiert_aus": [
+          "Pflegefachmann/-frau",
+          "alternativ OP: MFA"
+        ],
+        "qualifizierung_moeglich": {
+          "bereich": "OP",
+          "fuer": "MFA",
+          "art": "Curriculum Bundesärztekammer"
+        },
+        "info_pool": {
+          "schichtzeiten": {},
+          "verguetung": {
+            "basis": "Angelehnt an TV-ÖD P Tabelle"
+          },
+          "benefits": [],
+          "prioritaeten": [
+            {
+              "bereich": "Herzkatheterlabor",
+              "prio_level": 1,
+              "grund": "Akuter Bedarf",
+              "standort": "Auerbachstraße 110, 70376 Stuttgart",
+              "ki_anweisung": "Bei Interesse am Herzkatheterlabor bevorzugt behandeln - akuter Bedarf"
+            },
+            {
+              "bereich": "Palliativmedizin",
+              "prio_level": 2,
+              "grund": "Brandneue Station",
+              "ki_anweisung": "Neue Palliativstation als Chance hervorheben"
+            }
+          ],
+          "unternehmen": [],
+          "ausnahmen": []
+        }
+      }
+    },
+    {
+      "id": "abteilung",
+      "question": "In welchem Bereich möchten Sie gerne arbeiten?",
+      "type": "choice",
+      "phase": null,
+      "preamble": "Wir haben verschiedene Fachabteilungen:",
+      "options": [
+        "Geriatrische Reha",
+        "Intensivstation",
+        "OP",
+        "Herzkatheterlabor",
+        "Palliativmedizin"
+      ],
+      "conversation_flow": null,
+      "required": false,
+      "priority": 2,
+      "group": "Einsatzbereich",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "5 Fachabteilungen verfügbar, inkl. brandneuer Palliativstation",
+      "category": null,
+      "category_order": null,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "info_pool": {
+          "schichtzeiten": {},
+          "verguetung": {
+            "basis": "Angelehnt an TV-ÖD P Tabelle"
+          },
+          "benefits": [],
+          "prioritaeten": [
+            {
+              "bereich": "Herzkatheterlabor",
+              "prio_level": 1,
+              "grund": "Akuter Bedarf",
+              "standort": "Auerbachstraße 110, 70376 Stuttgart",
+              "ki_anweisung": "Bei Interesse am Herzkatheterlabor bevorzugt behandeln - akuter Bedarf"
+            },
+            {
+              "bereich": "Palliativmedizin",
+              "prio_level": 2,
+              "grund": "Brandneue Station",
+              "ki_anweisung": "Neue Palliativstation als Chance hervorheben"
+            }
+          ],
+          "unternehmen": [],
+          "ausnahmen": []
+        }
+      }
+    },
+    {
+      "id": "arbeitszeit",
+      "question": "Vollzeit oder Teilzeit - was passt besser für Sie?",
+      "type": "choice",
+      "phase": null,
+      "preamble": "Kurz zur Arbeitszeit:",
+      "options": [
+        "Vollzeit",
+        "Teilzeit",
+        "Bin flexibel"
+      ],
+      "conversation_flow": null,
+      "required": true,
+      "priority": 2,
+      "group": "Rahmen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Vollzeit: 39 Std/Woche, Teilzeit: flexibel gestaltbar",
+      "category": null,
+      "category_order": null,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "vollzeit_stunden": "39 Std/Woche",
+        "teilzeit_flexibel": true,
+        "info_pool": {
+          "schichtzeiten": {},
+          "verguetung": {
+            "basis": "Angelehnt an TV-ÖD P Tabelle"
+          },
+          "benefits": [],
+          "prioritaeten": [
+            {
+              "bereich": "Herzkatheterlabor",
+              "prio_level": 1,
+              "grund": "Akuter Bedarf",
+              "standort": "Auerbachstraße 110, 70376 Stuttgart",
+              "ki_anweisung": "Bei Interesse am Herzkatheterlabor bevorzugt behandeln - akuter Bedarf"
+            },
+            {
+              "bereich": "Palliativmedizin",
+              "prio_level": 2,
+              "grund": "Brandneue Station",
+              "ki_anweisung": "Neue Palliativstation als Chance hervorheben"
+            }
+          ],
+          "unternehmen": [],
+          "ausnahmen": []
+        }
+      }
+    },
+    {
+      "id": "standort",
+      "question": "Wir haben zwei Standorte in Stuttgart. Haben Sie eine Präferenz?",
+      "type": "choice",
+      "phase": null,
+      "preamble": "Wir haben zwei Standorte in Stuttgart:",
+      "options": [
+        "Hohenheimerstraße 21 (Geriatrische Reha)",
+        "Auerbachstraße 110 (Intensiv, OP, Akutbereiche)"
+      ],
+      "conversation_flow": null,
+      "required": true,
+      "priority": 2,
+      "group": "Standort",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "2 Standorte verfügbar mit unterschiedlichen Schwerpunkten",
+      "category": null,
+      "category_order": null,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "standort_count": 2,
+        "standort_details": {
+          "standort_1": {
+            "adresse": "Hohenheimerstraße 21, 70184 Stuttgart",
+            "bereiche": [
+              "Geriatrische Reha"
+            ]
+          },
+          "standort_2": {
+            "adresse": "Auerbachstraße 110, 70376 Stuttgart",
+            "bereiche": [
+              "Intensiv",
+              "OP",
+              "Akutbereiche",
+              "Herzkatheterlabor"
+            ]
+          }
+        },
+        "info_pool": {
+          "schichtzeiten": {},
+          "verguetung": {
+            "basis": "Angelehnt an TV-ÖD P Tabelle"
+          },
+          "benefits": [],
+          "prioritaeten": [
+            {
+              "bereich": "Herzkatheterlabor",
+              "prio_level": 1,
+              "grund": "Akuter Bedarf",
+              "standort": "Auerbachstraße 110, 70376 Stuttgart",
+              "ki_anweisung": "Bei Interesse am Herzkatheterlabor bevorzugt behandeln - akuter Bedarf"
+            },
+            {
+              "bereich": "Palliativmedizin",
+              "prio_level": 2,
+              "grund": "Brandneue Station",
+              "ki_anweisung": "Neue Palliativstation als Chance hervorheben"
+            }
+          ],
+          "unternehmen": [],
+          "ausnahmen": []
+        }
+      }
+    }
+  ],
+  "meta": {
+    "schema_version": "1.0",
+    "generated_at": "2026-01-28T15:25:56.799989",
+    "generator": "voiceki-python-question-builder@1.0.0",
+    "policies_applied": [
+      "unified_pipeline_3_prompts",
+      "total_questions: 5"
+    ]
+  },
+  "_duration": 18.6,
+  "_question_count": 5,
+  "_generated_at": "2026-01-28T15:25:56.800990"
+}

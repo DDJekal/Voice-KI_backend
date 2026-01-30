@@ -8,9 +8,25 @@ Extrahiere strukturiert:
 
 ### 1. Standorte & Sites
 
+**WICHTIG - Unterscheide zwischen:**
+
+1. **ECHTE STANDORTE** (zählen als Standort-Option):
+   - Konkrete Adressen: "Stollberger Straße 25, 12627 Berlin"
+   - Einrichtungsnamen mit Adresse: "Kita Springmäuse, Stollberger Str. 25"
+   - Filialen/Häuser: "Haus am Giesinger Bahnhof"
+
+2. **REGIONEN/GEBIETE** (NUR als Kontext verwenden, KEINE separate Option):
+   - "Region Marzahn Hellersdorf" → Kontext für Preamble
+   - "Bereich München-Ost" → Kontext für Preamble
+   - "!!!Bitte erwähnen, dass Region X!!!" → INTERNE NOTIZ, extrahiere Region als context
+
+3. **LINKS zu Standortübersichten** (Fallback-Info):
+   - URLs zu Standortlisten → Für "falls Standort nicht passt"
+
 **Zu extrahieren:**
-- Standort-Namen
+- Standort-Namen (echte Einrichtungen)
 - Adressen (Straße, PLZ, Stadt)
+- Region/Gebiet als `region_context` (für Preamble)
 - Gebäudebezeichnungen
 - Zugehörige Stationen/Abteilungen pro Standort
 
@@ -36,19 +52,47 @@ Extrahiere zusätzlich einen `display_name` - das ist ein kurzer, eleganter Name
 ```json
 "sites": [
   {
-    "label": "Haus am Giesinger Bahnhof, München-Giesing",
-    "display_name": "München-Giesing",
-    "stations": ["Palliativmedizin", "Intensivstation"],
-    "source": {"page_id": 3, "prompt_id": 9}
-  },
-  {
-    "label": "Friedrich-Engels-Bogen 4, 81735 München",
-    "display_name": "München-Neuperlach",
+    "label": "Kita Springmäuse",
+    "address": "Stollberger Straße 25-27, 12627 Berlin",
+    "region_context": "Berlin Hellersdorf",
     "stations": [],
-    "source": {"page_id": 3, "prompt_id": 11}
+    "source": {"page_id": 3, "prompt_id": 9}
   }
-]
+],
+"region_context": "Region Marzahn Hellersdorf",
+"standort_fallback_url": "https://www.example.de/standorte/"
 ```
+
+**BEISPIEL - Korrekte Extraktion:**
+
+Input:
+```
+- "!!!Bitte erwähnen, dass es Region Marzahn Hellersdorf ist!!!"
+- "Kita Springmäuse, Stollberger Straße 25-27, 12627 Berlin"
+- "Link zur Standortübersicht: https://example.de/standorte/"
+```
+
+Output:
+```json
+{
+  "sites": [
+    {
+      "label": "Kita Springmäuse",
+      "address": "Stollberger Straße 25-27, 12627 Berlin",
+      "region_context": "Berlin Marzahn-Hellersdorf"
+    }
+  ],
+  "region_context": "Region Marzahn Hellersdorf",
+  "standort_fallback_url": "https://example.de/standorte/",
+  "site_count": 1
+}
+```
+
+→ Da NUR 1 echter Standort: Generiere Boolean-Frage mit Region in Preamble:
+   "Wir sind in Berlin Marzahn-Hellersdorf, genauer gesagt in der Kita Springmäuse. Passt das für Sie?"
+
+→ Bei 2+ Standorten: Generiere Choice-Frage:
+   "Wir haben mehrere Standorte in [Region]. Haben Sie eine Präferenz?"
 
 ### 2. Abteilungen & Stationen
 
@@ -186,7 +230,18 @@ Gib NUR valides JSON zurück:
 
 ```json
 {
-  "sites": [...],
+  "sites": [
+    {
+      "label": "Name der Einrichtung",
+      "address": "Straße, PLZ Stadt",
+      "region_context": "Region/Bezirk (falls bekannt)",
+      "stations": [],
+      "source": {"page_id": 1, "prompt_id": 1}
+    }
+  ],
+  "site_count": 1,
+  "region_context": "Übergreifende Region (falls genannt)",
+  "standort_fallback_url": "URL zur Standortübersicht (falls vorhanden)",
   "all_departments": [...],
   "priorities": [...],
   "roles": [...],
@@ -195,6 +250,18 @@ Gib NUR valides JSON zurück:
   "protocol_questions": [...]
 }
 ```
+
+### Standort-Frage generieren (site_count basiert):
+
+- **site_count = 1**: Boolean-Frage
+  → "Wir sind in [region_context], genauer in [site.label]. Passt das für Sie?"
+  
+- **site_count >= 2**: Choice-Frage
+  → "Wir haben [site_count] Standorte in [region_context]. Haben Sie eine Präferenz?"
+  → Options: [site1.label, site2.label, ...]
+  
+- **site_count = 0 aber standort_fallback_url**: Info
+  → "Hier finden Sie unsere Standorte: [url]"
 
 ## Wichtige Regeln
 

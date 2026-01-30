@@ -1,0 +1,432 @@
+{
+  "pipeline": "LEGACY",
+  "protocol_file": "test_data4.json",
+  "protocol_name": "Pflegefachkräfte",
+  "questions": [
+    {
+      "id": "mh_pflegefachmann_frau",
+      "question": "Können Sie mir etwas zu folgendem Punkt sagen: Pflegefachmann /-frau?",
+      "type": "string",
+      "phase": null,
+      "preamble": null,
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Rahmen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Must-Have: Pflegefachmann /-frau",
+      "category": "standardqualifikationen",
+      "category_order": 1,
+      "slot_config": {
+        "fills_slot": "qualifikation",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": {
+        "is_gate": true,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": [
+          "qualifikation"
+        ],
+        "condition": null,
+        "context_triggers": null
+      },
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "Pflegefachmann /-frau",
+        "source_type": "must_have",
+        "category": "other"
+      }
+    },
+    {
+      "id": "arbeitszeit_consolidated",
+      "question": "Haben Sie eine Präferenz bezüglich des Arbeitszeitmodells?",
+      "type": "choice",
+      "phase": null,
+      "preamble": "Ich möchte kurz auf das Arbeitszeitmodell eingehen. Teilzeit: flexibel. Vollzeit: 39 Std/ Woche. vollzeit='39 Std/Woche' teilzeit='flexibel'.",
+      "options": [
+        "Vollzeit",
+        "Teilzeit",
+        "Bin flexibel"
+      ],
+      "conversation_flow": null,
+      "required": true,
+      "priority": 2,
+      "group": "Rahmen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Konsolidierte Arbeitszeit-Frage",
+      "category": "rahmenbedingungen",
+      "category_order": 2,
+      "slot_config": {
+        "fills_slot": "dienstmodell",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": {
+        "is_gate": false,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": null,
+        "condition": null,
+        "context_triggers": {
+          "keywords_to_follow_up": [
+            "IMC",
+            "Intensiv",
+            "ITS",
+            "Intensivstation"
+          ]
+        }
+      },
+      "conversation_hints": null,
+      "metadata": {
+        "category": "arbeitszeit",
+        "source_type": "consolidated"
+      }
+    },
+    {
+      "id": "pq_79_190",
+      "question": "genaue Adresse der Bewerber erfragen!",
+      "type": "string",
+      "phase": null,
+      "preamble": null,
+      "options": [],
+      "conversation_flow": null,
+      "required": true,
+      "priority": 2,
+      "group": "Präferenzen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Protocol Question (Page 79)",
+      "category": "kontaktinformationen",
+      "category_order": 2,
+      "slot_config": {
+        "fills_slot": "address",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "genaue Adresse der Bewerber erfragen!",
+        "source_type": "protocol_question",
+        "category": "other"
+      }
+    },
+    {
+      "id": "pq_80_192",
+      "question": "Schichtzeiten: individuelle Anpassungen möglich",
+      "type": "string",
+      "phase": null,
+      "preamble": null,
+      "options": null,
+      "conversation_flow": null,
+      "required": false,
+      "priority": 2,
+      "group": "Präferenzen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Protocol Question (Page 80)",
+      "category": "rahmenbedingungen",
+      "category_order": 2,
+      "slot_config": null,
+      "gate_config": {
+        "is_gate": false,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": null,
+        "condition": null,
+        "context_triggers": {
+          "keywords_to_follow_up": [
+            "Nacht",
+            "Nachtdienst",
+            "Schicht"
+          ]
+        }
+      },
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "Schichtzeiten: individuelle Anpassungen möglich",
+        "source_type": "protocol_question",
+        "category": "schichten"
+      }
+    },
+    {
+      "id": "site_multiple",
+      "question": "Haben Sie bereits eine Präferenz für einen bestimmten Standort?",
+      "type": "choice",
+      "phase": null,
+      "preamble": "Was ist Ihnen bei der Wahl des Standorts wichtig:",
+      "options": [
+        "Auerbachstraße 110, 70376 Stuttgart",
+        "Hohenheimerstraße 21, 70184 Stuttgart",
+        "Gerokstraße 31, 70184 Stuttgart"
+      ],
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Standort",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "3 Standorte verfügbar",
+      "category": "standort",
+      "category_order": 3,
+      "slot_config": {
+        "fills_slot": "standort",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": {
+        "is_gate": false,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": null,
+        "condition": null,
+        "context_triggers": {
+          "keywords_to_follow_up": [
+            "IMC",
+            "Intensiv",
+            "ITS",
+            "Intensivstation"
+          ]
+        }
+      },
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "Auerbachstraße 110, 70376 Stuttgart, Hohenheimerstraße 21, 70184 Stuttgart, Gerokstraße 31, 70184 Stuttgart",
+        "source_type": "site",
+        "category": "location"
+      }
+    },
+    {
+      "id": "pq_79_188",
+      "question": "Erfragen: In welcher Fachabteilung möchten Sie gerne arbeiten? (im Kommentarfeld eintragen )",
+      "type": "choice",
+      "phase": null,
+      "preamble": null,
+      "options": [],
+      "conversation_flow": null,
+      "required": true,
+      "priority": 2,
+      "group": "Präferenzen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Protocol Question (Page 79)",
+      "category": "einsatzbereiche",
+      "category_order": 4,
+      "slot_config": {
+        "fills_slot": "einsatzbereich",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "Erfragen: In welcher Fachabteilung möchten Sie gerne arbeiten? (im Kommentarfeld eintragen )",
+        "source_type": "protocol_question",
+        "category": "departments"
+      }
+    },
+    {
+      "id": "alt_fuer_den_bereich_op_mfa_qualifizierungsmassnahme_nach_curriculum_der_bundesaerztekammer_im_hause_moeglich",
+      "question": "Wie sieht Ihre Erfahrung mit Für den Bereich OP: MFA + Qualifizierungsmaßnahme nach Curriculum der Bundesärztekammer im Hause möglich aus?",
+      "type": "boolean",
+      "phase": null,
+      "preamble": null,
+      "options": null,
+      "conversation_flow": null,
+      "required": false,
+      "priority": 2,
+      "group": "Präferenzen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Alternative: Für den Bereich OP: MFA + Qualifizierungsmaßnahme nach Curriculum der Bundesärztekammer im Hause möglich",
+      "category": "einsatzbereiche",
+      "category_order": 4,
+      "slot_config": null,
+      "gate_config": {
+        "is_gate": false,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": null,
+        "condition": null,
+        "context_triggers": {
+          "keywords_to_follow_up": [
+            "OP",
+            "Operation",
+            "Operationssaal"
+          ]
+        }
+      },
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "Für den Bereich OP: MFA + Qualifizierungsmaßnahme nach Curriculum der Bundesärztekammer im Hause möglich",
+        "source_type": "alternative",
+        "category": "departments"
+      }
+    },
+    {
+      "id": "departments",
+      "question": "In welchem Bereich möchten Sie gerne arbeiten?",
+      "type": "choice",
+      "phase": null,
+      "preamble": "Welcher Bereich kommt für Sie in Frage:",
+      "options": [
+        "Anästhesie",
+        "Bronchologie",
+        "Chirurgische Station (Plastisch)",
+        "Dialyse",
+        "Endoskopie",
+        "Gastroenterologie",
+        "Geriatrie",
+        "Gynäkologie (Kreißsaal, Gynäkologische Ambulanz, Mutter-Kind-Zentrum, Gynäkologisch-Onkologisch)",
+        "Herzkatheterlabor",
+        "IMC",
+        "Intensivmedizin",
+        "Kardiologie, Herzchirurgie",
+        "Nephrologie",
+        "OP",
+        "OP und ANÄ (Plastische)",
+        "Onkologie",
+        "Orthopädie & Unfallchirurgie",
+        "Palliativmedizin",
+        "Pneumologie",
+        "Psychosomatik",
+        "Rehabilitation",
+        "Schlaflabor",
+        "Stroke Unit",
+        "Thoraxchirurgie"
+      ],
+      "conversation_flow": null,
+      "required": false,
+      "priority": 2,
+      "group": "Einsatzbereich",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "24 Abteilungen verfügbar",
+      "category": "einsatzbereiche",
+      "category_order": 4,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "Anästhesie, Bronchologie, Chirurgische Station (Plastisch), Dialyse, Endoskopie, Gastroenterologie, Geriatrie, Gynäkologie (Kreißsaal, Gynäkologische Ambulanz, Mutter-Kind-Zentrum, Gynäkologisch-Onkologisch), Herzkatheterlabor, IMC, Intensivmedizin, Kardiologie, Herzchirurgie, Nephrologie, OP, OP und ANÄ (Plastische), Onkologie, Orthopädie & Unfallchirurgie, Palliativmedizin, Pneumologie, Psychosomatik, Rehabilitation, Schlaflabor, Stroke Unit, Thoraxchirurgie",
+        "source_type": "departments",
+        "category": "departments"
+      }
+    },
+    {
+      "id": "pq_79_188",
+      "question": "In welcher Fachabteilung möchten Sie gerne arbeiten?",
+      "type": "string",
+      "phase": null,
+      "preamble": null,
+      "options": null,
+      "conversation_flow": null,
+      "required": false,
+      "priority": 2,
+      "group": "Qualifikation",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Protocol Question (Page 79)",
+      "category": "einsatzbereiche",
+      "category_order": 4,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "In welcher Fachabteilung möchten Sie gerne arbeiten?",
+        "source_type": "protocol_question",
+        "category": "qualifications"
+      }
+    },
+    {
+      "id": "pq_80_198",
+      "question": "Angelehnt an den TV-ÖD P Tabelle",
+      "type": "string",
+      "phase": null,
+      "preamble": null,
+      "options": null,
+      "conversation_flow": null,
+      "required": false,
+      "priority": 2,
+      "group": "Präferenzen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Protocol Question (Page 80)",
+      "category": "zusaetzliche_informationen",
+      "category_order": 6,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "Angelehnt an den TV-ÖD P Tabelle",
+        "source_type": "protocol_question",
+        "category": "other"
+      }
+    }
+  ],
+  "meta": {
+    "schema_version": "1.0",
+    "generated_at": "2026-01-30T11:04:34.537365",
+    "generator": "voiceki-python-question-builder@1.0.0",
+    "policies_applied": [
+      "slot_dependency: mh_pflegefachmann_frau -> qualifikation",
+      "slot_dependency: pq_79_190 -> address",
+      "slot_dependency: arbeitszeit_consolidated -> dienstmodell",
+      "slot_dependency: pq_79_188 -> einsatzbereich",
+      "slot_dependency: site_multiple -> standort",
+      "gate_sequence: mh_pflegefachmann_frau",
+      "keyword_trigger: arbeitszeit_consolidated -> Intensiv",
+      "keyword_trigger: alt_fuer_den_bereich_op_mfa_qualifizierungsmassnahme_nach_curriculum_der_bundesaerztekammer_im_hause_moeglich -> OP",
+      "keyword_trigger: site_multiple -> Intensiv",
+      "keyword_trigger: pq_80_192 -> Nachtdienst"
+    ]
+  },
+  "_duration": 46.1,
+  "_question_count": 10,
+  "_generated_at": "2026-01-30T11:04:34.584924"
+}

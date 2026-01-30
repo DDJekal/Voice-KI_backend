@@ -27,6 +27,7 @@ from ..types import (
     ProtocolQuestion,
     GateConfig
 )
+from .structure import _extract_location_info  # Für Standort-Extraktion
 
 logger = logging.getLogger(__name__)
 
@@ -795,60 +796,107 @@ def generate_all_questions(extract_result: ExtractResult) -> List[Question]:
     if extract_result.sites and len(extract_result.sites) > 0:
         location_preamble = _get_preamble("location", is_gate=False)
         
+        # Extrahiere Location-Infos für alle Sites
+        locations = []
+        for site in extract_result.sites:
+            # Nutze address falls vorhanden, sonst label
+            address_to_parse = getattr(site, 'address', None) or site.label or ''
+            loc_info = _extract_location_info(address_to_parse)
+            # Region aus site.region_context oder extrahiertem district
+            region = getattr(site, 'region_context', None) or loc_info.get('district')
+            loc_info['region'] = region
+            loc_info['einrichtung'] = site.label  # Einrichtungsname separat speichern
+            locations.append(loc_info)
+        
+        # Prüfe ob es region_context auf extract_result-Ebene gibt
+        global_region = getattr(extract_result, 'region_context', None)
+        
+        # Extrahiere Stadtteil aus global_region falls vorhanden (z.B. "Region Marzahn Hellersdorf" -> "Marzahn-Hellersdorf")
+        if global_region:
+            global_region = global_region.replace("Region ", "").replace(" ", "-").strip()
+        
         # Einfache Standort-Frage generieren
         if len(extract_result.sites) == 1:
             site = extract_result.sites[0]
-            site_raw = site.label or 'unbekannter Standort'
+            loc = locations[0]
             
-            # NEU: Nutze LLM-generiertes display_name
-            site_display = _get_site_display_name(site)
+            # Extrahiere Stadt aus Adresse - suche nach bekannten Stadtmustern
+            city = loc.get('city', '')
+            
+            # Fix: Wenn city die volle Adresse enthält, extrahiere nur den Stadtnamen
+            # Suche nach PLZ-Stadt Muster (z.B. "12627 Berlin")
+            if city:
+                plz_city_match = re.search(r'\d{5}\s+([A-ZÄÖÜa-zäöü\-]+)', city)
+                if plz_city_match:
+                    city = plz_city_match.group(1)
+                # Fallback: Suche nach bekannten Stadtnamen
+                elif 'Berlin' in city:
+                    city = 'Berlin'
+                elif 'München' in city:
+                    city = 'München'
+                elif 'Hamburg' in city:
+                    city = 'Hamburg'
+            
+            # Bestimme den besten Standort-Text für die Frage
+            # Priorität: Stadt + Region > Stadt + Stadtteil > nur Stadt > Einrichtungsname
+            region = global_region or loc.get('region') or loc.get('district')
+            
+            if city and region:
+                location_text = f"{city} {region}"
+            elif city:
+                location_text = city
+            elif region:
+                location_text = region
+            else:
+                # Fallback auf Einrichtungsname
+                location_text = site.label or 'unbekannter Standort'
+            
+            # Volle Adresse für Kontext (Einrichtung + Adresse)
+            einrichtung = loc.get('einrichtung', site.label)
+            full_address = getattr(site, 'address', None) or loc.get('full_address', site.label)
+            context_text = f"{einrichtung}, {full_address}" if einrichtung != full_address else full_address
             
             questions.append(Question(
                 id="site_single",
-                question=f"Unser Standort ist in {site_display}. Passt das für Sie?",
+                question=f"Unser Standort ist in {location_text}. Passt das für Sie?",
                 type=QuestionType.BOOLEAN,
                 required=True,
                 priority=1,
                 group=QuestionGroup.STANDORT,
-                context=f"Standort: {site_raw}",  # Volle Adresse im Kontext behalten
+                context=f"Vollständige Adresse: {context_text}",
                 preamble=location_preamble,
-                metadata={
-                    "source_text": site_raw, 
-                    "display_name": site_display,
-                    "source_type": "site", 
-                    "category": "location"
-                }
+                metadata={"source_text": context_text, "source_type": "site", "category": "location"}
             ))
-            logger.info(f"  ✓ Site: '{site_raw}' → Display: '{site_display}'")
+            logger.info(f"  ✓ Site: '{site.label}' → Location: '{location_text}'")
         else:
-            # Mehrere Standorte - nutze LLM-generierte display_names
-            site_names_display = []
-            site_names_raw = []
+            # Mehrere Standorte - nutze Städte oder Straßen als Optionen
+            cities = set(loc.get('city') for loc in locations if loc.get('city'))
             
-            for i, s in enumerate(extract_result.sites):
-                raw = s.label or f"Standort {i+1}"
-                display = _get_site_display_name(s)
-                site_names_raw.append(raw)
-                site_names_display.append(display)
+            if len(cities) == 1:
+                # Alle in derselben Stadt → Straßen als Optionen
+                site_options = [loc.get('street') or extract_result.sites[i].label 
+                               for i, loc in enumerate(locations)]
+                city_name = list(cities)[0]
+                preamble = f"Wir haben mehrere Standorte in {city_name}. Haben Sie eine Präferenz?"
+            else:
+                # Verschiedene Städte → Städte als Optionen
+                site_options = [loc.get('city') or extract_result.sites[i].label 
+                               for i, loc in enumerate(locations)]
+                preamble = None
             
             questions.append(Question(
                 id="site_multiple",
                 question="Haben Sie bereits eine Präferenz für einen bestimmten Standort?",
                 type=QuestionType.CHOICE,
-                options=site_names_display,  # LLM-generierte elegante Namen
+                options=site_options,
                 required=True,
                 priority=1,
                 group=QuestionGroup.STANDORT,
-                context=f"{len(site_names_display)} Standorte verfügbar",
-                preamble=location_preamble,
-                metadata={
-                    "source_text": ', '.join(site_names_raw),
-                    "display_names": site_names_display,
-                    "source_type": "site", 
-                    "category": "location"
-                }
+                context=f"{len(site_options)} Standorte verfügbar",
+                preamble=preamble or location_preamble,
+                metadata={"source_text": ', '.join(site_options), "source_type": "site", "category": "location"}
             ))
-            logger.info(f"  ✓ Sites: {len(site_names_display)} locations with LLM display names")
+            logger.info(f"  ✓ Sites: {len(site_options)} locations")
         question_id_counter += 1
     
     logger.info(f"  ✓ Generated location questions")

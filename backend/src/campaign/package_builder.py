@@ -80,6 +80,11 @@ class CampaignPackageBuilder:
         # Convert to dict - aber nur mit benötigten Feldern!
         questions = self._trim_questions_for_export(questions_catalog)
         
+        # Knowledge-Base extrahieren (für Rückfragen des Bewerbers)
+        knowledge_base = getattr(questions_catalog, 'knowledge_base', None)
+        if knowledge_base:
+            print(f"   Knowledge-Base: {len(knowledge_base)} Kategorien")
+        
         # 3. Extrahiere Prioritäten
         print("3. Extrahiere Prioritaeten...")
         priorities = self._extract_priorities(company, questions)
@@ -119,7 +124,10 @@ class CampaignPackageBuilder:
             
             # NEU: Separate Arrays für ElevenLabs Template-Variablen
             "gate_questions": gate_questions,
-            "preference_questions": preference_questions
+            "preference_questions": preference_questions,
+            
+            # Knowledge-Base für Rückfragen des Bewerbers
+            "knowledge_base": knowledge_base or {}
         }
         
         # 6. Validierung
@@ -171,6 +179,11 @@ class CampaignPackageBuilder:
         # Convert to dict - aber nur mit benötigten Feldern!
         questions = self._trim_questions_for_export(questions_catalog)
         
+        # Knowledge-Base extrahieren (für Rückfragen des Bewerbers)
+        knowledge_base = getattr(questions_catalog, 'knowledge_base', None)
+        if knowledge_base:
+            print(f"   Knowledge-Base: {len(knowledge_base)} Kategorien")
+        
         # 2. Extrahiere Prioritäten
         print("2️⃣ Extrahiere Prioritaeten...")
         priorities = self._extract_priorities(company_data, questions)
@@ -210,7 +223,10 @@ class CampaignPackageBuilder:
             
             # NEU: Separate Arrays für ElevenLabs Template-Variablen
             "gate_questions": gate_questions,
-            "preference_questions": preference_questions
+            "preference_questions": preference_questions,
+            
+            # Knowledge-Base für Rückfragen des Bewerbers
+            "knowledge_base": knowledge_base or {}
         }
         
         # 5. Validierung
@@ -305,7 +321,7 @@ class CampaignPackageBuilder:
         EXPORT_FIELDS = {
             'id', 'question', 'preamble', 'group', 'context',
             'category', 'category_order', 'type', 'options',
-            'priority', 'help_text', 'gate_config'  # NEU: für ElevenLabs Gate/Preference Filtering
+            'priority', 'help_text', 'gate_config'
         }
         
         # Trimme Questions

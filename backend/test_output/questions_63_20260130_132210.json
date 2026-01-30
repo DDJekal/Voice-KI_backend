@@ -1,0 +1,241 @@
+{
+  "protocol_id": 63,
+  "protocol_name": "Projektleiter",
+  "processed_at": "2026-01-30T12:22:10.648640Z",
+  "question_count": 5,
+  "questions": [
+    {
+      "id": "berufserfahrung_deutschland",
+      "question": "Wie lange arbeiten Sie schon in Deutschland in diesem Bereich?",
+      "type": "string",
+      "phase": 2,
+      "preamble": null,
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Qualifikation",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Mindestens 2 Jahre in Deutschland erforderlich",
+      "category": null,
+      "category_order": null,
+      "slot_config": null,
+      "gate_config": {
+        "is_gate": true,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": null,
+        "condition": null,
+        "context_triggers": null
+      },
+      "conversation_hints": null,
+      "metadata": null
+    },
+    {
+      "id": "deutschkenntnisse",
+      "question": "Ist Deutsch Ihre Muttersprache?",
+      "type": "string",
+      "phase": 2,
+      "preamble": null,
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Qualifikation",
+      "help_text": "Wenn nein: 'Wie würden Sie Ihr Deutschniveau einschätzen - B1, B2 oder C1?'",
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Mindestens B2 erforderlich",
+      "category": null,
+      "category_order": null,
+      "slot_config": null,
+      "gate_config": {
+        "is_gate": true,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": null,
+        "condition": null,
+        "context_triggers": null
+      },
+      "conversation_hints": null,
+      "metadata": null
+    },
+    {
+      "id": "qualifikation",
+      "question": "Welche Ausbildung haben Sie abgeschlossen?",
+      "type": "string",
+      "phase": 2,
+      "preamble": null,
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Qualifikation",
+      "help_text": "Bei Unklarheit: 'Haben Sie eine Ausbildung im Elektrobereich?'",
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Akzeptiert: Studium Elektrotechnik oder verwandter Bereich, Ausbildung Elektriker/Elektrotechniker/Elektroniker, Elektrofachkraft",
+      "category": null,
+      "category_order": null,
+      "slot_config": null,
+      "gate_config": {
+        "is_gate": true,
+        "is_alternative": true,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": null,
+        "condition": null,
+        "context_triggers": null
+      },
+      "conversation_hints": null,
+      "metadata": null
+    },
+    {
+      "id": "fuehrerschein",
+      "question": "Haben Sie einen Führerschein?",
+      "type": "boolean",
+      "phase": 2,
+      "preamble": null,
+      "options": null,
+      "conversation_flow": null,
+      "required": false,
+      "priority": 2,
+      "group": "Qualifikation",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Wünschenswert, aber nicht zwingend erforderlich",
+      "category": null,
+      "category_order": null,
+      "slot_config": null,
+      "gate_config": {
+        "is_gate": false,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": null,
+        "condition": null,
+        "context_triggers": null
+      },
+      "conversation_hints": null,
+      "metadata": null
+    },
+    {
+      "id": "arbeitszeit_vollzeit",
+      "question": "Die Stelle ist in Vollzeit ausgeschrieben. Passt das für Sie?",
+      "type": "boolean",
+      "phase": 4,
+      "preamble": null,
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 2,
+      "group": "Rahmen",
+      "help_text": "Bei nein: 'Wie viele Stunden pro Woche wären für Sie ideal?'",
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Vollzeit-Position",
+      "category": null,
+      "category_order": null,
+      "slot_config": null,
+      "gate_config": {
+        "is_gate": false,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": null,
+        "condition": null,
+        "context_triggers": null
+      },
+      "conversation_hints": null,
+      "metadata": null
+    }
+  ],
+  "knowledge_base": {
+    "salary_info": {
+      "grundgehalt": "Attraktives Grundgehalt",
+      "erfolgsbeteiligung": "leistungsabhängige Erfolgsbeteiligung möglich",
+      "mindestgarantie": "Gaber zahlt min. 10% mehr als der jetzige Arbeitgeber",
+      "source": "protocol"
+    },
+    "work_conditions": [],
+    "standort": {
+      "label": "Bünde",
+      "adresse": "Am Fichtenkamp 7-9, Bünde"
+    },
+    "company_culture": [
+      {
+        "text": "Traditionsunternehmen seit 1995",
+        "source": "protocol"
+      },
+      {
+        "text": "Eigenfinanziert - stehen sicher am Markt und finanzieren sich aus eigener Kraft",
+        "source": "protocol"
+      },
+      {
+        "text": "Full-Service-Unternehmen: übernehmen jeden Schritt beim Kunden von Anschluss und Transport bis zu den regelmäßigen Wartungen",
+        "source": "protocol"
+      },
+      {
+        "text": "Stehen für nachhaltige Zukunft und erneuerbare Energien",
+        "source": "protocol"
+      },
+      {
+        "text": "Deutsche Qualität: Produktion in Deutschland mit schnellen Lieferzeiten und Kompatibilität in allen deutschen Mittelspannungsnetzen",
+        "source": "protocol"
+      }
+    ],
+    "company_benefits": [
+      "Unbefristeter Arbeitsvertrag",
+      "Leistungsabhängige Erfolgsbeteiligung möglich",
+      "Mindestens 10% mehr als aktueller Arbeitgeber",
+      {
+        "text": "Breit aufgestellt in verschiedenen Einsatzfeldern: Photovoltaik, Windkraft, Unternehmen, Netzbetreiber, E-Mobilität (Ladestationen)",
+        "source": "protocol"
+      },
+      {
+        "text": "Arbeit an großen Solarparks und großen Projekten (nicht nur kleine Photovoltaik-Anlagen)",
+        "source": "protocol"
+      }
+    ],
+    "location_priorities": [],
+    "internal_notes": [
+      {
+        "text": "AP: Hergert",
+        "category": "contact"
+      },
+      {
+        "text": "hergert@faber-etec.de",
+        "category": "contact"
+      }
+    ],
+    "general_info": [
+      {
+        "text": "Spezialisiert auf große Projekte im Energiebereich",
+        "source": "protocol"
+      }
+    ]
+  },
+  "_duration_seconds": 7.8,
+  "_generated_locally": true,
+  "_pipeline": "UNIFIED"
+}

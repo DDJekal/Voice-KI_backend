@@ -10,7 +10,7 @@ import logging
 from pathlib import Path
 from typing import Dict, Any, List
 
-from ..openai_adapter import call_openai_async
+from ..llm_adapter import call_llm_async
 from ..schemas import validate_extract_result
 from ..types import ExtractResult
 from ...config import get_settings
@@ -32,13 +32,12 @@ async def extract_qualifications(protocol: Dict[str, Any]) -> Dict[str, Any]:
     logger.info("🔍 Stage 1/3: Extracting qualifications...")
     
     try:
-        response = await call_openai_async(
-            model=settings.openai_model,
-            temperature=0.7,
+        response = await call_llm_async(
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": json.dumps({"protocol": protocol}, ensure_ascii=False)}
             ],
+            temperature=0.7,
             response_format={"type": "json_object"}
         )
         
@@ -79,13 +78,12 @@ async def extract_rahmen(protocol: Dict[str, Any]) -> Dict[str, Any]:
     logger.info("🔍 Stage 2/3: Extracting rahmenbedingungen...")
     
     try:
-        response = await call_openai_async(
-            model=settings.openai_model,
-            temperature=0.7,
+        response = await call_llm_async(
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": json.dumps({"protocol": protocol}, ensure_ascii=False)}
             ],
+            temperature=0.7,
             response_format={"type": "json_object"}
         )
         
@@ -116,13 +114,12 @@ async def extract_info(protocol: Dict[str, Any]) -> Dict[str, Any]:
     logger.info("🔍 Stage 3/3: Extracting organizational info...")
     
     try:
-        response = await call_openai_async(
-            model=settings.openai_model,
-            temperature=0.7,
+        response = await call_llm_async(
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": json.dumps({"protocol": protocol}, ensure_ascii=False)}
             ],
+            temperature=0.7,
             response_format={"type": "json_object"}
         )
         
@@ -239,6 +236,10 @@ async def extract_multi_stage(protocol: Dict[str, Any]) -> ExtractResult:
         "roles": info_data.get("roles", []),
         "culture_notes": info_data.get("culture_notes", []),
         "department_contacts": info_data.get("department_contacts", {}),
+        
+        # NEU: Region-Kontext für Standort-Fragen
+        "region_context": info_data.get("region_context"),
+        "standort_fallback_url": info_data.get("standort_fallback_url"),
         
         # From rahmen
         "constraints": merge_constraints(rahmen_data),

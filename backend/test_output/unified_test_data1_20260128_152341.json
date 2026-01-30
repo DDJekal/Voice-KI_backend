@@ -1,0 +1,219 @@
+{
+  "pipeline": "UNIFIED",
+  "protocol_file": "test_data1.json",
+  "protocol_name": "Projektleiter",
+  "questions": [
+    {
+      "id": "deutschkenntnisse",
+      "question": "Wie würden Sie Ihre Deutschkenntnisse selbst einschätzen?",
+      "type": "string",
+      "phase": null,
+      "preamble": "Kurz zur Einordnung bezüglich der Sprachkenntnisse:",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Qualifikation",
+      "help_text": "Bei Unsicherheit: 'Können Sie technische Gespräche auf Deutsch führen und technische Dokumentation verstehen?'",
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Mindestens B2-Level erforderlich",
+      "category": null,
+      "category_order": null,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "mindest_level": "B2",
+        "info_pool": {
+          "schichtzeiten": {},
+          "verguetung": {
+            "grundgehalt": "Attraktives Grundgehalt",
+            "erfolgsbeteiligung": "leistungsabhängige Erfolgsbeteiligung möglich",
+            "mindestaufschlag": "min. 10% mehr als jetziger Arbeitgeber",
+            "arbeitgeber_info": "Gaber zahlt überdurchschnittlich"
+          },
+          "benefits": [],
+          "prioritaeten": [],
+          "unternehmen": [
+            "Traditionsunternehmen seit 1995",
+            "Eigenfinanziert - stehen sicher am Markt ohne Fremdfinanzierung",
+            "Produktion in Deutschland mit schnellen Lieferzeiten",
+            "Kompatibel in allen deutschen Mittelspannungsnetzen",
+            "Fokus auf nachhaltige Zukunft und erneuerbare Energien",
+            "Full-Service-Unternehmen: komplette Abwicklung von Anschluss bis Wartung",
+            "Breit aufgestellt: Photovoltaik, Windkraft, Unternehmen, Netzbetreiber, E-Mobilität (Ladestationen)",
+            "Spezialisiert auf große Solarparks und Großprojekte"
+          ],
+          "ausnahmen": []
+        }
+      }
+    },
+    {
+      "id": "qualifikation",
+      "question": "Welche Ausbildung oder welches Studium haben Sie abgeschlossen?",
+      "type": "string",
+      "phase": null,
+      "preamble": "Damit ich Ihren fachlichen Hintergrund einordnen kann:",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Qualifikation",
+      "help_text": "Bei unklarer Antwort nachfragen: 'Ist das eine technische/elektrotechnische Ausbildung?'",
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "VALIDIERUNG: Zwingend: Studium Elektrotechnik oder eng verwandter Bereich. ALTERNATIV akzeptiert: Ausbildung zum Elektriker/Elektrotechniker/Elektroniker oder Elektrofachkraft. Mindestens eines erforderlich.",
+      "category": null,
+      "category_order": null,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "konsolidiert_aus": [
+          "Studium Elektrotechnik oder in einem eng verwandten Bereich",
+          "Ausbildung zum Elektriker/ Elektrotechniker/ Elektroniker",
+          "Ausbildung zur Elektrofachkraft"
+        ],
+        "zwingend": "Studium Elektrotechnik oder verwandt",
+        "alternativen": [
+          "Elektriker",
+          "Elektrotechniker",
+          "Elektroniker",
+          "Elektrofachkraft"
+        ],
+        "info_pool": {
+          "schichtzeiten": {},
+          "verguetung": {
+            "grundgehalt": "Attraktives Grundgehalt",
+            "erfolgsbeteiligung": "leistungsabhängige Erfolgsbeteiligung möglich",
+            "mindestaufschlag": "min. 10% mehr als jetziger Arbeitgeber",
+            "arbeitgeber_info": "Gaber zahlt überdurchschnittlich"
+          },
+          "benefits": [],
+          "prioritaeten": [],
+          "unternehmen": [
+            "Traditionsunternehmen seit 1995",
+            "Eigenfinanziert - stehen sicher am Markt ohne Fremdfinanzierung",
+            "Produktion in Deutschland mit schnellen Lieferzeiten",
+            "Kompatibel in allen deutschen Mittelspannungsnetzen",
+            "Fokus auf nachhaltige Zukunft und erneuerbare Energien",
+            "Full-Service-Unternehmen: komplette Abwicklung von Anschluss bis Wartung",
+            "Breit aufgestellt: Photovoltaik, Windkraft, Unternehmen, Netzbetreiber, E-Mobilität (Ladestationen)",
+            "Spezialisiert auf große Solarparks und Großprojekte"
+          ],
+          "ausnahmen": []
+        }
+      }
+    },
+    {
+      "id": "arbeitszeit",
+      "question": "Vollzeit - passt das für Sie?",
+      "type": "boolean",
+      "phase": null,
+      "preamble": "Zur Arbeitszeit:",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 2,
+      "group": "Rahmen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Position ist als Vollzeitstelle ausgeschrieben",
+      "category": null,
+      "category_order": null,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "info_pool": {
+          "schichtzeiten": {},
+          "verguetung": {
+            "grundgehalt": "Attraktives Grundgehalt",
+            "erfolgsbeteiligung": "leistungsabhängige Erfolgsbeteiligung möglich",
+            "mindestaufschlag": "min. 10% mehr als jetziger Arbeitgeber",
+            "arbeitgeber_info": "Gaber zahlt überdurchschnittlich"
+          },
+          "benefits": [],
+          "prioritaeten": [],
+          "unternehmen": [
+            "Traditionsunternehmen seit 1995",
+            "Eigenfinanziert - stehen sicher am Markt ohne Fremdfinanzierung",
+            "Produktion in Deutschland mit schnellen Lieferzeiten",
+            "Kompatibel in allen deutschen Mittelspannungsnetzen",
+            "Fokus auf nachhaltige Zukunft und erneuerbare Energien",
+            "Full-Service-Unternehmen: komplette Abwicklung von Anschluss bis Wartung",
+            "Breit aufgestellt: Photovoltaik, Windkraft, Unternehmen, Netzbetreiber, E-Mobilität (Ladestationen)",
+            "Spezialisiert auf große Solarparks und Großprojekte"
+          ],
+          "ausnahmen": []
+        }
+      }
+    },
+    {
+      "id": "standort",
+      "question": "Unser Standort ist in Bünde. Passt das für Sie?",
+      "type": "boolean",
+      "phase": null,
+      "preamble": null,
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 2,
+      "group": "Standort",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Vollständige Adresse: Am Fichtenkamp 7-9, Bünde",
+      "category": null,
+      "category_order": null,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "standort_count": 1,
+        "region_kontext": null,
+        "fallback_url": null,
+        "info_pool": {
+          "schichtzeiten": {},
+          "verguetung": {
+            "grundgehalt": "Attraktives Grundgehalt",
+            "erfolgsbeteiligung": "leistungsabhängige Erfolgsbeteiligung möglich",
+            "mindestaufschlag": "min. 10% mehr als jetziger Arbeitgeber",
+            "arbeitgeber_info": "Gaber zahlt überdurchschnittlich"
+          },
+          "benefits": [],
+          "prioritaeten": [],
+          "unternehmen": [
+            "Traditionsunternehmen seit 1995",
+            "Eigenfinanziert - stehen sicher am Markt ohne Fremdfinanzierung",
+            "Produktion in Deutschland mit schnellen Lieferzeiten",
+            "Kompatibel in allen deutschen Mittelspannungsnetzen",
+            "Fokus auf nachhaltige Zukunft und erneuerbare Energien",
+            "Full-Service-Unternehmen: komplette Abwicklung von Anschluss bis Wartung",
+            "Breit aufgestellt: Photovoltaik, Windkraft, Unternehmen, Netzbetreiber, E-Mobilität (Ladestationen)",
+            "Spezialisiert auf große Solarparks und Großprojekte"
+          ],
+          "ausnahmen": []
+        }
+      }
+    }
+  ],
+  "meta": {
+    "schema_version": "1.0",
+    "generated_at": "2026-01-28T15:24:15.280801",
+    "generator": "voiceki-python-question-builder@1.0.0",
+    "policies_applied": [
+      "unified_pipeline_3_prompts",
+      "total_questions: 4"
+    ]
+  },
+  "_duration": 13.6,
+  "_question_count": 4,
+  "_generated_at": "2026-01-28T15:24:15.280801"
+}

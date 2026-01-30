@@ -10,8 +10,9 @@ fastapi==0.115.0
 uvicorn[standard]==0.34.0
 python-multipart==0.0.20
 
-# OpenAI for Question Generation (REQUIRED!)
+# LLM APIs for Question Generation
 openai==1.57.0
+anthropic>=0.76.0  # Claude API (Primary Provider)
 
 # JSON Schema Validation
 jsonschema==4.23.0

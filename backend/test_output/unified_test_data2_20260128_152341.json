@@ -1,0 +1,278 @@
+{
+  "pipeline": "UNIFIED",
+  "protocol_file": "test_data2.json",
+  "protocol_name": "Leitungskraft für unsere Kita (mwd)",
+  "questions": [
+    {
+      "id": "deutschkenntnisse",
+      "question": "Wie würden Sie Ihre Deutschkenntnisse selbst einschätzen?",
+      "type": "string",
+      "phase": null,
+      "preamble": "Kurz zur Einordnung bezüglich der Sprachkenntnisse:",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Qualifikation",
+      "help_text": "Bei Unsicherheit: 'Haben Sie ein Zertifikat oder können Sie fließend Deutsch sprechen und schreiben?'",
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Mindestens B2 zwingend erforderlich",
+      "category": null,
+      "category_order": null,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "mindest_level": "B2",
+        "info_pool": {
+          "schichtzeiten": {},
+          "verguetung": {
+            "tarif": "Haustarif orientiert am TV-L Berlin",
+            "entgeltgruppe": "EG 10a",
+            "gehaltsspanne": {
+              "einstieg": "3.475€",
+              "maximum": "5.259€",
+              "bedingung": "Einstieg ohne einschlägige Leitungserfahrung"
+            }
+          },
+          "benefits": [
+            "30 Tage Jahresurlaub"
+          ],
+          "prioritaeten": [],
+          "unternehmen": [
+            "Kindertagesstätten für Kleinkind- und Vorschulalter",
+            "Einfühlsame und individuelle Begleitung und Förderung der Kinder",
+            "Offen für alle Kinder - unabhängig von kultureller Herkunft, Nationalität oder sozialer Situation",
+            "Inklusive Betreuung - mit oder ohne Beeinträchtigung oder Behinderung",
+            "Enge Zusammenarbeit mit den Familien als wichtiges Anliegen",
+            "Projekt 'Zukunft' - aufsuchendes Beratungs- und Unterstützungsangebot für Familien und Alleinerziehende in Kooperation mit FAB e.V."
+          ],
+          "ausnahmen": []
+        }
+      }
+    },
+    {
+      "id": "qualifikation",
+      "question": "Welche Ausbildung haben Sie abgeschlossen?",
+      "type": "string",
+      "phase": null,
+      "preamble": "Damit ich Ihren fachlichen Hintergrund einordnen kann:",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Qualifikation",
+      "help_text": "Bei Erzieher:in: 'Das ist grundsätzlich interessant, allerdings wäre diese Position dann nicht für die stellvertretende Leitung geeignet.'",
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "VALIDIERUNG: Zwingend: staatlich anerkannter Abschluss in einem sozialpädagogischen Beruf (z.B. Sozialpädagoge, Sozialarbeiter, Heilpädagoge). ALTERNATIV: Erzieher:innen (aber NICHT für stellvertretende Leitung geeignet).",
+      "category": null,
+      "category_order": null,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "konsolidiert_aus": [
+          "staatlich anerkannter Abschluss sozialpädagogisch",
+          "alternativ Erzieher:innen"
+        ],
+        "einschränkungen": {
+          "erzieher": "nicht für stellv. Leitung geeignet"
+        },
+        "info_pool": {
+          "schichtzeiten": {},
+          "verguetung": {
+            "tarif": "Haustarif orientiert am TV-L Berlin",
+            "entgeltgruppe": "EG 10a",
+            "gehaltsspanne": {
+              "einstieg": "3.475€",
+              "maximum": "5.259€",
+              "bedingung": "Einstieg ohne einschlägige Leitungserfahrung"
+            }
+          },
+          "benefits": [
+            "30 Tage Jahresurlaub"
+          ],
+          "prioritaeten": [],
+          "unternehmen": [
+            "Kindertagesstätten für Kleinkind- und Vorschulalter",
+            "Einfühlsame und individuelle Begleitung und Förderung der Kinder",
+            "Offen für alle Kinder - unabhängig von kultureller Herkunft, Nationalität oder sozialer Situation",
+            "Inklusive Betreuung - mit oder ohne Beeinträchtigung oder Behinderung",
+            "Enge Zusammenarbeit mit den Familien als wichtiges Anliegen",
+            "Projekt 'Zukunft' - aufsuchendes Beratungs- und Unterstützungsangebot für Familien und Alleinerziehende in Kooperation mit FAB e.V."
+          ],
+          "ausnahmen": []
+        }
+      }
+    },
+    {
+      "id": "arbeitszeit",
+      "question": "Die Position ist als Vollzeitstelle mit 39 Wochenstunden ausgeschrieben - passt das für Sie?",
+      "type": "boolean",
+      "phase": null,
+      "preamble": "Zur Arbeitszeit:",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 2,
+      "group": "Rahmen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Vollzeit mit 39 Wochenstunden",
+      "category": null,
+      "category_order": null,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "wochenstunden": 39,
+        "arbeitszeit_typ": "vollzeit",
+        "info_pool": {
+          "schichtzeiten": {},
+          "verguetung": {
+            "tarif": "Haustarif orientiert am TV-L Berlin",
+            "entgeltgruppe": "EG 10a",
+            "gehaltsspanne": {
+              "einstieg": "3.475€",
+              "maximum": "5.259€",
+              "bedingung": "Einstieg ohne einschlägige Leitungserfahrung"
+            }
+          },
+          "benefits": [
+            "30 Tage Jahresurlaub"
+          ],
+          "prioritaeten": [],
+          "unternehmen": [
+            "Kindertagesstätten für Kleinkind- und Vorschulalter",
+            "Einfühlsame und individuelle Begleitung und Förderung der Kinder",
+            "Offen für alle Kinder - unabhängig von kultureller Herkunft, Nationalität oder sozialer Situation",
+            "Inklusive Betreuung - mit oder ohne Beeinträchtigung oder Behinderung",
+            "Enge Zusammenarbeit mit den Familien als wichtiges Anliegen",
+            "Projekt 'Zukunft' - aufsuchendes Beratungs- und Unterstützungsangebot für Familien und Alleinerziehende in Kooperation mit FAB e.V."
+          ],
+          "ausnahmen": []
+        }
+      }
+    },
+    {
+      "id": "fortbildungen",
+      "question": "Haben Sie Fortbildungen oder Qualifizierungen in diesem Bereich gemacht?",
+      "type": "string",
+      "phase": null,
+      "preamble": "Bezüglich Ihrer Weiterbildung:",
+      "options": null,
+      "conversation_flow": null,
+      "required": false,
+      "priority": 2,
+      "group": "Qualifikation",
+      "help_text": "Falls ja: 'Welche waren das konkret?' Falls nein: 'Das ist kein Problem, aber gut zu wissen.'",
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Nachweis über einschlägige Fortbildungen, Qualifizierungen erwünscht",
+      "category": null,
+      "category_order": null,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "typ": "nachweis_erforderlich",
+        "info_pool": {
+          "schichtzeiten": {},
+          "verguetung": {
+            "tarif": "Haustarif orientiert am TV-L Berlin",
+            "entgeltgruppe": "EG 10a",
+            "gehaltsspanne": {
+              "einstieg": "3.475€",
+              "maximum": "5.259€",
+              "bedingung": "Einstieg ohne einschlägige Leitungserfahrung"
+            }
+          },
+          "benefits": [
+            "30 Tage Jahresurlaub"
+          ],
+          "prioritaeten": [],
+          "unternehmen": [
+            "Kindertagesstätten für Kleinkind- und Vorschulalter",
+            "Einfühlsame und individuelle Begleitung und Förderung der Kinder",
+            "Offen für alle Kinder - unabhängig von kultureller Herkunft, Nationalität oder sozialer Situation",
+            "Inklusive Betreuung - mit oder ohne Beeinträchtigung oder Behinderung",
+            "Enge Zusammenarbeit mit den Familien als wichtiges Anliegen",
+            "Projekt 'Zukunft' - aufsuchendes Beratungs- und Unterstützungsangebot für Familien und Alleinerziehende in Kooperation mit FAB e.V."
+          ],
+          "ausnahmen": []
+        }
+      }
+    },
+    {
+      "id": "standort",
+      "question": "Unser Standort ist in Berlin Marzahn-Hellersdorf. Passt das für Sie?",
+      "type": "boolean",
+      "phase": null,
+      "preamble": null,
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 2,
+      "group": "Standort",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Vollständige Adresse: Kita Springmäuse, Stollberger Straße 25-27, 12627 Berlin",
+      "category": null,
+      "category_order": null,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "standort_count": 1,
+        "region_kontext": "Region Marzahn-Hellersdorf",
+        "fallback_url": "https://www.urban-consult.de/kindertagesstaetten/",
+        "info_pool": {
+          "schichtzeiten": {},
+          "verguetung": {
+            "tarif": "Haustarif orientiert am TV-L Berlin",
+            "entgeltgruppe": "EG 10a",
+            "gehaltsspanne": {
+              "einstieg": "3.475€",
+              "maximum": "5.259€",
+              "bedingung": "Einstieg ohne einschlägige Leitungserfahrung"
+            }
+          },
+          "benefits": [
+            "30 Tage Jahresurlaub"
+          ],
+          "prioritaeten": [],
+          "unternehmen": [
+            "Kindertagesstätten für Kleinkind- und Vorschulalter",
+            "Einfühlsame und individuelle Begleitung und Förderung der Kinder",
+            "Offen für alle Kinder - unabhängig von kultureller Herkunft, Nationalität oder sozialer Situation",
+            "Inklusive Betreuung - mit oder ohne Beeinträchtigung oder Behinderung",
+            "Enge Zusammenarbeit mit den Familien als wichtiges Anliegen",
+            "Projekt 'Zukunft' - aufsuchendes Beratungs- und Unterstützungsangebot für Familien und Alleinerziehende in Kooperation mit FAB e.V."
+          ],
+          "ausnahmen": []
+        }
+      }
+    }
+  ],
+  "meta": {
+    "schema_version": "1.0",
+    "generated_at": "2026-01-28T15:24:52.519354",
+    "generator": "voiceki-python-question-builder@1.0.0",
+    "policies_applied": [
+      "unified_pipeline_3_prompts",
+      "total_questions: 5"
+    ]
+  },
+  "_duration": 16.6,
+  "_question_count": 5,
+  "_generated_at": "2026-01-28T15:24:52.519354"
+}

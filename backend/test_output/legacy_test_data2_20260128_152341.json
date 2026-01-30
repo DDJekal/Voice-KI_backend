@@ -1,0 +1,349 @@
+{
+  "pipeline": "LEGACY",
+  "protocol_file": "test_data2.json",
+  "protocol_name": "Leitungskraft für unsere Kita (mwd)",
+  "questions": [
+    {
+      "id": "mh_staatlich_anerkannter_abschluss_in_einem_sozialpaedagogischen_beruf",
+      "question": "Welche Ausbildung haben Sie abgeschlossen?",
+      "type": "string",
+      "phase": null,
+      "preamble": "Damit ich Ihren fachlichen Hintergrund einordnen kann:",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Qualifikation",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Must-Have: staatlich anerkannter Abschluss in einem sozialpädagogischen Beruf",
+      "category": "standardqualifikationen",
+      "category_order": 1,
+      "slot_config": {
+        "fills_slot": "qualifikation",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": {
+        "is_gate": true,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": [
+          "qualifikation"
+        ],
+        "condition": null,
+        "context_triggers": null
+      },
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "staatlich anerkannter Abschluss in einem sozialpädagogischen Beruf",
+        "source_type": "must_have",
+        "category": "qualifications"
+      }
+    },
+    {
+      "id": "arbeitszeit_consolidated",
+      "question": "Haben Sie eine Präferenz bezüglich des Arbeitszeitmodells?",
+      "type": "choice",
+      "phase": null,
+      "preamble": "Ich möchte kurz auf das Arbeitszeitmodell eingehen. Vollzeit (39 Wochenstunden). vollzeit='39 Wochenstunden' teilzeit=None.",
+      "options": [
+        "Vollzeit",
+        "Teilzeit",
+        "Bin flexibel"
+      ],
+      "conversation_flow": null,
+      "required": true,
+      "priority": 2,
+      "group": "Rahmen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Konsolidierte Arbeitszeit-Frage",
+      "category": "rahmenbedingungen",
+      "category_order": 2,
+      "slot_config": {
+        "fills_slot": "dienstmodell",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": {
+        "is_gate": false,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": null,
+        "condition": null,
+        "context_triggers": {
+          "keywords_to_follow_up": [
+            "IMC",
+            "Intensiv",
+            "ITS",
+            "Intensivstation"
+          ]
+        }
+      },
+      "conversation_hints": null,
+      "metadata": {
+        "category": "arbeitszeit",
+        "source_type": "consolidated"
+      }
+    },
+    {
+      "id": "mh_deutschkenntnisse_b2",
+      "question": "Wie würden Sie Ihre Deutschkenntnisse selbst einschätzen?",
+      "type": "string",
+      "phase": null,
+      "preamble": "Kurz zur Einordnung bezüglich der Sprachkenntnisse:",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Rahmen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Must-Have: Deutschkenntnisse B2",
+      "category": "standardqualifikationen",
+      "category_order": 3,
+      "slot_config": {
+        "fills_slot": "gate_mh_deutschkenntnisse_b2",
+        "required": true,
+        "confidence_threshold": 0.9,
+        "validation": null
+      },
+      "gate_config": {
+        "is_gate": true,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": [
+          "gate_mh_deutschkenntnisse_b2"
+        ],
+        "condition": null,
+        "context_triggers": null
+      },
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "Deutschkenntnisse B2",
+        "source_type": "must_have",
+        "category": "german_language"
+      }
+    },
+    {
+      "id": "mh_mehrjaehrige_berufserfahrung",
+      "question": "Wie lange arbeiten Sie schon in diesem Bereich?",
+      "type": "string",
+      "phase": null,
+      "preamble": "Um Ihre Berufserfahrung besser zu verstehen:",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Rahmen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Must-Have: mehrjährige Berufserfahrung",
+      "category": "standardqualifikationen",
+      "category_order": 3,
+      "slot_config": {
+        "fills_slot": "einsatzbereich",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": {
+        "is_gate": true,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": [
+          "einsatzbereich"
+        ],
+        "condition": null,
+        "context_triggers": null
+      },
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "mehrjährige Berufserfahrung",
+        "source_type": "must_have",
+        "category": "experience"
+      }
+    },
+    {
+      "id": "site_single",
+      "question": "Unser Standort ist in Berlin Marzahn-Hellersdorf. Passt das für Sie?",
+      "type": "boolean",
+      "phase": null,
+      "preamble": "Was ist Ihnen bei der Wahl des Standorts wichtig:",
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 1,
+      "group": "Standort",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Vollständige Adresse: Kita Springmäuse, Stollberger Straße 25-27, 12627 Berlin",
+      "category": "standort",
+      "category_order": 3,
+      "slot_config": {
+        "fills_slot": "standort",
+        "required": true,
+        "confidence_threshold": 0.8,
+        "validation": null
+      },
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "Kita Springmäuse, Stollberger Straße 25-27, 12627 Berlin",
+        "source_type": "site",
+        "category": "location"
+      }
+    },
+    {
+      "id": "pq_88_293",
+      "question": "Vergütung nach Haustarif orientiert am TV-L Berlin (EG 10a) 3.475€ (Einstieg ohne einschlägige Leitungserfahrung) bis 5.259€",
+      "type": "boolean",
+      "phase": null,
+      "preamble": null,
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 2,
+      "group": "Präferenzen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Protocol Question (Page 88)",
+      "category": "zusaetzliche_informationen",
+      "category_order": 6,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "Vergütung nach Haustarif orientiert am TV-L Berlin (EG 10a) 3.475€ (Einstieg ohne einschlägige Leitungserfahrung) bis 5.259€",
+        "source_type": "protocol_question",
+        "category": "gehalt"
+      }
+    },
+    {
+      "id": "pq_88_297",
+      "question": "30 Tage Jahresurlaub",
+      "type": "boolean",
+      "phase": null,
+      "preamble": null,
+      "options": null,
+      "conversation_flow": null,
+      "required": true,
+      "priority": 2,
+      "group": "Präferenzen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Protocol Question (Page 88)",
+      "category": "zusaetzliche_informationen",
+      "category_order": 6,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "30 Tage Jahresurlaub",
+        "source_type": "protocol_question",
+        "category": "benefits"
+      }
+    },
+    {
+      "id": "alt_erzieher_innen_auch_weiterleiten_dann_aber_mit_dem_hinweis_fuer_die_stellv_leitung_nicht_geeignet",
+      "question": "Wie sieht Ihre Erfahrung mit Erzieher:innen auch weiterleiten, dann aber mit dem Hinweis, für die stellv. Leitung nicht geeignet aus?",
+      "type": "boolean",
+      "phase": null,
+      "preamble": null,
+      "options": null,
+      "conversation_flow": null,
+      "required": false,
+      "priority": 2,
+      "group": "Präferenzen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Alternative: Erzieher:innen auch weiterleiten, dann aber mit dem Hinweis, für die stellv. Leitung nicht geeignet",
+      "category": "zusaetzliche_informationen",
+      "category_order": 6,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "Erzieher:innen auch weiterleiten, dann aber mit dem Hinweis, für die stellv. Leitung nicht geeignet",
+        "source_type": "alternative",
+        "category": "other"
+      }
+    },
+    {
+      "id": "constraint_gehalt",
+      "question": "Unser Gehaltsrahmen liegt bei 3.475€ (Einstieg ohne einschlägige Leitungserfahrung) bis 5.259€. Passt das für Sie?",
+      "type": "boolean",
+      "phase": null,
+      "preamble": null,
+      "options": null,
+      "conversation_flow": null,
+      "required": false,
+      "priority": 2,
+      "group": "Rahmen",
+      "help_text": null,
+      "input_hint": null,
+      "conditions": null,
+      "source": null,
+      "context": "Gehalt: 3.475€ (Einstieg ohne einschlägige Leitungserfahrung) bis 5.259€",
+      "category": "zusaetzliche_informationen",
+      "category_order": 6,
+      "slot_config": null,
+      "gate_config": null,
+      "conversation_hints": null,
+      "metadata": {
+        "source_text": "3.475€ (Einstieg ohne einschlägige Leitungserfahrung) bis 5.259€",
+        "source_type": "constraint",
+        "category": "gehalt"
+      }
+    }
+  ],
+  "meta": {
+    "schema_version": "1.0",
+    "generated_at": "2026-01-28T15:24:35.900388",
+    "generator": "voiceki-python-question-builder@1.0.0",
+    "policies_applied": [
+      "slot_dependency: mh_mehrjaehrige_berufserfahrung -> einsatzbereich",
+      "slot_dependency: mh_staatlich_anerkannter_abschluss_in_einem_sozialpaedagogischen_beruf -> qualifikation",
+      "slot_dependency: arbeitszeit_consolidated -> dienstmodell",
+      "slot_dependency: site_single -> standort",
+      "gate_sequence: mh_mehrjaehrige_berufserfahrung",
+      "gate_sequence: mh_deutschkenntnisse_b2",
+      "gate_sequence: mh_staatlich_anerkannter_abschluss_in_einem_sozialpaedagogischen_beruf",
+      "keyword_trigger: arbeitszeit_consolidated -> Intensiv"
+    ]
+  },
+  "_duration": 20.6,
+  "_question_count": 9,
+  "_generated_at": "2026-01-28T15:24:35.912990"
+}

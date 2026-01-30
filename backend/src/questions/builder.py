@@ -5,11 +5,13 @@ Main entry point for question generation pipeline.
 Port of src/pipeline/buildCatalog.ts
 """
 
+import asyncio
 import logging
 from typing import Dict, Any
 from datetime import datetime
 
 from .pipeline.extract_multistage import extract  # Multi-Stage Pipeline
+from .pipeline.generate_unified import generate_unified  # NEU: Unified 3-Prompt Pipeline
 from .pipeline.structure import build_questions
 from .pipeline.structure_v2 import build_questions_v2  # NEU: V2 Pipeline
 from .pipeline.conversational_flow import build_conversational_flow
@@ -56,12 +58,32 @@ async def build_question_catalog(
     logger.info("Starting Question Catalog Builder")
     logger.info("=" * 70)
     
+    settings = get_settings()
+    use_unified = getattr(settings, 'use_unified_pipeline', False)
+    
     try:
+        # Check if unified pipeline is enabled
+        if use_unified:
+            logger.info("Using UNIFIED Pipeline (3 specialized prompts)")
+            catalog = await generate_unified(conversation_protocol)
+            
+            # Kategorisiere Fragen
+            for question in catalog.questions:
+                categorize_question(question)
+            
+            logger.info("=" * 70)
+            logger.info(f"Question Catalog Built: {len(catalog.questions)} questions")
+            logger.info("=" * 70)
+            
+            return catalog
+        
+        # FALLBACK: Legacy Pipeline
+        logger.info("Using LEGACY Pipeline (extract-multistage + structure_v2)")
+        
         # ================================================================
         # PARALLEL STAGE: Classify + Extract gleichzeitig starten
         # Spart ~10 Sekunden durch parallele LLM-Aufrufe
         # ================================================================
-        import asyncio
         
         logger.info("Stage 0+1/7: Classify + Extract PARALLEL...")
         
@@ -98,28 +120,21 @@ async def build_question_catalog(
             logger.error(f"Extraction failed: {extract_result}")
             raise extract_result
         
-        logger.info(f"  ✓ Classified: {len(classified_data.get('gate_items', []))} gates, "
+        logger.info(f"  Classified: {len(classified_data.get('gate_items', []))} gates, "
                    f"{len(classified_data.get('preference_items', []))} preferences, "
                    f"{len(classified_data.get('information_items', []))} info items")
-        logger.info(f"  ✓ Extracted: {len(extract_result.must_have)} must-haves, "
+        logger.info(f"  Extracted: {len(extract_result.must_have)} must-haves, "
                    f"{len(extract_result.sites)} sites")
         
         # 2. Build base questions (deterministic)
         logger.info("Stage 2/7: Build base questions...")
         
         # NEU: Nutze V2 Pipeline (Generate-First, Filter-Later)
-        # V2 ist robuster und verliert keine Fragen
-        # DEBUG MODE: V2 aktiviert für Debugging
-        settings = get_settings()
-        use_v2 = getattr(settings, 'use_structure_v2', True)  # DEBUG: V2 aktiviert!
+        use_v2 = getattr(settings, 'use_structure_v2', True)
         
         if use_v2:
             logger.info("  Using Structure V2 (Generate-First, Filter-Later)")
             base_questions = build_questions_v2(extract_result, classified_data)
-            # #region agent log
-            import json, time
-            with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'builder.py:75','message':'V2 returned','data':{'count':len(base_questions),'v2_used':True},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'E'})+'\n')
-            # #endregion
         else:
             logger.info("  Using Structure V1 (Legacy)")
             base_questions = build_questions(extract_result)
@@ -146,24 +161,11 @@ async def build_question_catalog(
         # 6. Categorize
         logger.info("Stage 6/7: Categorize questions...")
         categorized = []
-        # #region agent log
-        import json, time
-        categorize_errors = []
-        # #endregion
         for q in validated:
-            # #region agent log
-            try:
-                cat = categorize_question(q)
-                q.category = cat.category
-                q.category_order = cat.order
-                categorized.append(q)
-            except Exception as e:
-                categorize_errors.append({'q_id':q.id,'error':str(e)})
-                raise
-            # #endregion
-        # #region agent log
-        with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'builder.py:107','message':'After Categorize','data':{'count':len(categorized),'errors':categorize_errors},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'F'})+'\n')
-        # #endregion
+            cat = categorize_question(q)
+            q.category = cat.category
+            q.category_order = cat.order
+            categorized.append(q)
         
         # 6.5. Apply Policies (NEU!)
         policy_level = context.get("policy_level")
@@ -191,14 +193,6 @@ async def build_question_catalog(
         def sort_key(q):
             """
             Phasen-basierte Sortierung mit Speziallogik für Basis-Qualifikationen.
-            
-            Reihenfolge:
-            1. phase (1-6, None am Ende)
-            2. category_order (innerhalb Phase)
-            3. required (True = früher als False)
-            4. priority (niedrigere Nummer = wichtiger)
-            5. is_basic_qualification (Basis-Examen VOR Fachweiterbildungen)
-            6. id (alphabetisch für Konsistenz)
             """
             # Erkenne Basis-Qualifikationsfragen (allgemeines Examen)
             is_basic_qualification = (
@@ -236,33 +230,17 @@ async def build_question_catalog(
         )
         
         # Attach knowledge_base as attribute (bypass Pydantic validation)
-        # Get KB from extract_result if V2 was used
         knowledge_base = getattr(extract_result, '_knowledge_base', None)
         if knowledge_base:
             object.__setattr__(catalog, 'knowledge_base', knowledge_base)
             logger.info(f"  Knowledge-Base attached ({len(knowledge_base)} categories)")
         
-        # #region agent log
-        try:
-            catalog_dump = catalog.model_dump(by_alias=True)
-            dump_success = True
-            dump_error = None
-        except Exception as e:
-            dump_success = False
-            dump_error = str(e)
-            catalog_dump = None
-        with open(r'c:\Users\David Jekal\Desktop\Projekte\KI-Sellcrtuiting_VoiceKI\.cursor\debug.log', 'a') as f: f.write(json.dumps({'location':'builder.py:197','message':'Catalog model_dump','data':{'success':dump_success,'error':dump_error,'question_count':len(catalog.questions) if catalog else 0},'timestamp':int(time.time()*1000),'sessionId':'debug-session','hypothesisId':'A,F'})+'\n')
-        # #endregion
-        
         # 8. Validate catalog
-        # Use by_alias=True to serialize with "_meta" for backward compatibility
-        if dump_success:
-            validate_question_catalog(catalog_dump)
-        else:
-            raise Exception(f"Catalog model_dump failed: {dump_error}")
+        catalog_dump = catalog.model_dump(by_alias=True)
+        validate_question_catalog(catalog_dump)
         
         logger.info("=" * 70)
-        logger.info(f"✅ Question Catalog Built Successfully!")
+        logger.info(f"Question Catalog Built Successfully!")
         logger.info(f"   Total Questions: {len(catalog.questions)}")
         logger.info(f"   Required: {sum(1 for q in catalog.questions if q.required)}")
         logger.info(f"   Optional: {sum(1 for q in catalog.questions if not q.required)}")
@@ -292,6 +270,5 @@ async def build_question_catalog(
         return catalog
         
     except Exception as e:
-        logger.error(f"❌ Question Catalog Builder failed: {e}")
+        logger.error(f"Question Catalog Builder failed: {e}")
         raise
-

@@ -1,0 +1,249 @@
+{
+  "protocol_id": 63,
+  "protocol_name": "Projektleiter",
+  "processed_at": "2026-01-30T12:19:04.095930Z",
+  "question_count": 7,
+  "questions": [
+    {
+      "id": "qual_ausbildung_zur_elektrofachkraft_m_w_d",
+      "question": "Welche Ausbildung haben Sie abgeschlossen?",
+      "type": "choice",
+      "preamble": "Damit ich Ihren fachlichen Hintergrund einordnen kann:",
+      "options": [
+        "Ausbildung zur Elektrofachkraft (m/w/d)",
+        "Ausbildung zum Elektriker/ Elektrotechniker/ Elektroniker (m/w/d)",
+        "Andere"
+      ],
+      "priority": 1,
+      "group": "Qualifikation",
+      "help_text": null,
+      "context": "Qualifikation: Bevorzugt [], Alternativen: ['Ausbildung zur Elektrofachkraft (m/w/d)', 'Ausbildung zum Elektriker/ Elektrotechniker/ Elektroniker (m/w/d)']",
+      "category": "standardqualifikationen",
+      "category_order": 1,
+      "gate_config": {
+        "is_gate": true,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": [
+          "qualifikation"
+        ],
+        "condition": null,
+        "context_triggers": null
+      }
+    },
+    {
+      "id": "constraint_arbeitszeit_str",
+      "question": "Die ausgeschriebene Arbeitszeit ist Vollzeit. Passt das für Sie?",
+      "type": "boolean",
+      "preamble": "Ich möchte kurz auf das Arbeitszeitmodell eingehen.",
+      "options": null,
+      "priority": 2,
+      "group": "Rahmen",
+      "help_text": null,
+      "context": "Arbeitszeit: Vollzeit",
+      "category": "rahmenbedingungen",
+      "category_order": 2,
+      "gate_config": {
+        "is_gate": false,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": null,
+        "condition": null,
+        "context_triggers": {
+          "keywords_to_follow_up": [
+            "IMC",
+            "Intensiv",
+            "ITS",
+            "Intensivstation"
+          ]
+        }
+      }
+    },
+    {
+      "id": "mh_min_2_jahre_berufserfahrung_in_deutschland",
+      "question": "Wie würden Sie Ihre Deutschkenntnisse selbst einschätzen?",
+      "type": "string",
+      "preamble": "Kurz zur Einordnung bezüglich der Sprachkenntnisse:",
+      "options": null,
+      "priority": 1,
+      "group": "Rahmen",
+      "help_text": null,
+      "context": "Must-Have: min 2. Jahre Berufserfahrung in Deutschland",
+      "category": "standardqualifikationen",
+      "category_order": 3,
+      "gate_config": {
+        "is_gate": true,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": [
+          "gate_mh_min_2_jahre_berufserfahrung_in_deutschland"
+        ],
+        "condition": null,
+        "context_triggers": null
+      }
+    },
+    {
+      "id": "pq_90_311",
+      "question": "Deutsch B2",
+      "type": "choice",
+      "preamble": null,
+      "options": null,
+      "priority": 1,
+      "group": "Qualifikation",
+      "help_text": null,
+      "context": "Protocol Question (Page 90)",
+      "category": "standardqualifikationen",
+      "category_order": 3,
+      "gate_config": {
+        "is_gate": true,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": [
+          "gate_pq_90_311"
+        ],
+        "condition": null,
+        "context_triggers": null
+      }
+    },
+    {
+      "id": "site_single",
+      "question": "Unser Standort ist in Bünde. Passt das für Sie?",
+      "type": "boolean",
+      "preamble": "Was ist Ihnen bei der Wahl des Standorts wichtig:",
+      "options": null,
+      "priority": 1,
+      "group": "Standort",
+      "help_text": null,
+      "context": "Standort: Am Fichtenkamp 7-9 Bünde",
+      "category": "standort",
+      "category_order": 3,
+      "gate_config": null
+    },
+    {
+      "id": "qualifications_consolidated_multichoice",
+      "question": "Welche der folgenden Qualifikationen haben Sie?",
+      "type": "multi_choice",
+      "preamble": null,
+      "options": [
+        "Führerschein",
+        "Ausbildung zur Elektrofachkraft (m/w/d)",
+        "Ausbildung zum Elektriker/ Elektrotechniker/ Elektroniker (m/w/d)"
+      ],
+      "priority": 2,
+      "group": "Qualifikation",
+      "help_text": null,
+      "context": "Konsolidierte Multi-Choice aus 3 Fragen",
+      "category": "zusaetzliche_informationen",
+      "category_order": 6,
+      "gate_config": null
+    },
+    {
+      "id": "opt_fuehrerschein",
+      "question": "Haben Sie einen Führerschein?",
+      "type": "boolean",
+      "preamble": "Das ist keine Voraussetzung, aber",
+      "options": null,
+      "priority": 3,
+      "group": "Präferenzen",
+      "help_text": null,
+      "context": "Optional: Führerschein",
+      "category": "zusaetzliche_informationen",
+      "category_order": 6,
+      "gate_config": {
+        "is_gate": false,
+        "is_alternative": false,
+        "alternative_for": null,
+        "can_satisfy_gate": false,
+        "final_alternative": false,
+        "end_message_if_all_no": null,
+        "requires_slots": null,
+        "condition": null,
+        "context_triggers": null
+      }
+    }
+  ],
+  "knowledge_base": {
+    "company_benefits": [],
+    "salary_info": {
+      "notes": [
+        {
+          "modell": "Attraktives Grundgehalt plus leistungsabhängige Erfolgsbeteiligung möglich"
+        }
+      ]
+    },
+    "special_benefits": [],
+    "location_priorities": [],
+    "work_conditions": [
+      {
+        "text": "Unbefristeter Arbeitsvertrag bei einem zuverlässigen Arbeitgeber",
+        "source": "protocol_information"
+      },
+      {
+        "text": "Vollzeit",
+        "source": "extracted_constraints"
+      }
+    ],
+    "company_culture": [
+      {
+        "text": "seit 1995: Traditionsunternehmen",
+        "source": "protocol_information"
+      }
+    ],
+    "general_info": [
+      {
+        "text": "Attraktives Grundgehalt plus leistungsabhängige Erfolgsbeteiligung möglich( Gaber zahlt min. 10 % mehr als der jetzige Arbeitgeber!",
+        "source": "protocol_information"
+      },
+      {
+        "text": "kein Fremdfinanziertes Unternhemen - stehen sicher am Markt und finanzieren sich aus eigener Kraft (nicht wie viele andere Unternehmen im Energiebereich die sich groß präsentieren, aber dann schnell wieder abstürzen",
+        "source": "protocol_information"
+      },
+      {
+        "text": "breit aufgestellt Einsatzfelder: Photov., Windkraft, Unternehmen, Netzbetreiber, E-Mobilität (Ladesationen)",
+        "source": "protocol_information"
+      },
+      {
+        "text": "Full-Service-Unternehmen: übernehemen jeden Schritt beim Kunden von Anschluss und Transport bis zu den regelmäßigen Wartungen am Ende",
+        "source": "protocol_information"
+      },
+      {
+        "text": "große Solarparks und nicht nur eine kleine Photov. Anlage aufs Dach (Also punkt 1 große Projekte)",
+        "source": "protocol_information"
+      },
+      {
+        "text": "deutsche Qualität: Produktion in DE (schnelle Lieferzeiten+Kompatibel in allen deutschen Mittelspannungnetzen)",
+        "source": "protocol_information"
+      },
+      {
+        "text": "stehen für nachhaltige Zukunft und erneubare Energien",
+        "source": "protocol_information"
+      },
+      {
+        "text": "Standort: Am Fichtenkamp 7-9 Bünde",
+        "source": "protocol_information"
+      }
+    ],
+    "internal_notes": [
+      {
+        "text": "AP : Hergert hergert@faber-etec.de",
+        "category": "contact",
+        "source": "protocol"
+      }
+    ],
+    "job_context": {},
+    "job_tasks": [],
+    "department_contacts": {}
+  }
+}
