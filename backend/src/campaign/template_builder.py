@@ -249,7 +249,7 @@ FRAGEN FÜR DIESE PHASE
             template += f"{'='*70}\n\n"
             
             if cat_key == "standardqualifikationen":
-                template += "WICHTIG: Gate-Questions! Bei NEIN auf Muss-Kriterium → Gespräch höflich beenden.\n\n"
+                template += "WICHTIG: Muss-Kriterien – Antwort erfassen. Bewertung erfolgt durch das Recruiting-Team.\n\n"
             
             # Fragen formatieren
             for q in by_category[cat_key]:
@@ -337,7 +337,7 @@ UNTERNEHMEN:
                 if gc.get("has_alternatives"):
                     output += "▸ Hat Alternativen\n"
                 else:
-                    output += "▸ KEINE Alternativen - bei NEIN Gespräch beenden\n"
+                    output += "▸ Keine Alternativen vorhanden\n"
             
             output += "="*60 + "\n\n"
         

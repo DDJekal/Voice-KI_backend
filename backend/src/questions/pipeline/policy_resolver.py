@@ -165,7 +165,7 @@ class PolicyResolver:
         Ensures gate questions are asked in correct sequence.
         
         Policy: Gate questions (must-have criteria) must be asked before
-        preference questions. Failed gates end conversation early.
+        preference questions. Gate answers are recorded for evaluation by the recruiting team.
         """
         logger.debug("Applying gate-sequence policy...")
         

@@ -193,7 +193,7 @@ FRAGEN FÜR DIESE PHASE
             
             # Spezielle Behandlung für bestimmte Kategorien
             if cat_key == "standardqualifikationen":
-                kb += "WICHTIG: Gate-Questions! Bei NEIN auf Muss-Kriterium → Gespräch höflich beenden.\n\n"
+                kb += "WICHTIG: Muss-Kriterien – Antwort erfassen. Bewertung erfolgt durch das Recruiting-Team.\n\n"
                 kb += self._format_question_section(by_category[cat_key])
             elif cat_key == "info":
                 kb += self._format_info_section(by_category[cat_key])
@@ -265,12 +265,8 @@ RÜCKMELDUNG-ZEITFENSTER:
                         output += f"▸ Alternative IDs: {', '.join(gc['alternative_question_ids'])}\n"
                 else:
                     output += "▸ KEINE Alternativen verfügbar\n"
-                    output += "▸ Bei NEIN → Gespräch sofort beenden\n"
+                    output += "▸ Antwort dokumentieren\n"
                 
-                if gc.get("end_message"):
-                    output += f"\nENDE-NACHRICHT bei NEIN:\n\"{gc['end_message']}\"\n"
-                
-                # NEU: Slot-Requirements
                 if gc.get("requires_slots"):
                     output += f"▸ Benötigt Slots: {', '.join(gc['requires_slots'])}\n"
                 
@@ -282,9 +278,7 @@ RÜCKMELDUNG-ZEITFENSTER:
                 if gc.get("can_satisfy_gate"):
                     output += "▸ Kann Gate-Kriterium erfüllen bei JA\n"
                 if gc.get("final_alternative"):
-                    output += "▸ ⚠️  LETZTE Alternative - bei NEIN Gespräch beenden!\n"
-                    if gc.get("end_message_if_all_no"):
-                        output += f"\nENDE-NACHRICHT:\n\"{gc['end_message_if_all_no']}\"\n"
+                    output += "▸ Letzte Alternative\n"
             
             # NEU: Context-Triggers
             if gc.get("context_triggers"):
@@ -563,17 +557,17 @@ natürliche, empathische und effektive Gespräche.
      → Beispiel: "Sie sagten 'bald verfügbar' – meinen Sie innerhalb 
         der nächsten 4 Wochen oder eher 2-3 Monate?"
 
-3. GATE-SEQUENZ (strikt einhalten!):
+3. GATE-SEQUENZ:
    
-   ⚠️  Alle Gates MÜSSEN VOR Rahmenbedingungen geklärt sein!
+   Gates VOR Rahmenbedingungen klären.
    
    Reihenfolge:
-     1. Gate: Qualifikation (muss erfüllt sein)
-        → Bei Scheitern: Alternativen prüfen, dann ggf. Call beenden
+     1. Gate: Qualifikation erfassen
+        → Bei Alternativen: alle Optionen abfragen
      2. Gate: Verfügbarkeit (falls vorhanden)
-        → Bei > 6 Monate: höflich beenden
+        → Antwort dokumentieren
    
-   ✅ NUR wenn alle Gates bestanden → weiter zu Präferenzen
+   Danach weiter zu Präferenzen.
 
 4. GESPRÄCHS-DIVERSITÄT:
    
